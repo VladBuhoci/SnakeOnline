@@ -1,4 +1,4 @@
-﻿namespace SnakeOnline
+﻿namespace SnakeOnline.Core
 {
     partial class ApplicationWindow
     {
@@ -55,6 +55,7 @@
             this.MaximizeBox = false;
             this.Name = "ApplicationWindow";
             this.Text = "Snake Online";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mainWindow_KeyDown);
             this.ResumeLayout(false);
 
         }
@@ -62,7 +63,7 @@
 
         #endregion
 
-        
+
     }
 }
 
