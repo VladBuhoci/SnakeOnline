@@ -28,7 +28,7 @@ namespace SnakeOnline.Core
 
             this.bodyParts = BuildSnake(posX, posY, color);
 
-            SnakeGameManager.AddSnake(bodyParts);
+            SnakeGameManager.GetInstance().AddSnake(this, bodyParts);
         }
 
         private Queue<SnakeBodyObject> BuildSnake(int posX, int posY, Color color)
@@ -84,36 +84,47 @@ namespace SnakeOnline.Core
 
         // ~ Begin movement interface.
 
-        public void MoveUp()
+        public void ChangeDirection(SnakeOrientation newOrientation)
         {
-            if (currentOrientation != SnakeOrientation.Up)
+            currentOrientation = newOrientation;
+        }
+
+        public void MoveSnake()
+        {
+            switch (currentOrientation)
             {
-                currentOrientation = SnakeOrientation.Up;
+                case SnakeOrientation.Up:
+                    MoveSnakeInCurrentDirection(bodyParts.Last().posX, bodyParts.Last().posY - 1);
+                    break;
+
+                case SnakeOrientation.Right:
+                    MoveSnakeInCurrentDirection(bodyParts.Last().posX + 1, bodyParts.Last().posY);
+                    break;
+
+                case SnakeOrientation.Down:
+                    MoveSnakeInCurrentDirection(bodyParts.Last().posX, bodyParts.Last().posY + 1);
+                    break;
+
+                case SnakeOrientation.Left:
+                    MoveSnakeInCurrentDirection(bodyParts.Last().posX - 1, bodyParts.Last().posY);
+                    break;
             }
         }
 
-        public void MoveRight()
+        private void MoveSnakeInCurrentDirection(int newHeadPosX, int newHeadPosY)
         {
-            if (currentOrientation != SnakeOrientation.Right)
-            {
-                currentOrientation = SnakeOrientation.Right;
-            }
-        }
+            // We move the last body part up front, make it the new head and change the previous head to a simple part.
+            // The new head also needs some changes regarding the position in the arena matrix, relative to the old head.
 
-        public void MoveDown()
-        {
-            if (currentOrientation != SnakeOrientation.Down)
-            {
-                currentOrientation = SnakeOrientation.Down;
-            }
-        }
+            var oldTailToBecomeNewHead = bodyParts.Dequeue();
 
-        public void MoveLeft()
-        {
-            if (currentOrientation != SnakeOrientation.Left)
-            {
-                currentOrientation = SnakeOrientation.Left;
-            }
+            oldTailToBecomeNewHead.isHead = true;
+            oldTailToBecomeNewHead.posX = newHeadPosX;
+            oldTailToBecomeNewHead.posY = newHeadPosY;
+
+            bodyParts.Last().isHead = false;
+
+            bodyParts.Enqueue(oldTailToBecomeNewHead);
         }
 
         // ~ End movement interface.

@@ -18,53 +18,55 @@ namespace SnakeOnline.Core
         /// <summary>
         ///     Constructor.
         /// </summary>
-        public SnakeController(int snakePosX, int snakePosY, Color snakeColor)
+        public SnakeController(int snakePosX, int snakePosY, Color snakeColor, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
         {
             // TODO: temporary.. should create the snake on the server in the future.
-            controlledSnake = new Snake(snakePosX, snakePosY, snakeColor);
+            controlledSnake = new Snake(snakePosX, snakePosY, snakeColor, snakeOrientation, bodyLength);
+
+            currentOrientation = snakeOrientation;
         }
 
-        public void MoveUp()
+        public void ChangeDirectionUp()
         {
             if (currentOrientation != SnakeOrientation.Up)
             {
                 currentOrientation = SnakeOrientation.Up;
 
                 // TODO: temporary..
-                controlledSnake.MoveUp();
+                controlledSnake.ChangeDirection(SnakeOrientation.Up);
             }
         }
 
-        public void MoveRight()
+        public void ChangeDirectionRight()
         {
             if (currentOrientation != SnakeOrientation.Right)
             {
                 currentOrientation = SnakeOrientation.Right;
 
                 // TODO: temporary..
-                controlledSnake.MoveRight();
+                controlledSnake.ChangeDirection(SnakeOrientation.Right);
             }
         }
 
-        public void MoveDown()
+        public void ChangeDirectionDown()
         {
             if (currentOrientation != SnakeOrientation.Down)
             {
                 currentOrientation = SnakeOrientation.Down;
 
                 // TODO: temporary..
-                controlledSnake.MoveDown();
+                controlledSnake.ChangeDirection(SnakeOrientation.Down);
             }
         }
 
-        public void MoveLeft()
+        public void ChangeDirectionLeft()
         {
             if (currentOrientation != SnakeOrientation.Left)
             {
                 currentOrientation = SnakeOrientation.Left;
 
                 // TODO: temporary..
-                controlledSnake.MoveLeft();
+                controlledSnake.ChangeDirection(SnakeOrientation.Left);
             }
         }
     }

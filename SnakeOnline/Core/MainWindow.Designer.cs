@@ -55,6 +55,7 @@
             this.MaximizeBox = false;
             this.Name = "ApplicationWindow";
             this.Text = "Snake Online";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ApplicationWindow_FormClosing);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mainWindow_KeyDown);
             this.ResumeLayout(false);
 

@@ -12,16 +12,20 @@ namespace SnakeOnline.Core
 {
     public partial class ApplicationWindow : Form
     {
+        private SnakeController snakeController;
+
         public ApplicationWindow()
         {
             InitializeComponent();
 
-            new SnakeController(20, 15, Color.Red);
+            SnakeGameManager.GetInstance().SetGameArenaPanel(gameArenaPanel);
+
+            snakeController = new SnakeController(29, 30, Color.Red);
         }
 
         private void gameArenaPanel_Paint(object sender, PaintEventArgs e)
         {
-            foreach (SnakeGameArenaObject arenaObj in SnakeGameManager.gameArenaObjects)
+            foreach (SnakeGameArenaObject arenaObj in SnakeGameManager.GetInstance().gameArenaObjects)
             {
                 if (arenaObj is SnakeBodyObject)
                 {
@@ -38,13 +42,34 @@ namespace SnakeOnline.Core
                     }
                 }
             }
-
-            Refresh();
         }
         
         private void mainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            
+            switch (e.KeyCode)
+            {
+                case Keys.W:
+                    snakeController.ChangeDirectionUp();
+                    break;
+
+                case Keys.D:
+                    snakeController.ChangeDirectionRight();
+                    break;
+
+                case Keys.S:
+                    snakeController.ChangeDirectionDown();
+                    break;
+
+                case Keys.A:
+                    snakeController.ChangeDirectionLeft();
+                    break;
+            }
+        }
+
+        private void ApplicationWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Stop auxiliary game loop thread.
+            SnakeGameManager.GetInstance().RequestAuxGameLoopThreadToEnd();
         }
     }
 }
