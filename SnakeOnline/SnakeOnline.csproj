@@ -45,15 +45,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MainWindow.cs">
+    <Compile Include="Core\SnakeGameArenaObject.cs" />
+    <Compile Include="Core\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainWindow.Designer.cs">
+    <Compile Include="Core\MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="Program.cs" />
+    <Compile Include="Core\Program.cs" />
+    <Compile Include="Core\SnakeBodyObject.cs" />
+    <Compile Include="Core\SnakeGameManager.cs" />
+    <Compile Include="Core\SnakeOrientation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="MainWindow.resx">
+    <Compile Include="Core\Snake.cs" />
+    <Compile Include="Core\SnakeController.cs" />
+    <EmbeddedResource Include="Core\MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
