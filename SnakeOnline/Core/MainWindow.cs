@@ -20,7 +20,7 @@ namespace SnakeOnline.Core
 
             SnakeGameManager.GetInstance().SetGameArenaPanel(gameArenaPanel);
 
-            snakeController = new SnakeController(29, 30, Color.Red);
+            snakeController = new SnakeController(19, 30, Color.Red, SnakeOrientation.Right, 25);
         }
 
         private void gameArenaPanel_Paint(object sender, PaintEventArgs e)

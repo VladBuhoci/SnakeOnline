@@ -11,12 +11,15 @@ namespace SnakeOnline.Core
 
         public Color color { get; set; }
 
-        public SnakeBodyObject(int posX, int posY, bool isHead, Color color)
+        public Snake snake;
+
+        public SnakeBodyObject(int posX, int posY, bool isHead, Color color, Snake snake)
         {
             this.posX = posX;
             this.posY = posY;
             this.isHead = isHead;
             this.color = color;
+            this.snake = snake;
         }
     }
 }
