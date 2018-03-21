@@ -10,13 +10,16 @@ namespace SnakeOnline.Core
 {
     sealed class SnakeGameManager
     {
-        public SnakeGameArenaObject[, ] gameArenaObjects = new SnakeGameArenaObject[50, 50];
+        public static int gameArenaWidth = 50;
+        public static int gameArenaHeight = 50;
 
         private static SnakeGameManager classInstance = new SnakeGameManager();
         private static bool bApplicationAttemptsClosing;
 
         private List<Snake> snakes = new List<Snake>();
         private Panel gameArenaPanel;
+
+        public SnakeGameArenaObject[, ] gameArenaObjects = new SnakeGameArenaObject[gameArenaWidth, gameArenaHeight];
         
         private SnakeGameManager()
         {

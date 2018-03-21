@@ -28,7 +28,7 @@ namespace SnakeOnline.Core
 
         public void ChangeDirectionUp()
         {
-            if (currentOrientation != SnakeOrientation.Up)
+            if (currentOrientation != SnakeOrientation.Up && currentOrientation != SnakeOrientation.Down)
             {
                 currentOrientation = SnakeOrientation.Up;
 
@@ -39,7 +39,7 @@ namespace SnakeOnline.Core
 
         public void ChangeDirectionRight()
         {
-            if (currentOrientation != SnakeOrientation.Right)
+            if (currentOrientation != SnakeOrientation.Right && currentOrientation != SnakeOrientation.Left)
             {
                 currentOrientation = SnakeOrientation.Right;
 
@@ -50,7 +50,7 @@ namespace SnakeOnline.Core
 
         public void ChangeDirectionDown()
         {
-            if (currentOrientation != SnakeOrientation.Down)
+            if (currentOrientation != SnakeOrientation.Down && currentOrientation != SnakeOrientation.Up)
             {
                 currentOrientation = SnakeOrientation.Down;
 
@@ -61,7 +61,7 @@ namespace SnakeOnline.Core
 
         public void ChangeDirectionLeft()
         {
-            if (currentOrientation != SnakeOrientation.Left)
+            if (currentOrientation != SnakeOrientation.Left && currentOrientation != SnakeOrientation.Right)
             {
                 currentOrientation = SnakeOrientation.Left;
 

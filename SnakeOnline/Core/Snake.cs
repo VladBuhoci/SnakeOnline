@@ -113,6 +113,20 @@ namespace SnakeOnline.Core
 
         private void MoveSnakeInCurrentDirection(int newHeadPosX, int newHeadPosY)
         {
+            // Handle the new coordinates first:
+            //      they may make the snake go out of bounds, so try to switch them with the values on the
+            //      opposite side of the arena matrix, giving the illusion of "portals" in the walls.
+
+            if (newHeadPosX >= SnakeGameManager.gameArenaWidth)
+                newHeadPosX = 0;
+            else if (newHeadPosX < 0)
+                newHeadPosX = SnakeGameManager.gameArenaWidth;
+
+            if (newHeadPosY >= SnakeGameManager.gameArenaHeight)
+                newHeadPosY = 0;
+            else if (newHeadPosY < 0)
+                newHeadPosY = SnakeGameManager.gameArenaHeight;
+
             // We move the last body part up front, make it the new head and change the previous head to a simple part.
             // The new head also needs some changes regarding the position in the arena matrix, relative to the old head.
 
