@@ -26,6 +26,11 @@ namespace SnakeOnline.Core
             currentOrientation = snakeOrientation;
         }
 
+        public Snake GetControlledSnake()
+        {
+            return controlledSnake;
+        }
+
         public void ChangeDirectionUp()
         {
             if (currentOrientation != SnakeOrientation.Up && currentOrientation != SnakeOrientation.Down)

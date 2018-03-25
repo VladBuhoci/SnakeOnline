@@ -16,6 +16,8 @@ namespace SnakeOnline.Core
 
         private Queue<SnakeBodyObject> bodyParts;
 
+        private int bodyPartsToGrow;
+
         private bool _bIsAlive;     // real field.
         public bool bIsAlive
         {
@@ -52,9 +54,9 @@ namespace SnakeOnline.Core
 
             this.bodyParts = BuildSnake(posX, posY, color);
 
-            bIsAlive = true;
+            this.bodyPartsToGrow = 0;
 
-            SnakeGameManager.GetInstance().AddSnake(this, bodyParts);
+            bIsAlive = true;            
         }
 
         private Queue<SnakeBodyObject> BuildSnake(int posX, int posY, Color color)
@@ -105,6 +107,11 @@ namespace SnakeOnline.Core
             }            
 
             return snakeParts;
+        }
+
+        public Queue<SnakeBodyObject> GetSnakeBodyParts()
+        {
+            return bodyParts;
         }
 
 
@@ -172,6 +179,16 @@ namespace SnakeOnline.Core
                         SnakeGameManager.GetInstance().KillSnake(((SnakeBodyObject) gameArenaObj).snake);
                     }
                 }
+                else if (gameArenaObj is FoodObject)
+                {
+                    // Eat the food and grow some parts.
+
+                    FoodObject foundFood = (FoodObject) gameArenaObj;
+
+                    bodyPartsToGrow = foundFood.bodyPartsAmount;
+
+                    SnakeGameManager.GetInstance().FoodWasEaten(foundFood);
+                }
 
                 return;
             }
@@ -179,24 +196,35 @@ namespace SnakeOnline.Core
             // We move the last body part up front, make it the new head and change the previous head to a simple part.
             // The new head also needs some changes regarding the position in the arena matrix, relative to the old head.
 
-            var oldTailToBecomeNewHead = bodyParts.Dequeue();
+            SnakeBodyObject bodyPartToBecomeNewHead;
 
-            // Do the same changes in the arena matrix.
-            SnakeGameManager.GetInstance().gameArenaObjects[oldTailToBecomeNewHead.posX, oldTailToBecomeNewHead.posY] = null;
+            if (bodyPartsToGrow > 0)
+            {
+                bodyPartToBecomeNewHead = new SnakeBodyObject(newHeadPosX, newHeadPosY, true, bodyParts.Last().color, this);
 
-            oldTailToBecomeNewHead.isHead = true;
-            oldTailToBecomeNewHead.posX = newHeadPosX;
-            oldTailToBecomeNewHead.posY = newHeadPosY;
+                bodyPartsToGrow -= 1;
+            }
+            else
+            {
+                bodyPartToBecomeNewHead = bodyParts.Dequeue();
+
+                // Do the same changes in the arena matrix.
+                SnakeGameManager.GetInstance().gameArenaObjects[bodyPartToBecomeNewHead.posX, bodyPartToBecomeNewHead.posY] = null;
+
+                bodyPartToBecomeNewHead.isHead = true;
+                bodyPartToBecomeNewHead.posX = newHeadPosX;
+                bodyPartToBecomeNewHead.posY = newHeadPosY;
+            }
 
             bodyParts.Last().isHead = false;
 
             // Same for arena matrix.. just to be sure nothing bad happens.
             ((SnakeBodyObject) SnakeGameManager.GetInstance().gameArenaObjects[bodyParts.Last().posX, bodyParts.Last().posY]).isHead = false;
 
-            bodyParts.Enqueue(oldTailToBecomeNewHead);
+            bodyParts.Enqueue(bodyPartToBecomeNewHead);
 
             // Same for the arena matrix.
-            SnakeGameManager.GetInstance().gameArenaObjects[oldTailToBecomeNewHead.posX, oldTailToBecomeNewHead.posY] = oldTailToBecomeNewHead;
+            SnakeGameManager.GetInstance().gameArenaObjects[bodyPartToBecomeNewHead.posX, bodyPartToBecomeNewHead.posY] = bodyPartToBecomeNewHead;
         }
 
         // ~ End movement interface.
