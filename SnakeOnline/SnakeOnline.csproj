@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\FoodObject.cs" />
     <Compile Include="Core\SnakeGameArenaObject.cs" />
     <Compile Include="Core\MainWindow.cs">
       <SubType>Form</SubType>

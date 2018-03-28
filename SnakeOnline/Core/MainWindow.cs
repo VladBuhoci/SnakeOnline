@@ -20,7 +20,10 @@ namespace SnakeOnline.Core
 
             SnakeGameManager.GetInstance().SetGameArenaPanel(gameArenaPanel);
 
-            snakeController = new SnakeController(19, 30, Color.Red, SnakeOrientation.Right, 25);
+            snakeController = new SnakeController(19, 30, Color.Red);
+
+            SnakeGameManager.GetInstance().AddSnake(snakeController.GetControlledSnake());
+            SnakeGameManager.GetInstance().SpawnFood(snakeController.GetControlledSnake().GetSnakeBodyParts().FirstOrDefault().color);
         }
 
         private void gameArenaPanel_Paint(object sender, PaintEventArgs e)
@@ -40,6 +43,12 @@ namespace SnakeOnline.Core
                     {
                         e.Graphics.DrawEllipse(new Pen(snakePart.color), new Rectangle(snakePart.posX * 10 + 1, snakePart.posY * 10 + 1, 8, 8));
                     }
+                }
+                else if (arenaObj is FoodObject)
+                {
+                    // Draw a diamond (for now).
+                    e.Graphics.DrawPolygon(new Pen(arenaObj.color), new Point[] { new Point(arenaObj.posX * 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10), new Point(arenaObj.posX * 10 + 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10 + 10) });
+                    e.Graphics.FillPolygon(new SolidBrush(arenaObj.color), new Point[] { new Point(arenaObj.posX * 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10), new Point(arenaObj.posX * 10 + 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10 + 10) });
                 }
             }
         }
