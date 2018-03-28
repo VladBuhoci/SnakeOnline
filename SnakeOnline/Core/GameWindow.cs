@@ -10,11 +10,11 @@ using System.Windows.Forms;
 
 namespace SnakeOnline.Core
 {
-    public partial class ApplicationWindow : Form
+    public partial class GameWindow : Form
     {
         private SnakeController snakeController;
 
-        public ApplicationWindow()
+        public GameWindow()
         {
             InitializeComponent();
 
@@ -53,7 +53,7 @@ namespace SnakeOnline.Core
             }
         }
         
-        private void mainWindow_KeyDown(object sender, KeyEventArgs e)
+        private void gameWindow_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.KeyCode)
             {
@@ -75,7 +75,7 @@ namespace SnakeOnline.Core
             }
         }
 
-        private void ApplicationWindow_FormClosing(object sender, FormClosingEventArgs e)
+        private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             // Stop auxiliary game loop thread.
             SnakeGameManager.GetInstance().RequestAuxGameLoopThreadToEnd();
