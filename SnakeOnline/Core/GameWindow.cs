@@ -18,9 +18,11 @@ namespace SnakeOnline.Core
         {
             InitializeComponent();
 
+            GameClient client = new GameClient();
+
             SnakeGameManager.GetInstance().SetGameArenaPanel(gameArenaPanel);
 
-            snakeController = new SnakeController(19, 30, Color.Red);
+            snakeController = new SnakeController(client, 19, 30, Color.Red);
 
             SnakeGameManager.GetInstance().AddSnake(snakeController.GetControlledSnake());
             SnakeGameManager.GetInstance().SpawnFood(snakeController.GetControlledSnake().GetSnakeBodyParts().FirstOrDefault().color);

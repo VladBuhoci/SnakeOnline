@@ -44,7 +44,7 @@
             this.gameArenaPanel.TabIndex = 0;
             this.gameArenaPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.gameArenaPanel_Paint);
             // 
-            // ApplicationWindow
+            // GameWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -53,7 +53,7 @@
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.Name = "ApplicationWindow";
+            this.Name = "GameWindow";
             this.Text = "Snake Online";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GameWindow_FormClosing);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.gameWindow_KeyDown);

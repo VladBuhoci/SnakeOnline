@@ -11,17 +11,17 @@ namespace SnakeOnline.Core
     class SnakeController
     {
         // TODO: temporary..
-        Snake controlledSnake { get; set; }
+        public Snake controlledSnake { get; set; }
 
         private SnakeOrientation currentOrientation;
 
         /// <summary>
         ///     Constructor.
         /// </summary>
-        public SnakeController(int snakePosX, int snakePosY, Color snakeColor, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
+        public SnakeController(GameClient client, int snakePosX, int snakePosY, Color snakeColor, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
         {
             // TODO: temporary.. should create the snake on the server in the future.
-            controlledSnake = new Snake(snakePosX, snakePosY, snakeColor, snakeOrientation, bodyLength);
+            controlledSnake = new Snake(client, snakePosX, snakePosY, snakeColor, snakeOrientation, bodyLength);
 
             currentOrientation = snakeOrientation;
         }

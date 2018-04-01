@@ -35,6 +35,8 @@ namespace SnakeOnline.Core
         {
             gameArenaPanel = gamePanel;
 
+            // Start the game loop thread.
+
             Thread auxGameLoopThread = new Thread(() => GameLoop(snakes, gameArenaPanel));
             auxGameLoopThread.Start();
         }

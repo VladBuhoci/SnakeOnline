@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\FoodObject.cs" />
+    <Compile Include="Core\GameClient.cs" />
     <Compile Include="Core\SnakeGameArenaObject.cs" />
     <Compile Include="Core\GameWindow.cs">
       <SubType>Form</SubType>

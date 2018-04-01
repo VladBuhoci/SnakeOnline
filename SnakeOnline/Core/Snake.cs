@@ -9,6 +9,8 @@ namespace SnakeOnline.Core
 {
     class Snake
     {
+        private GameClient client;  // temporary????
+
         private SnakeOrientation currentOrientation;
 
         private int bodyLength;
@@ -45,8 +47,10 @@ namespace SnakeOnline.Core
         /// <summary>
         ///     Constructor.
         /// </summary>
-        public Snake(int posX, int posY, Color color, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
+        public Snake(GameClient client, int posX, int posY, Color color, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
         {
+            this.client = client;
+
             this.currentOrientation = snakeOrientation;
 
             this.bodyLength = bodyLength;
@@ -178,6 +182,9 @@ namespace SnakeOnline.Core
                     {
                         SnakeGameManager.GetInstance().KillSnake(((SnakeBodyObject) gameArenaObj).snake);
                     }
+
+                    // Exit from this method.. no need to move anymore.
+                    return;
                 }
                 else if (gameArenaObj is FoodObject)
                 {
@@ -189,8 +196,6 @@ namespace SnakeOnline.Core
 
                     SnakeGameManager.GetInstance().FoodWasEaten(foundFood);
                 }
-
-                return;
             }
 
             // We move the last body part up front, make it the new head and change the previous head to a simple part.
@@ -225,6 +230,10 @@ namespace SnakeOnline.Core
 
             // Same for the arena matrix.
             SnakeGameManager.GetInstance().gameArenaObjects[bodyPartToBecomeNewHead.posX, bodyPartToBecomeNewHead.posY] = bodyPartToBecomeNewHead;
+
+            // Temporary... just for testing
+            byte[] dataToSend = Encoding.ASCII.GetBytes("New head position: " + newHeadPosX + " | " + newHeadPosY);
+            client.SendTestData(dataToSend);
         }
 
         // ~ End movement interface.
