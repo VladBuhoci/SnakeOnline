@@ -7,9 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SnakeOnline.Core
+namespace SnakeOnlineCore
 {
-    sealed class SnakeGameManager
+    public sealed class SnakeGameManager
     {
         private static SnakeGameManager classInstance = new SnakeGameManager();
         private static bool bApplicationAttemptsClosing;
@@ -59,13 +59,7 @@ namespace SnakeOnline.Core
                 {
                     snake.MoveSnake();
                 }
-
-                // Work-around: some things shouldn't "normally" be accessed from any threads other than their original one.
-                if (gamePanel != null && gamePanel.IsHandleCreated)
-                {
-                    gamePanel.BeginInvoke(new MethodInvoker(delegate { gamePanel.Refresh(); }));
-                }
-
+                
                 Thread.Sleep(100);
             }
 

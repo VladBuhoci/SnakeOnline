@@ -13,9 +13,12 @@ namespace SnakeOnline.Core
     {
         private static Socket clientSocket;
 
+        private int serverPortNumber;
+
         public GameClient()
         {
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            serverPortNumber = 1702;
 
             LoopConnect();
         }
@@ -31,11 +34,11 @@ namespace SnakeOnline.Core
 
                 try
                 {
-                    clientSocket.Connect(IPAddress.Loopback, 1702);
+                    clientSocket.Connect(IPAddress.Loopback, serverPortNumber);
                 }
                 catch (SocketException)
                 {
-
+                    //MessageBox.Show("Cannot connect to server :(");
                 }
             }
         }

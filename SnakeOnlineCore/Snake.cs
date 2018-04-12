@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SnakeOnline.Core
+namespace SnakeOnlineCore
 {
-    class Snake
+    public class Snake
     {
-        private GameClient client;  // temporary????
+        //private GameClient client;  // temporary????
+        private Object client;      // VERY VERY TEMPORARY!!
 
         private SnakeOrientation currentOrientation;
 
@@ -47,7 +48,7 @@ namespace SnakeOnline.Core
         /// <summary>
         ///     Constructor.
         /// </summary>
-        public Snake(GameClient client, int posX, int posY, Color color, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
+        public Snake(/*GameClient*/ Object client, int posX, int posY, Color color, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
         {
             this.client = client;
 
@@ -60,7 +61,7 @@ namespace SnakeOnline.Core
 
             this.bodyPartsToGrow = 0;
 
-            bIsAlive = true;            
+            bIsAlive = true;
         }
 
         private Queue<SnakeBodyObject> BuildSnake(int posX, int posY, Color color)
@@ -108,7 +109,7 @@ namespace SnakeOnline.Core
                     snakeParts.Enqueue(new SnakeBodyObject(posX - bodyLength, posY, true, color, this));   // The head.
 
                     break;
-            }            
+            }
 
             return snakeParts;
         }
@@ -117,7 +118,6 @@ namespace SnakeOnline.Core
         {
             return bodyParts;
         }
-
 
         // ~ Begin movement interface.
 
@@ -128,7 +128,7 @@ namespace SnakeOnline.Core
 
         public void MoveSnake()
         {
-            if (! bIsAlive)
+            if (!bIsAlive)
                 return;
 
             switch (currentOrientation)
@@ -232,8 +232,8 @@ namespace SnakeOnline.Core
             SnakeGameManager.GetInstance().gameArenaObjects[bodyPartToBecomeNewHead.posX, bodyPartToBecomeNewHead.posY] = bodyPartToBecomeNewHead;
 
             // Temporary... just for testing
-            byte[] dataToSend = Encoding.ASCII.GetBytes("New head position: " + newHeadPosX + " | " + newHeadPosY);
-            client.SendTestData(dataToSend);
+            //byte[] dataToSend = Encoding.ASCII.GetBytes("New head position: " + newHeadPosX + " | " + newHeadPosY);
+            //client.SendTestData(dataToSend);
         }
 
         // ~ End movement interface.

@@ -16,7 +16,7 @@ namespace SnakeOnlineServer.Core
         private static Socket serverSocket;
         private static List<Socket> clientSocketList;
 
-        private static byte[] dataBuffer = new byte[1024];  // TODO: needed as a class field?
+        private static byte[] rawDataBuffer = new byte[1024];  // TODO: needed as a class field?
 
         public GameServer(TextBox _serverLogTextBox)
         {
@@ -33,6 +33,8 @@ namespace SnakeOnlineServer.Core
             serverSocket.Bind(new IPEndPoint(IPAddress.Any, 1702));
             serverSocket.Listen(10);
             serverSocket.BeginAccept(new AsyncCallback(ServerAcceptConnectionCallback), null);
+
+            LogMessage("Server has started.");
         }
 
         private static void ServerAcceptConnectionCallback(IAsyncResult AR)
@@ -40,7 +42,7 @@ namespace SnakeOnlineServer.Core
             try
             {
                 Socket newClientSocket = serverSocket.EndAccept(AR);
-                newClientSocket.BeginReceive(dataBuffer, 0, dataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), newClientSocket);
+                newClientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), newClientSocket);
 
                 clientSocketList.Add(newClientSocket);
 
@@ -62,20 +64,19 @@ namespace SnakeOnlineServer.Core
             try
             {
                 int receivedDataSize = clientSocket.EndReceive(AR);
-                byte[] dataBuf = new byte[receivedDataSize];
+                byte[] actualDataBuffer = new byte[receivedDataSize];
 
-                Array.Copy(dataBuffer, dataBuf, receivedDataSize);
-
-                // Log received data
-                LogMessage("Data received: " + Encoding.ASCII.GetString(dataBuf));
+                Array.Copy(rawDataBuffer, actualDataBuffer, receivedDataSize);
 
                 // TODO: handle the received data.
-                //SendData();
-                //byte[] dataToSendBackToClient = ...
-                //clientSocket.BeginSend(dataToSendBackToClient, 0, dataToSendBackToClient.Length, SocketFlags.None, new AsyncCallback(ServerSendToClientCallback), clientSocket);
+                HandleReceivedData(actualDataBuffer);
+                
+                // TODO: after handling the data, send things back to the client(s).
+                // TODO: is this really where (and how) to do it?
+                //SendDataToClient();
 
                 // Resume receiving data from this client socket.
-                clientSocket.BeginReceive(dataBuffer, 0, dataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), clientSocket);
+                clientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), clientSocket);
             }
             catch
             {
@@ -89,9 +90,15 @@ namespace SnakeOnlineServer.Core
             }
         }
 
-        private static void SendData()
+        private static void HandleReceivedData(byte[] dataBuffer)
         {
 
+        }
+
+        private static void SendDataToClient()
+        {
+            //byte[] dataToSendBackToClient = ...
+            //clientSocket.BeginSend(dataToSendBackToClient, 0, dataToSendBackToClient.Length, SocketFlags.None, new AsyncCallback(ServerSendToClientCallback), clientSocket);
         }
 
         private static void ServerSendToClientCallback(IAsyncResult AR)

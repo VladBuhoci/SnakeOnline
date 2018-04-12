@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
 
-namespace SnakeOnline.Core
+namespace SnakeOnlineCore
 {
-    class SnakeGameArenaObject
+    public class SnakeGameArenaObject
     {
         public int posX { get; set; }
         public int posY { get; set; }

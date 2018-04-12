@@ -1,6 +1,6 @@
-﻿namespace SnakeOnline.Core
+﻿namespace SnakeOnlineCore
 {
-    enum SnakeOrientation
+    public enum SnakeOrientation
     {
         Up,
         Right,
