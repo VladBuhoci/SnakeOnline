@@ -13,6 +13,7 @@ namespace SnakeOnlineCore
         private Object client;      // VERY VERY TEMPORARY!!
 
         private SnakeOrientation currentOrientation;
+        private Queue<SnakeOrientation> orientationQueue;
 
         private int bodyLength;
         private int bodyLengthMin;
@@ -53,6 +54,7 @@ namespace SnakeOnlineCore
             this.client = client;
 
             this.currentOrientation = snakeOrientation;
+            this.orientationQueue = new Queue<SnakeOrientation>();
 
             this.bodyLength = bodyLength;
             this.bodyLengthMin = bodyLength;
@@ -61,7 +63,7 @@ namespace SnakeOnlineCore
 
             this.bodyPartsToGrow = 0;
 
-            bIsAlive = true;
+            this.bIsAlive = true;
         }
 
         private Queue<SnakeBodyObject> BuildSnake(int posX, int posY, Color color)
@@ -110,7 +112,7 @@ namespace SnakeOnlineCore
 
                     break;
             }
-
+            
             return snakeParts;
         }
 
@@ -123,13 +125,16 @@ namespace SnakeOnlineCore
 
         public void ChangeDirection(SnakeOrientation newOrientation)
         {
-            currentOrientation = newOrientation;
+            orientationQueue.Enqueue(newOrientation);
         }
 
         public void MoveSnake()
         {
-            if (!bIsAlive)
+            if (! bIsAlive)
                 return;
+
+            if (orientationQueue.Count > 0)
+                currentOrientation = orientationQueue.Dequeue();
 
             switch (currentOrientation)
             {
