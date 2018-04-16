@@ -14,6 +14,7 @@ namespace SnakeOnline.Core
         // TODO: temporary..
         public Snake controlledSnake { get; set; }
 
+        private GameClient socket;
         private SnakeOrientation currentOrientation;
 
         /// <summary>
@@ -22,9 +23,12 @@ namespace SnakeOnline.Core
         public SnakeController(GameClient client, int snakePosX, int snakePosY, Color snakeColor, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
         {
             // TODO: temporary.. should create the snake on the server in the future.
-            controlledSnake = new Snake(client, snakePosX, snakePosY, snakeColor, snakeOrientation, bodyLength);
+            controlledSnake = new Snake(snakePosX, snakePosY, snakeColor, snakeOrientation, bodyLength);
 
-            currentOrientation = snakeOrientation;
+            socket = client;
+            currentOrientation = snakeOrientation;  // how to deal with this? get it from the server? send it to the server?
+
+            AskServerToSpawnSnake();
         }
 
         public Snake GetControlledSnake()
@@ -74,6 +78,11 @@ namespace SnakeOnline.Core
                 // TODO: temporary..
                 controlledSnake.ChangeDirection(SnakeOrientation.Left);
             }
+        }
+
+        private void AskServerToSpawnSnake()
+        {
+            socket.SendSnakeSpawnRequestToServer();
         }
     }
 }

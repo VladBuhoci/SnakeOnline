@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SnakeOnlineCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,13 +18,15 @@ namespace SnakeOnlineServer.Core
         private static List<Socket> clientSocketList;
 
         private static byte[] rawDataBuffer = new byte[1024];  // TODO: needed as a class field?
+        private static int uniqueIDCounter;
 
         public GameServer(TextBox _serverLogTextBox)
         {
             serverLogTextBox = _serverLogTextBox;
 
-            clientSocketList = new List<Socket>();
             serverSocket     = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            clientSocketList = new List<Socket>();
+            uniqueIDCounter  = 0;
         }
 
         public void SetUpServer()
@@ -42,11 +45,18 @@ namespace SnakeOnlineServer.Core
             try
             {
                 Socket newClientSocket = serverSocket.EndAccept(AR);
+
+                // Begin receiving data from this client.
                 newClientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), newClientSocket);
+
+                // Send the unique ID to this client.
+                byte[] idData = CommunicationProtocolUtils.MakeCommand(null, CommunicationProtocol.SEND_PLAYER_ID, uniqueIDCounter.ToString());
+                newClientSocket.Send(idData);
 
                 clientSocketList.Add(newClientSocket);
 
-                LogMessage("New client is now connected to the server.");
+                LogMessage(String.Format("New client is now connected to the server. (id: {0})", uniqueIDCounter));
+                uniqueIDCounter += 1;
 
                 // Resume accepting connections.
                 serverSocket.BeginAccept(new AsyncCallback(ServerAcceptConnectionCallback), null);
@@ -78,9 +88,10 @@ namespace SnakeOnlineServer.Core
                 // Resume receiving data from this client socket.
                 clientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), clientSocket);
             }
-            catch
+            catch (Exception e)
             {
                 LogMessage("~ Client disconnected.");
+                LogMessage(e.StackTrace);
 
                 clientSocketList.Remove(clientSocket);
 
@@ -92,7 +103,23 @@ namespace SnakeOnlineServer.Core
 
         private static void HandleReceivedData(byte[] dataBuffer)
         {
+            CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolFromCommand(dataBuffer);
 
+            switch (command)
+            {
+                case CommunicationProtocol.SPAWN_SNAKE:
+                    LogMessage("Player requested a snake to be created.");
+
+                    // Create a snake and a unique ID and return the ID to the player.
+                    // ... but not here. The right place is the game manager.
+                    // ... also, it might be better to just generate an ID for each player when they connect for the first time.
+
+                    break;
+
+                default:
+                    LogMessage("Unknown command received from client.");
+                    break;
+            }
         }
 
         private static void SendDataToClient()
@@ -112,7 +139,7 @@ namespace SnakeOnlineServer.Core
         {
             if (serverLogTextBox != null)
             {
-                serverLogTextBox.AppendText(text + "\n");
+                serverLogTextBox.BeginInvoke(new MethodInvoker(delegate { serverLogTextBox.AppendText(text + "\n"); }));
             }
         }
 

@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommunicationProtocol.cs" />
+    <Compile Include="CommunicationProtocolUtils.cs" />
     <Compile Include="FoodObject.cs" />
     <Compile Include="Snake.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

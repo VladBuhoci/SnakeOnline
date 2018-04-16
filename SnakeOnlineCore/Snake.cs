@@ -9,9 +9,6 @@ namespace SnakeOnlineCore
 {
     public class Snake
     {
-        //private GameClient client;  // temporary????
-        private Object client;      // VERY VERY TEMPORARY!!
-
         private SnakeOrientation currentOrientation;
         private Queue<SnakeOrientation> orientationQueue;
 
@@ -49,10 +46,8 @@ namespace SnakeOnlineCore
         /// <summary>
         ///     Constructor.
         /// </summary>
-        public Snake(/*GameClient*/ Object client, int posX, int posY, Color color, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
+        public Snake(int posX, int posY, Color color, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
         {
-            this.client = client;
-
             this.currentOrientation = snakeOrientation;
             this.orientationQueue = new Queue<SnakeOrientation>();
 
@@ -235,10 +230,6 @@ namespace SnakeOnlineCore
 
             // Same for the arena matrix.
             SnakeGameManager.GetInstance().gameArenaObjects[bodyPartToBecomeNewHead.posX, bodyPartToBecomeNewHead.posY] = bodyPartToBecomeNewHead;
-
-            // Temporary... just for testing
-            //byte[] dataToSend = Encoding.ASCII.GetBytes("New head position: " + newHeadPosX + " | " + newHeadPosY);
-            //client.SendTestData(dataToSend);
         }
 
         // ~ End movement interface.

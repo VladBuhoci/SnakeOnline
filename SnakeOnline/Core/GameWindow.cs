@@ -29,9 +29,10 @@ namespace SnakeOnline.Core
             snakeController = new SnakeController(client, 19, 30, Color.Red);
             bApplicationAttemptsClosing = false;
 
+            // Snake handling will be migrated on the server.
             SnakeGameManager.GetInstance().AddSnake(snakeController.GetControlledSnake());
 
-            // food spawning will be migrated on the server.
+            // Food spawning will be migrated on the server.
             SnakeGameManager.GetInstance().SpawnFood(snakeController.GetControlledSnake().GetSnakeBodyParts().FirstOrDefault().color);
 
             // Start the game render loop thread.
