@@ -10,32 +10,58 @@ namespace SnakeOnlineCore
 {
     public sealed class CommunicationProtocolUtils
     {
+        private static BinaryFormatter binaryFormatter = new BinaryFormatter();
+
+        /// <summary>
+        ///     Private constructor, so the class cannot be instantiated..
+        /// </summary>
         private CommunicationProtocolUtils() { }
 
-        // TODO: document this
-        public static byte[] MakeCommand(int ? uniqueID, CommunicationProtocol command, String dataToSend)
+        /// <summary>
+        ///     Wraps up the data in an array of bytes, ready to be sent over the network.
+        /// </summary>
+        /// 
+        /// <param name="uniqueID">Unique ID of the user's socket, or -1 if it's the server.</param>
+        /// <param name="command">Any of the enumerated values.</param>
+        /// <param name="dataToSend">Actual data that needs to be sent to other sockets. This can be anything.</param>
+        /// 
+        /// <returns>
+        ///     Returns an array of bytes which can be sent to other sockets, where it can be deserialized
+        ///         and thus, have its data accessed.
+        /// </returns>
+        public static byte[] MakeNetworkCommand(int uniqueID, CommunicationProtocol command, Object dataToSend)
         {
-            StringBuilder commandAsString = new StringBuilder(uniqueID != null ? uniqueID.ToString() : "-1");
+            uniqueID = uniqueID >= 0 ? uniqueID : -1;
+            CommunicationPacketWrapper wrapper = new CommunicationPacketWrapper(uniqueID, command, dataToSend);
+            MemoryStream stream = new MemoryStream();
 
-            commandAsString.AppendFormat("/{0}", command.ToString());
-            commandAsString.AppendFormat("/{0}", dataToSend);
+            binaryFormatter.Serialize(stream, wrapper);
 
-            return Encoding.ASCII.GetBytes(commandAsString.ToString());
+            return stream.ToArray();
         }
 
         public static int GetIDFromCommand(byte[] commandData)
         {
-            return Int32.Parse(Encoding.ASCII.GetString(commandData).Split('/')[0]);
+            MemoryStream stream = new MemoryStream(commandData);
+            CommunicationPacketWrapper wrapper = (CommunicationPacketWrapper) binaryFormatter.Deserialize(stream);
+
+            return wrapper.uniqueID;
         }
 
-        public static CommunicationProtocol GetProtocolFromCommand(byte[] commandData)
+        public static CommunicationProtocol GetProtocolValueFromCommand(byte[] commandData)
         {
-            return (CommunicationProtocol) Enum.Parse(typeof(CommunicationProtocol), Encoding.ASCII.GetString(commandData).Split('/')[1]);
+            MemoryStream stream = new MemoryStream(commandData);
+            CommunicationPacketWrapper wrapper = (CommunicationPacketWrapper) binaryFormatter.Deserialize(stream);
+
+            return wrapper.protocolCommand;
         }
 
-        public static String GetDataFromCommand(byte[] commandData)
+        public static Object GetDataFromCommand(byte[] commandData)
         {
-            return Encoding.ASCII.GetString(commandData).Split('/')[2];
+            MemoryStream stream = new MemoryStream(commandData);
+            CommunicationPacketWrapper wrapper = (CommunicationPacketWrapper) binaryFormatter.Deserialize(stream);
+
+            return wrapper.data;
         }
     }
 }

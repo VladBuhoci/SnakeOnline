@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommunicationPacketWrapper.cs" />
     <Compile Include="CommunicationProtocol.cs" />
     <Compile Include="CommunicationProtocolUtils.cs" />
     <Compile Include="FoodObject.cs" />

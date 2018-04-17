@@ -65,7 +65,7 @@ namespace SnakeOnline.Core
 
                 Array.Copy(rawDataBuffer, actualDataBuffer, receivedDataSize);
 
-                // TODO: handle the received data.
+                // Handle the received data.
                 HandleReceivedData(actualDataBuffer);
 
                 // TODO: any code to send data back to server should done here.
@@ -88,12 +88,14 @@ namespace SnakeOnline.Core
         {
             if (CommunicationProtocolUtils.GetIDFromCommand(dataBuffer) == -1)
             {
-                CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolFromCommand(dataBuffer);
+                CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
 
                 switch (command)
                 {
                     case CommunicationProtocol.SEND_PLAYER_ID:
-                        uniqueID = CommunicationProtocolUtils.GetIDFromCommand(dataBuffer);
+                        // Save the ID provided by the server.
+                        // This only happens when we connect to the server.
+                        uniqueID = (int) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
                         break;
 
                     case CommunicationProtocol.SEND_ARENA_MATRIX:
@@ -111,7 +113,7 @@ namespace SnakeOnline.Core
 
         public void SendSnakeSpawnRequestToServer()
         {
-            socket.Send(CommunicationProtocolUtils.MakeCommand(uniqueID, CommunicationProtocol.SPAWN_SNAKE, "NODATA"));
+            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniqueID, CommunicationProtocol.SPAWN_SNAKE, "NODATA"));
         }
     }
 }

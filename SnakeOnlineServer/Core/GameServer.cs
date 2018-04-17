@@ -50,7 +50,7 @@ namespace SnakeOnlineServer.Core
                 newClientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), newClientSocket);
 
                 // Send the unique ID to this client.
-                byte[] idData = CommunicationProtocolUtils.MakeCommand(null, CommunicationProtocol.SEND_PLAYER_ID, uniqueIDCounter.ToString());
+                byte[] idData = CommunicationProtocolUtils.MakeNetworkCommand(-1, CommunicationProtocol.SEND_PLAYER_ID, uniqueIDCounter);
                 newClientSocket.Send(idData);
 
                 clientSocketList.Add(newClientSocket);
@@ -78,11 +78,11 @@ namespace SnakeOnlineServer.Core
 
                 Array.Copy(rawDataBuffer, actualDataBuffer, receivedDataSize);
 
-                // TODO: handle the received data.
+                // Handle the received data.
                 HandleReceivedData(actualDataBuffer);
                 
-                // TODO: after handling the data, send things back to the client(s).
-                // TODO: is this really where (and how) to do it?
+                // TODO #1: after handling the data, send things back to the client(s).
+                // TODO #2: is this really where (and how) to do it?
                 //SendDataToClient();
 
                 // Resume receiving data from this client socket.
@@ -103,7 +103,7 @@ namespace SnakeOnlineServer.Core
 
         private static void HandleReceivedData(byte[] dataBuffer)
         {
-            CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolFromCommand(dataBuffer);
+            CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
 
             switch (command)
             {
