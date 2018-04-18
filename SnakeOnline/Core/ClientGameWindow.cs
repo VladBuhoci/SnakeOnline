@@ -12,36 +12,35 @@ using SnakeOnlineCore;
 
 namespace SnakeOnline.Core
 {
-    public partial class GameWindow : Form
+    partial class ClientGameWindow : Form
     {
+        private SnakeGameManagerCL snakeGameManagerCL;
+        private GameClient gameClient;
         private SnakeController snakeController;
 
-        private static bool bApplicationAttemptsClosing;
-
-        public GameWindow()
+        public ClientGameWindow(GameClient client, int uniqueGameManagerID)
         {
             InitializeComponent();
-
-            GameClient client = new GameClient();
-
-            SnakeGameManager.GetInstance().SetGameArenaPanel(gameArenaPanel);
-
+            
+            snakeGameManagerCL = new SnakeGameManagerCL(gameArenaPane, uniqueGameManagerID);
+            gameClient = client;
+            gameClient.snakeGameManagerCL = snakeGameManagerCL;
             snakeController = new SnakeController(client, 19, 30, Color.Red);
-            bApplicationAttemptsClosing = false;
+
+            SnakeGameManager.GetInstance().SetGameArenaPane(gameArenaPane);
+            
+            //bApplicationAttemptsClosing = false;
 
             // Snake handling will be migrated on the server.
             SnakeGameManager.GetInstance().AddSnake(snakeController.GetControlledSnake());
 
             // Food spawning will be migrated on the server.
             SnakeGameManager.GetInstance().SpawnFood(snakeController.GetControlledSnake().GetSnakeBodyParts().FirstOrDefault().color);
-
-            // Start the game render loop thread.
-            Thread auxGameRenderLoopThread = new Thread(() => RenderLoop(gameArenaPanel));
-            auxGameRenderLoopThread.Start();
         }
 
-        private void gameArenaPanel_Paint(object sender, PaintEventArgs e)
+        private void gameArenaPane_Paint(object sender, PaintEventArgs e)
         {
+            //foreach (SnakeGameArenaObject arenaObj in snakeGameManagerCL.gameArenaObjects)
             foreach (SnakeGameArenaObject arenaObj in SnakeGameManager.GetInstance().gameArenaObjects)
             {
                 if (arenaObj is SnakeBodyObject)
@@ -88,30 +87,13 @@ namespace SnakeOnline.Core
                     break;
             }
         }
-
-        private static void RenderLoop(Panel gamePanel)
-        {
-            while (true)
-            {
-                if (bApplicationAttemptsClosing)
-                {
-                    break;
-                }
-                
-                if (gamePanel != null && gamePanel.IsHandleCreated)
-                {
-                    gamePanel.BeginInvoke(new MethodInvoker(delegate { gamePanel.Refresh(); }));
-                }
-
-                Thread.Sleep(100);
-            }
-            
-            Thread.CurrentThread.Abort();
-        }
-
+        
         private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            bApplicationAttemptsClosing = true;
+            snakeGameManagerCL = null;
+            gameClient.CleanUp();
+            gameClient = null;
+            snakeController = null;
         }
     }
 }

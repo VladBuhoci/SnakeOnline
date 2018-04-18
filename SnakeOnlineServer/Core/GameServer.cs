@@ -12,21 +12,27 @@ namespace SnakeOnlineServer.Core
 {
     class GameServer
     {
-        private static TextBox serverLogTextBox;
+        private TextBox serverLogTextBox;
 
-        private static Socket serverSocket;
-        private static List<Socket> clientSocketList;
+        private Socket serverSocket;
+        private Dictionary<int, Socket> idClientSocketPairs;
+        private Dictionary<int, SnakeGameManagerSV> snakeGameManagerSVCollection;
 
-        private static byte[] rawDataBuffer = new byte[1024];  // TODO: needed as a class field?
-        private static int uniqueIDCounter;
+        private byte[] rawDataBuffer = new byte[1024];  // TODO: needed as a class field?
+        private int uniquePlayerIDCounter;
+        private int uniqueGameManagerIDCounter;
 
         public GameServer(TextBox _serverLogTextBox)
         {
-            serverLogTextBox = _serverLogTextBox;
+            serverLogTextBox             = _serverLogTextBox;
+            snakeGameManagerSVCollection = new Dictionary<int, SnakeGameManagerSV>();
 
-            serverSocket     = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            clientSocketList = new List<Socket>();
-            uniqueIDCounter  = 0;
+            serverSocket                 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            idClientSocketPairs          = new Dictionary<int, Socket>();
+            uniquePlayerIDCounter        = 0;
+            uniqueGameManagerIDCounter   = 0;
+
+            //CreateNewGameAndGameManager();      // TODO: shouldn't be done here.
         }
 
         public void SetUpServer()
@@ -40,7 +46,16 @@ namespace SnakeOnlineServer.Core
             LogMessage("Server has started.");
         }
 
-        private static void ServerAcceptConnectionCallback(IAsyncResult AR)
+        private void CreateNewGameAndGameManager(int arenaWidth, int arenaHeight, Dictionary<int, Snake> idSnakePairs)
+        {
+            SnakeGameManagerSV manager = new SnakeGameManagerSV(arenaWidth, arenaHeight, idSnakePairs);
+
+            snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, manager);
+
+            uniqueGameManagerIDCounter += 1;
+        }
+
+        private void ServerAcceptConnectionCallback(IAsyncResult AR)
         {
             try
             {
@@ -50,13 +65,13 @@ namespace SnakeOnlineServer.Core
                 newClientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), newClientSocket);
 
                 // Send the unique ID to this client.
-                byte[] idData = CommunicationProtocolUtils.MakeNetworkCommand(-1, CommunicationProtocol.SEND_PLAYER_ID, uniqueIDCounter);
+                byte[] idData = CommunicationProtocolUtils.MakeNetworkCommand(-1, 0, CommunicationProtocol.SEND_PLAYER_ID, uniquePlayerIDCounter);
                 newClientSocket.Send(idData);
 
-                clientSocketList.Add(newClientSocket);
+                idClientSocketPairs.Add(uniquePlayerIDCounter, newClientSocket);
 
-                LogMessage(String.Format("New client is now connected to the server. (id: {0})", uniqueIDCounter));
-                uniqueIDCounter += 1;
+                LogMessage(String.Format("New client is now connected to the server. (id: {0})", uniquePlayerIDCounter));
+                uniquePlayerIDCounter += 1;
 
                 // Resume accepting connections.
                 serverSocket.BeginAccept(new AsyncCallback(ServerAcceptConnectionCallback), null);
@@ -67,7 +82,7 @@ namespace SnakeOnlineServer.Core
             }
         }
 
-        private static void ServerBeginReceiveDataFromClient(IAsyncResult AR)
+        private void ServerBeginReceiveDataFromClient(IAsyncResult AR)
         {
             Socket clientSocket = (Socket) AR.AsyncState;
 
@@ -79,7 +94,7 @@ namespace SnakeOnlineServer.Core
                 Array.Copy(rawDataBuffer, actualDataBuffer, receivedDataSize);
 
                 // Handle the received data.
-                HandleReceivedData(actualDataBuffer);
+                HandleReceivedData(actualDataBuffer, clientSocket);
                 
                 // TODO #1: after handling the data, send things back to the client(s).
                 // TODO #2: is this really where (and how) to do it?
@@ -91,9 +106,27 @@ namespace SnakeOnlineServer.Core
             catch (Exception e)
             {
                 LogMessage("~ Client disconnected.");
+                LogMessage(e.Message);
                 LogMessage(e.StackTrace);
 
-                clientSocketList.Remove(clientSocket);
+                int key = -1;
+                var enumerator = idClientSocketPairs.GetEnumerator();
+
+                while (enumerator.Current.Value != null)
+                {
+                    if (enumerator.Current.Value == clientSocket)
+                    {
+                        key = enumerator.Current.Key;
+                        break;
+                    }
+
+                    enumerator.MoveNext();
+                }
+
+                if (key != -1)
+                {
+                    idClientSocketPairs.Remove(key);
+                }
 
                 clientSocket.Close();
                 clientSocket.Dispose();
@@ -101,7 +134,7 @@ namespace SnakeOnlineServer.Core
             }
         }
 
-        private static void HandleReceivedData(byte[] dataBuffer)
+        private void HandleReceivedData(byte[] dataBuffer, Socket clientSocket)
         {
             CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
 
@@ -116,26 +149,48 @@ namespace SnakeOnlineServer.Core
 
                     break;
 
+                case CommunicationProtocol.CREATE_GAME:
+                    LogMessage("New game request.");
+
+                    int playerID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
+
+                    // Create the game manager here and do thingies for it.
+                    // ... also add it to the dictionary.
+                    // ... NOTE: the command wrapper should contain every client ID that will participate in this match in the data field.
+
+                    // foreach (clientID in list of IDs)
+                    // Think of the data that could be sent here...
+                    byte[] newManagerResultCommand = CommunicationProtocolUtils.MakeNetworkCommand(-1, uniqueGameManagerIDCounter, CommunicationProtocol.SEND_GAME_MANAGER_ID, playerID);
+
+                    // Send the result back.
+                    idClientSocketPairs[playerID].Send(newManagerResultCommand);
+
+                    //snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, newManager);
+
+                    uniqueGameManagerIDCounter += 1;
+
+                    break;
+
                 default:
                     LogMessage("Unknown command received from client.");
                     break;
             }
         }
 
-        private static void SendDataToClient()
+        private void SendDataToClient()
         {
             //byte[] dataToSendBackToClient = ...
             //clientSocket.BeginSend(dataToSendBackToClient, 0, dataToSendBackToClient.Length, SocketFlags.None, new AsyncCallback(ServerSendToClientCallback), clientSocket);
         }
 
-        private static void ServerSendToClientCallback(IAsyncResult AR)
+        private void ServerSendToClientCallback(IAsyncResult AR)
         {
             Socket clientSocket = (Socket) AR.AsyncState;
 
             clientSocket.EndSend(AR);
         }
 
-        private static void LogMessage(String text)
+        private void LogMessage(String text)
         {
             if (serverLogTextBox != null)
             {
@@ -145,24 +200,28 @@ namespace SnakeOnlineServer.Core
 
         /// <summary>
         ///     Clean up method.
-        ///     W.I.P.
         /// </summary>
         public void CleanUp()
         {
             serverLogTextBox.Clear();
 
             // close all sockets
-            foreach (Socket clientSocket in clientSocketList)
+            foreach (Socket clientSocket in idClientSocketPairs.Values)
             {
                 clientSocket.Close();
                 clientSocket.Dispose();
             }
 
-            clientSocketList.Clear();
+            idClientSocketPairs.Clear();
 
             serverSocket.Close();
             serverSocket.Dispose();
             serverSocket = null;
+
+            foreach (SnakeGameManagerSV manager in snakeGameManagerSVCollection.Values)
+            {
+                manager.RequestAuxGameLoopThreadToEnd();
+            }
         }
     }
 }

@@ -11,11 +11,11 @@ using System.Windows.Forms;
 
 namespace SnakeOnlineServer
 {
-    public partial class MainWindow : Form
+    public partial class ServerControlWindow : Form
     {
         private GameServer server;
 
-        public MainWindow()
+        public ServerControlWindow()
         {
             InitializeComponent();
         }

@@ -13,22 +13,26 @@ namespace SnakeOnline.Core
 {
     class GameClient
     {
-        private static Socket socket;
+        private Socket socket;
+
+        private Form clientMenuWindow;
 
         private int serverPortNumber;
-        private int uniqueID;
+        private int uniquePlayerID;
+        private int currentUniqueGameManagerID;
         private byte[] rawDataBuffer = new byte[1024];
 
-        public GameClient()
+        public SnakeGameManagerCL snakeGameManagerCL { get; set; }
+
+        public GameClient(Form clientMainmenuWindow)
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            clientMenuWindow = clientMainmenuWindow;
             serverPortNumber = 1702;
-
-            LoopConnect();
-            WaitReceiveAndHandleDataFromServer();
+            currentUniqueGameManagerID = -1;
         }
 
-        private void LoopConnect()
+        public void LoopConnect()
         {
             int attempts = 0;
 
@@ -46,6 +50,9 @@ namespace SnakeOnline.Core
                     //MessageBox.Show("Cannot connect to server :(");
                 }
             }
+
+            // Now that we're connected, we can send and receive messages from the server.
+            WaitReceiveAndHandleDataFromServer();
         }
 
         private void WaitReceiveAndHandleDataFromServer()
@@ -53,7 +60,7 @@ namespace SnakeOnline.Core
             // Begin receiving data from the server.
             socket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(BeginReceiveDataFromServer), socket);
         }
-
+        
         private void BeginReceiveDataFromServer(IAsyncResult AR)
         {
             Socket socket = (Socket) AR.AsyncState;
@@ -68,7 +75,7 @@ namespace SnakeOnline.Core
                 // Handle the received data.
                 HandleReceivedData(actualDataBuffer);
 
-                // TODO: any code to send data back to server should done here.
+                // TODO: any code to send data back to server should be done here.
                 
                 // Resume receiving data from the server.
                 socket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(BeginReceiveDataFromServer), socket);
@@ -78,15 +85,12 @@ namespace SnakeOnline.Core
                 socket.Close();
                 socket.Dispose();
                 socket = null;
-
-                MessageBox.Show(null, "Disconnected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation, MessageBoxDefaultButton.Button1);
-                Application.Exit();
             }
         }
 
         private void HandleReceivedData(byte[] dataBuffer)
         {
-            if (CommunicationProtocolUtils.GetIDFromCommand(dataBuffer) == -1)
+            if (CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer) == -1)
             {
                 CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
 
@@ -95,7 +99,15 @@ namespace SnakeOnline.Core
                     case CommunicationProtocol.SEND_PLAYER_ID:
                         // Save the ID provided by the server.
                         // This only happens when we connect to the server.
-                        uniqueID = (int) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                        uniquePlayerID = (int) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                        break;
+
+                    case CommunicationProtocol.SEND_GAME_MANAGER_ID:
+                        currentUniqueGameManagerID = CommunicationProtocolUtils.GetGameManagerIDFromCommand(dataBuffer);
+
+                        Form gameWindow = new ClientGameWindow(this, currentUniqueGameManagerID);
+                        gameWindow.ShowDialog(clientMenuWindow);
+
                         break;
 
                     case CommunicationProtocol.SEND_ARENA_MATRIX:
@@ -113,7 +125,26 @@ namespace SnakeOnline.Core
 
         public void SendSnakeSpawnRequestToServer()
         {
-            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniqueID, CommunicationProtocol.SPAWN_SNAKE, "NODATA"));
+            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID(), CommunicationProtocol.SPAWN_SNAKE, "NODATA"));
+        }
+
+        public void SendCreateGameRequestToServer()
+        {
+            // TODO: add every client id in the data field?
+            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.CREATE_GAME, "NODATA YET | probably many client IDs"));
+        }
+
+        /// <summary>
+        ///     Clean up method.
+        /// </summary>
+        public void CleanUp()
+        {
+            socket.Close();
+            socket.Dispose();
+            socket = null;
+
+            snakeGameManagerCL.RequestAuxGameLoopThreadToEnd();
+            snakeGameManagerCL = null;
         }
     }
 }

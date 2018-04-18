@@ -1,6 +1,6 @@
 ﻿namespace SnakeOnlineServer
 {
-    partial class MainWindow
+    partial class ServerControlWindow
     {
         /// <summary>
         ///     Required designer variable.

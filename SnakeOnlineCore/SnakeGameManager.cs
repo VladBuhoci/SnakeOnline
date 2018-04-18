@@ -15,7 +15,6 @@ namespace SnakeOnlineCore
         private static bool bApplicationAttemptsClosing;
 
         private List<Snake> snakes = new List<Snake>();
-        private Panel gameArenaPanel;
 
         public int gameArenaWidth = 50;
         public int gameArenaHeight = 50;
@@ -31,13 +30,11 @@ namespace SnakeOnlineCore
             return classInstance;
         }
 
-        public void SetGameArenaPanel(Panel gamePanel)
+        public void SetGameArenaPane(PictureBox gameArenaPane)
         {
-            gameArenaPanel = gamePanel;
-
             // Start the game loop thread.
 
-            Thread auxGameLoopThread = new Thread(() => GameLoop(snakes, gameArenaPanel));
+            Thread auxGameLoopThread = new Thread(() => GameLoop(snakes, gameArenaPane));
             auxGameLoopThread.Start();
         }
 
@@ -46,7 +43,7 @@ namespace SnakeOnlineCore
             bApplicationAttemptsClosing = true;
         }
 
-        private static void GameLoop(List<Snake> snakeList, Panel gamePanel)
+        private static void GameLoop(List<Snake> snakeList, PictureBox gamePanel)
         {
             while (true)
             {
