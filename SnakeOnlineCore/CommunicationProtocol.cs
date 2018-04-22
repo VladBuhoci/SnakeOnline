@@ -36,18 +36,28 @@ namespace SnakeOnlineCore
         SEND_PLAYER_ID = 11,
 
         /// <summary>
+        ///     Used by the server to inform all clients about the change(s) which occured recently in the
+        ///         collection of clients, such as a new user who has just connected or somebody who left.
+        ///     <para/>
+        ///     Good for updating the list of people in the lobby of each client.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        SEND_CONNECTED_CLIENTS_COLLECTION = 12,
+
+        /// <summary>
         ///     Used whenever a new game is going to be created and a game manager is born.
         ///     Every manager needs to be identified by using a unique ID.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_GAME_MANAGER_ID = 12,
+        SEND_GAME_MANAGER_ID = 13,
 
         /// <summary>
         ///     Used whenever the arena matrix is changed in some way and the clients need to be aware of that change.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_ARENA_MATRIX = 13
+        SEND_ARENA_MATRIX = 14
     }
 }

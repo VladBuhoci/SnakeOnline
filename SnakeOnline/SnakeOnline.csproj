@@ -49,6 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\ClientLobbyWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Core\ClientLobbyWindow.Designer.cs">
+      <DependentUpon>ClientLobbyWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Core\ClientMenuWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -68,6 +74,9 @@
     <Compile Include="Core\SnakeController.cs" />
     <EmbeddedResource Include="Core\ClientGameWindow.resx">
       <DependentUpon>ClientGameWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\ClientLobbyWindow.resx">
+      <DependentUpon>ClientLobbyWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Core\ClientMenuWindow.resx">
       <DependentUpon>ClientMenuWindow.cs</DependentUpon>

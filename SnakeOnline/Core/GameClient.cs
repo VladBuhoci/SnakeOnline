@@ -15,26 +15,27 @@ namespace SnakeOnline.Core
     {
         private Socket socket;
 
-        private Form clientMenuWindow;
-
         private int serverPortNumber;
         private int uniquePlayerID;
         private int currentUniqueGameManagerID;
         private byte[] rawDataBuffer = new byte[1024];
 
+        public ClientLobbyWindow clientLobbyWindow { get; set; }
         public SnakeGameManagerCL snakeGameManagerCL { get; set; }
 
-        public GameClient(Form clientMainmenuWindow)
+        public GameClient()
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            clientMenuWindow = clientMainmenuWindow;
-            serverPortNumber = 1702;
-            currentUniqueGameManagerID = -1;
+            SetUpClientSocket();
         }
 
         public void LoopConnect()
         {
             int attempts = 0;
+
+            if (socket == null)
+            {
+                SetUpClientSocket();
+            }
 
             while (! socket.Connected)
             {
@@ -90,8 +91,8 @@ namespace SnakeOnline.Core
 
         private void HandleReceivedData(byte[] dataBuffer)
         {
-            if (CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer) == -1)
-            {
+            //if (CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer) == -1)
+            //{
                 CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
 
                 switch (command)
@@ -105,8 +106,9 @@ namespace SnakeOnline.Core
                     case CommunicationProtocol.SEND_GAME_MANAGER_ID:
                         currentUniqueGameManagerID = CommunicationProtocolUtils.GetGameManagerIDFromCommand(dataBuffer);
 
-                        Form gameWindow = new ClientGameWindow(this, currentUniqueGameManagerID);
-                        gameWindow.ShowDialog(clientMenuWindow);
+                        Form gameWindow = new ClientGameWindow(this, clientLobbyWindow, currentUniqueGameManagerID);
+                        clientLobbyWindow.Visible = false;
+                        gameWindow.ShowDialog(clientLobbyWindow);
 
                         break;
 
@@ -114,7 +116,7 @@ namespace SnakeOnline.Core
                         // TODO
                         break;
                 }
-            }
+            //}
         }
 
         // TODO: useful?
@@ -134,17 +136,42 @@ namespace SnakeOnline.Core
             socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.CREATE_GAME, "NODATA YET | probably many client IDs"));
         }
 
+        private void SetUpClientSocket()
+        {
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            serverPortNumber = 1702;
+            currentUniqueGameManagerID = -1;
+        }
+
         /// <summary>
-        ///     Clean up method.
+        ///     Clean up method for when the client disconnects from the server.
+        /// </summary>
+        public void DisconnectFromServer()
+        {
+            if (socket != null)
+            {
+                socket.Disconnect(true);
+                socket = null;
+            }
+        }
+
+        /// <summary>
+        ///     Final clean up method used when the program closes.
         /// </summary>
         public void CleanUp()
         {
-            socket.Close();
-            socket.Dispose();
-            socket = null;
+            if (socket != null)
+            {
+                socket.Close();
+                socket.Dispose();
+                socket = null;
 
-            snakeGameManagerCL.RequestAuxGameLoopThreadToEnd();
-            snakeGameManagerCL = null;
+                if (snakeGameManagerCL != null)
+                {
+                    snakeGameManagerCL.RequestAuxGameLoopThreadToEnd();
+                    snakeGameManagerCL = null;
+                }
+            }
         }
     }
 }

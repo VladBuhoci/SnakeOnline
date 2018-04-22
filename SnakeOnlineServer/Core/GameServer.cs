@@ -65,13 +65,20 @@ namespace SnakeOnlineServer.Core
                 newClientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), newClientSocket);
 
                 // Send the unique ID to this client.
-                byte[] idData = CommunicationProtocolUtils.MakeNetworkCommand(-1, 0, CommunicationProtocol.SEND_PLAYER_ID, uniquePlayerIDCounter);
+                byte[] idData = CommunicationProtocolUtils.MakeNetworkCommand(-1, -1, CommunicationProtocol.SEND_PLAYER_ID, uniquePlayerIDCounter);
                 newClientSocket.Send(idData);
 
+                // Add this client to the collection of clients.
                 idClientSocketPairs.Add(uniquePlayerIDCounter, newClientSocket);
 
                 LogMessage(String.Format("New client is now connected to the server. (id: {0})", uniquePlayerIDCounter));
                 uniquePlayerIDCounter += 1;
+
+                // TODO:
+                // Inform every client that a new user has connected to the server, by sending
+                //      a new collection of names to each client to be seen in their lobby.
+                //string[] clientsNames = idClientSocketPairs.Keys.ToArray();
+                //byte[] connectedClientsCollection = CommunicationProtocolUtils.MakeNetworkCommand(-1, -1, CommunicationProtocol.SEND_CONNECTED_CLIENTS_COLLECTION, );
 
                 // Resume accepting connections.
                 serverSocket.BeginAccept(new AsyncCallback(ServerAcceptConnectionCallback), null);
@@ -136,44 +143,48 @@ namespace SnakeOnlineServer.Core
 
         private void HandleReceivedData(byte[] dataBuffer, Socket clientSocket)
         {
-            CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
+            // TODO
+            //if (CommunicationProtocolUtils.IsCommandNotEmpty(dataBuffer))
+            { 
+                CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
 
-            switch (command)
-            {
-                case CommunicationProtocol.SPAWN_SNAKE:
-                    LogMessage("Player requested a snake to be created.");
+                switch (command)
+                {
+                    case CommunicationProtocol.SPAWN_SNAKE:
+                        LogMessage("Player requested a snake to be created.");
 
-                    // Create a snake and a unique ID and return the ID to the player.
-                    // ... but not here. The right place is the game manager.
-                    // ... also, it might be better to just generate an ID for each player when they connect for the first time.
+                        // Create a snake and a unique ID and return the ID to the player.
+                        // ... but not here. The right place is the game manager.
+                        // ... also, it might be better to just generate an ID for each player when they connect for the first time.
 
-                    break;
+                        break;
 
-                case CommunicationProtocol.CREATE_GAME:
-                    LogMessage("New game request.");
+                    case CommunicationProtocol.CREATE_GAME:
+                        LogMessage("New game request.");
 
-                    int playerID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
+                        int playerID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
 
-                    // Create the game manager here and do thingies for it.
-                    // ... also add it to the dictionary.
-                    // ... NOTE: the command wrapper should contain every client ID that will participate in this match in the data field.
+                        // Create the game manager here and do thingies for it.
+                        // ... also add it to the dictionary.
+                        // ... NOTE: the command wrapper should contain every client ID that will participate in this match in the data field.
 
-                    // foreach (clientID in list of IDs)
-                    // Think of the data that could be sent here...
-                    byte[] newManagerResultCommand = CommunicationProtocolUtils.MakeNetworkCommand(-1, uniqueGameManagerIDCounter, CommunicationProtocol.SEND_GAME_MANAGER_ID, playerID);
+                        // foreach (clientID in list of IDs)
+                        // Think of the data that could be sent here...
+                        byte[] newManagerResultCommand = CommunicationProtocolUtils.MakeNetworkCommand(-1, uniqueGameManagerIDCounter, CommunicationProtocol.SEND_GAME_MANAGER_ID, playerID);
 
-                    // Send the result back.
-                    idClientSocketPairs[playerID].Send(newManagerResultCommand);
+                        // Send the result back.
+                        idClientSocketPairs[playerID].Send(newManagerResultCommand);
 
-                    //snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, newManager);
+                        //snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, newManager);
 
-                    uniqueGameManagerIDCounter += 1;
+                        uniqueGameManagerIDCounter += 1;
 
-                    break;
+                        break;
 
-                default:
-                    LogMessage("Unknown command received from client.");
-                    break;
+                    default:
+                        LogMessage("Unknown command received from client.");
+                        break;
+                }
             }
         }
 

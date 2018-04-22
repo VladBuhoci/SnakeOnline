@@ -16,15 +16,17 @@ namespace SnakeOnline.Core
     {
         private SnakeGameManagerCL snakeGameManagerCL;
         private GameClient gameClient;
+        private Form clientMenuWindow;
         private SnakeController snakeController;
 
-        public ClientGameWindow(GameClient client, int uniqueGameManagerID)
+        public ClientGameWindow(GameClient client, Form clientMainMenuWindow, int uniqueGameManagerID)
         {
             InitializeComponent();
             
             snakeGameManagerCL = new SnakeGameManagerCL(gameArenaPane, uniqueGameManagerID);
             gameClient = client;
             gameClient.snakeGameManagerCL = snakeGameManagerCL;
+            clientMenuWindow = clientMainMenuWindow;
             snakeController = new SnakeController(client, 19, 30, Color.Red);
 
             SnakeGameManager.GetInstance().SetGameArenaPane(gameArenaPane);
@@ -91,9 +93,11 @@ namespace SnakeOnline.Core
         private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             snakeGameManagerCL = null;
-            gameClient.CleanUp();
-            gameClient = null;
+            //gameClient.DisconnectFromServer();
+            //gameClient = null;
             snakeController = null;
+
+            clientMenuWindow.Visible = true;
         }
     }
 }

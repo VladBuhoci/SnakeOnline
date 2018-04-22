@@ -41,6 +41,16 @@ namespace SnakeOnlineCore
             return stream.ToArray();
         }
 
+        public static bool IsCommandNotEmpty(byte[] commandData)
+        {
+            if (commandData.Any(b => b != 0))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static int GetPlayerIDFromCommand(byte[] commandData)
         {
             MemoryStream stream = new MemoryStream(commandData);
