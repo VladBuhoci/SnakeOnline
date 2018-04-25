@@ -18,7 +18,7 @@ namespace SnakeOnline.Core
         private int serverPortNumber;
         private string uniquePlayerID;
         private int currentUniqueGameManagerID;
-        private byte[] rawDataBuffer = new byte[1024];
+        private Queue<byte[]> rawDataBufferQueue = new Queue<byte[]>();
 
         private ClientMenuWindow clientMenuWindow;
         private ClientLobbyWindow clientLobbyWindow { get; set; }
@@ -50,7 +50,7 @@ namespace SnakeOnline.Core
                 {
                     socket.Connect(IPAddress.Loopback, serverPortNumber);
                 }
-                catch (SocketException)
+                catch (SocketException ex)
                 {
                     //MessageBox.Show("Cannot connect to server :(");
                 }
@@ -64,8 +64,12 @@ namespace SnakeOnline.Core
 
         private void WaitReceiveAndHandleDataFromServer()
         {
+            byte[] rawDataBuffer = new byte[1024];
+
             // Begin receiving data from the server.
             socket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(BeginReceiveDataFromServer), socket);
+
+            rawDataBufferQueue.Enqueue(rawDataBuffer);
         }
         
         private void BeginReceiveDataFromServer(IAsyncResult AR)
@@ -76,18 +80,20 @@ namespace SnakeOnline.Core
             {
                 int receivedDataSize = socket.EndReceive(AR);
                 byte[] actualDataBuffer = new byte[receivedDataSize];
+                                
+                Array.Copy(rawDataBufferQueue.Dequeue(), actualDataBuffer, receivedDataSize);
 
-                Array.Copy(rawDataBuffer, actualDataBuffer, receivedDataSize);
-                
                 // Resume receiving data from the server.
-                // Do this as soon as possible to avoid missing any incoming data from the server.
-                // TODO: is it okay? we may need a data structure (queue or stack) if data handling takes too long and bytes are lost.
+                byte[] rawDataBuffer = new byte[1024];
+
                 socket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(BeginReceiveDataFromServer), socket);
 
-                // Handle the received data.
+                rawDataBufferQueue.Enqueue(rawDataBuffer);
+                
+                // Deal with the received data.
                 HandleReceivedData(actualDataBuffer);
             }
-            catch
+            catch (SocketException ex)
             {
                 socket.Disconnect(true);
                 socket = null;
@@ -101,7 +107,7 @@ namespace SnakeOnline.Core
                 if (CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer) == "")
                 {
                     CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
-                    
+
                     switch (command)
                     {
                         case CommunicationProtocol.SEND_CLIENT_TEMP_UNIQUE_ID:
