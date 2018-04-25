@@ -139,7 +139,7 @@ namespace SnakeOnline.Core
                             if (clientLobbyWindow != null)
                             {
                                 string[] names = (string[]) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
-
+                                
                                 clientLobbyWindow.UpdateConnectedClientsList(names);
                             }
 
@@ -175,6 +175,11 @@ namespace SnakeOnline.Core
             socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.CONNECT_TO_LOBBY_WITH_NICNKNAME, nickname));
         }
 
+        public void SendUpdatedLobbyPeopleListRequest()
+        {
+            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.REQUEST_LOBBY_PEOPLE_LIST_UPDATE, ""));
+        }
+
         public void SendCreateGameRequestToServer()
         {
             // TODO: add every client id in the data field?
@@ -183,7 +188,7 @@ namespace SnakeOnline.Core
 
         public void SendSnakeSpawnRequestToServer()
         {
-            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID(), CommunicationProtocol.SPAWN_SNAKE, "NODATA"));
+            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID(), CommunicationProtocol.SPAWN_SNAKE, "add snake properties here"));
         }
 
         private void SetUpClientSocket()

@@ -15,6 +15,7 @@ namespace SnakeOnlineServer.Core
         private TextBox serverLogTextBox;
 
         private Socket serverSocket;
+        private Dictionary<string, Socket> tempIdClientSocketPairs;
         private Dictionary<string, Socket> idClientSocketPairs;
         private Dictionary<int, SnakeGameManagerSV> snakeGameManagerSVCollection;
 
@@ -28,6 +29,7 @@ namespace SnakeOnlineServer.Core
             snakeGameManagerSVCollection = new Dictionary<int, SnakeGameManagerSV>();
 
             serverSocket                 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            tempIdClientSocketPairs      = new Dictionary<string, Socket>();
             idClientSocketPairs          = new Dictionary<string, Socket>();
             uniquePlayerTempIDCounter    = 0;
             uniqueGameManagerIDCounter   = 0;
@@ -61,8 +63,8 @@ namespace SnakeOnlineServer.Core
             {
                 Socket newClientSocket = serverSocket.EndAccept(AR);
 
-                // Add this socket to the collection of clients.
-                idClientSocketPairs.Add(uniquePlayerTempIDCounter.ToString(), newClientSocket);
+                // Add this socket to the temporary collection of clients.
+                tempIdClientSocketPairs.Add(uniquePlayerTempIDCounter.ToString(), newClientSocket);
 
                 // Let the client know of its temporary ID.
                 // The client will later send this back along with their chosen nickname, which replaces
@@ -147,79 +149,98 @@ namespace SnakeOnlineServer.Core
                 switch (command)
                 {
                     case CommunicationProtocol.CONNECT_TO_LOBBY_WITH_NICNKNAME:
-                        string tempID = (string) CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
-                        string chosenNickname = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
-                        
-                        // Make sure this new name is not already in use by another player.
-                        // If it is, we will let the player know about this.
-
-                        bool isPlayerAllowedToJoinLobby = ! idClientSocketPairs.Keys.Contains(chosenNickname);
-
-                        if (isPlayerAllowedToJoinLobby)
                         {
-                            // Replace old ID with nickname by removing and re-adding the entry.
-                            // It's a work-around when trying to replace keys in dictionary objects.
+                            string tempID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
+                            string chosenNickname = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
 
-                            Socket clientSocketWithNickname = idClientSocketPairs.Where(s => s.Key == tempID).First().Value;
+                            // Make sure this new name is not already in use by another player.
+                            // If it is, we will let the player know about this.
 
-                            idClientSocketPairs.Remove(tempID);
-                            idClientSocketPairs.Add(chosenNickname, clientSocketWithNickname);
+                            bool isPlayerAllowedToJoinLobby = ! idClientSocketPairs.Keys.Contains(chosenNickname);
 
-                            LogMessage(String.Format("Client \"" + chosenNickname + "\" (previous temporary id: {0}) has joined the lobby.", tempID));
+                            if (isPlayerAllowedToJoinLobby)
+                            {
+                                // Replace old ID with nickname by removing and re-adding the entry.
+                                // It's a work-around when trying to replace keys in dictionary objects.
 
-                            clientSocketWithNickname.Send(CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.ACCEPT_NEW_CLIENT_WITH_NICKNAME, chosenNickname));
+                                Socket clientSocketWithNickname = tempIdClientSocketPairs.Where(s => s.Key == tempID).First().Value;
 
-                            // Inform every client that a new user has connected to the server, by sending
-                            //      a new collection of names to each client to be seen in their lobby.
+                                tempIdClientSocketPairs.Remove(tempID);
+                                idClientSocketPairs.Add(chosenNickname, clientSocketWithNickname);
+
+                                LogMessage(String.Format("Client \"" + chosenNickname + "\" (previous temporary id: {0}) has joined the lobby.", tempID));
+
+                                clientSocketWithNickname.Send(CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.ACCEPT_NEW_CLIENT_WITH_NICKNAME, chosenNickname));
+
+                                // Inform every client that a new user has connected to the server, by sending
+                                //      a new collection of names to each client to be seen in their lobby.
+                                string[] clientsNames = idClientSocketPairs.Keys.ToArray();
+                                byte[] connectedClientsCollection = CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.SEND_CONNECTED_CLIENTS_COLLECTION, clientsNames);
+
+                                foreach (Socket socket in idClientSocketPairs.Values)
+                                {
+                                    socket.Send(connectedClientsCollection);
+                                }
+                            }
+                            else
+                            {
+                                clientSocket.Send(CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.ACCEPT_NEW_CLIENT_WITH_NICKNAME, ""));
+                            }
+
+                            break;
+                        }
+
+                    case CommunicationProtocol.REQUEST_LOBBY_PEOPLE_LIST_UPDATE:
+                        {
+                            string clientID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
                             string[] clientsNames = idClientSocketPairs.Keys.ToArray();
                             byte[] connectedClientsCollection = CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.SEND_CONNECTED_CLIENTS_COLLECTION, clientsNames);
 
-                            foreach (Socket socket in idClientSocketPairs.Values)
-                            {
-                                socket.Send(connectedClientsCollection);
-                            }
-                        }
-                        else
-                        {
-                            clientSocket.Send(CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.ACCEPT_NEW_CLIENT_WITH_NICKNAME, ""));
-                        }
+                            idClientSocketPairs[clientID].Send(connectedClientsCollection);
 
-                        break;
+                            break;
+                        }
 
                     case CommunicationProtocol.CREATE_GAME:
-                        LogMessage("New game request.");
+                        {
+                            LogMessage("New game request.");
 
-                        string playerID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
+                            string playerID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
 
-                        // Create the game manager here and do thingies for it.
-                        // ... also add it to the dictionary.
-                        // ... NOTE: the command wrapper should contain every client ID that will participate in this match in the data field.
+                            // Create the game manager here and do thingies for it.
+                            // ... also add it to the dictionary.
+                            // ... NOTE: the command wrapper should contain every client ID that will participate in this match in the data field.
 
-                        // foreach (clientID in list of IDs)
-                        // Think of the data that could be sent here...
-                        byte[] newManagerResultCommand = CommunicationProtocolUtils.MakeNetworkCommand(null, uniqueGameManagerIDCounter, CommunicationProtocol.SEND_GAME_MANAGER_ID, playerID);
+                            // foreach (clientID in list of IDs)
+                            // Think of the data that could be sent here...
+                            byte[] newManagerResultCommand = CommunicationProtocolUtils.MakeNetworkCommand(null, uniqueGameManagerIDCounter, CommunicationProtocol.SEND_GAME_MANAGER_ID, playerID);
 
-                        // Send the result back.
-                        idClientSocketPairs[playerID].Send(newManagerResultCommand);
+                            // Send the result back.
+                            idClientSocketPairs[playerID].Send(newManagerResultCommand);
 
-                        //snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, newManager);
+                            //snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, newManager);
 
-                        uniqueGameManagerIDCounter += 1;
+                            uniqueGameManagerIDCounter += 1;
 
-                        break;
+                            break;
+                        }
 
                     case CommunicationProtocol.SPAWN_SNAKE:
-                        LogMessage("Player requested a snake to be created.");
+                        {
+                            LogMessage("Player requested a snake to be created.");
 
-                        // Create a snake and a unique ID and return the ID to the player.
-                        // ... but not here. The right place is the game manager.
-                        // ... also, it might be better to just generate an ID for each player when they connect for the first time.
+                            // Create a snake and a unique ID and return the ID to the player.
+                            // ... but not here. The right place is the game manager.
+                            // ... also, it might be better to just generate an ID for each player when they connect for the first time.
 
-                        break;
+                            break;
+                        }
 
                     default:
-                        LogMessage("Unknown command received from client.");
-                        break;
+                        {
+                            LogMessage("Unknown command received from client.");
+                            break;
+                        }
                 }
             }
         }
@@ -253,12 +274,19 @@ namespace SnakeOnlineServer.Core
             serverLogTextBox.Clear();
 
             // close all sockets
+            foreach (Socket clientSocket in tempIdClientSocketPairs.Values)
+            {
+                clientSocket.Close();
+                clientSocket.Dispose();
+            }
+
             foreach (Socket clientSocket in idClientSocketPairs.Values)
             {
                 clientSocket.Close();
                 clientSocket.Dispose();
             }
 
+            tempIdClientSocketPairs.Clear();
             idClientSocketPairs.Clear();
 
             serverSocket.Close();

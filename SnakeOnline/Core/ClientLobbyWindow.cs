@@ -19,6 +19,7 @@ namespace SnakeOnline.Core
             InitializeComponent();
 
             this.socket = socket;
+            this.socket.SendUpdatedLobbyPeopleListRequest();
         }
 
         public void UpdateConnectedClientsList(string[] names)

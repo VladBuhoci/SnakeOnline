@@ -18,19 +18,26 @@ namespace SnakeOnlineCore
         CONNECT_TO_LOBBY_WITH_NICNKNAME = 1,
 
         /// <summary>
+        ///     Used by the clients to get a new list of users currently connected to the server AND who joined the lobby.
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_LOBBY_PEOPLE_LIST_UPDATE = 2,
+
+        /// <summary>
         ///     Used when a client attempts to start a new game and a game manager is spawned.
         ///     This will cause the server to create a new manager and send an ID back to the client(s).
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        CREATE_GAME = 2,
+        CREATE_GAME = 3,
 
         /// <summary>
         ///     Used when the client joins a match and it requires a snake to take control of during gameplay.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        SPAWN_SNAKE = 3,
+        SPAWN_SNAKE = 4,
 
 
         // Server to client "commands".
