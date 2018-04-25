@@ -21,6 +21,11 @@ namespace SnakeOnline.Core
             this.socket = socket;
         }
 
+        public void UpdateConnectedClientsList(string[] names)
+        {
+            clientsList.DataSource = names;
+        }
+
         private void lobbyChat_SendButton_Click(object sender, EventArgs e)
         {
 

@@ -21,7 +21,7 @@ namespace SnakeOnlineCore
         ///     Wraps up the data in an array of bytes, ready to be sent over the network.
         /// </summary>
         /// 
-        /// <param name="uniquePlayerID">Unique ID of the user's socket, or -1 if it's the server.</param>
+        /// <param name="uniquePlayerID">Unique ID of the user's socket, or null string if it's the server.</param>
         /// <param name="uniqueGameManagerID">Unique ID of the game manager handling the match running on the client.</param>
         /// <param name="command">Any of the enumerated values.</param>
         /// <param name="dataToSend">Actual data that needs to be sent to other sockets. This can be anything.</param>
@@ -30,9 +30,10 @@ namespace SnakeOnlineCore
         ///     Returns an array of bytes which can be sent to other sockets, where it can be deserialized
         ///         and thus, have its data accessed.
         /// </returns>
-        public static byte[] MakeNetworkCommand(int uniquePlayerID, int uniqueGameManagerID, CommunicationProtocol command, Object dataToSend)
+        public static byte[] MakeNetworkCommand(string uniquePlayerID, int uniqueGameManagerID, CommunicationProtocol command, Object dataToSend)
         {
-            uniquePlayerID = uniquePlayerID >= 0 ? uniquePlayerID : -1;
+            uniquePlayerID = uniquePlayerID != null ? uniquePlayerID : "";
+
             CommunicationPacketWrapper wrapper = new CommunicationPacketWrapper(uniquePlayerID, uniqueGameManagerID, command, dataToSend);
             MemoryStream stream = new MemoryStream();
 
@@ -51,7 +52,7 @@ namespace SnakeOnlineCore
             return false;
         }
 
-        public static int GetPlayerIDFromCommand(byte[] commandData)
+        public static string GetPlayerIDFromCommand(byte[] commandData)
         {
             MemoryStream stream = new MemoryStream(commandData);
             CommunicationPacketWrapper wrapper = (CommunicationPacketWrapper) binaryFormatter.Deserialize(stream);

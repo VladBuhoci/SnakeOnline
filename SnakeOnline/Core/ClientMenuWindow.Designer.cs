@@ -30,6 +30,8 @@
         {
             this.connectToServerButton = new System.Windows.Forms.Button();
             this.mainMenuPanel = new System.Windows.Forms.Panel();
+            this.label1 = new System.Windows.Forms.Label();
+            this.nicknameTextBox = new System.Windows.Forms.TextBox();
             this.mainMenuPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -37,11 +39,11 @@
             // 
             this.connectToServerButton.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.connectToServerButton.AutoSize = true;
-            this.connectToServerButton.Location = new System.Drawing.Point(140, 196);
+            this.connectToServerButton.Location = new System.Drawing.Point(140, 243);
             this.connectToServerButton.Name = "connectToServerButton";
             this.connectToServerButton.Size = new System.Drawing.Size(105, 25);
             this.connectToServerButton.TabIndex = 0;
-            this.connectToServerButton.Text = "Connect to server";
+            this.connectToServerButton.Text = "Connect";
             this.connectToServerButton.UseVisualStyleBackColor = true;
             this.connectToServerButton.Click += new System.EventHandler(this.connectToServerButton_Click);
             // 
@@ -49,12 +51,31 @@
             // 
             this.mainMenuPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.mainMenuPanel.BackColor = System.Drawing.SystemColors.Control;
+            this.mainMenuPanel.Controls.Add(this.label1);
+            this.mainMenuPanel.Controls.Add(this.nicknameTextBox);
             this.mainMenuPanel.Controls.Add(this.connectToServerButton);
             this.mainMenuPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mainMenuPanel.Enabled = false;
             this.mainMenuPanel.Location = new System.Drawing.Point(0, 0);
             this.mainMenuPanel.Name = "mainMenuPanel";
             this.mainMenuPanel.Size = new System.Drawing.Size(384, 411);
             this.mainMenuPanel.TabIndex = 1;
+            // 
+            // label1
+            // 
+            this.label1.Location = new System.Drawing.Point(77, 185);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 18);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "Nickname";
+            // 
+            // nicknameTextBox
+            // 
+            this.nicknameTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.nicknameTextBox.Location = new System.Drawing.Point(140, 183);
+            this.nicknameTextBox.Name = "nicknameTextBox";
+            this.nicknameTextBox.Size = new System.Drawing.Size(105, 20);
+            this.nicknameTextBox.TabIndex = 1;
             // 
             // ClientMenuWindow
             // 
@@ -77,5 +98,7 @@
 
         private System.Windows.Forms.Button connectToServerButton;
         private System.Windows.Forms.Panel mainMenuPanel;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox nicknameTextBox;
     }
 }
