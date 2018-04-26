@@ -25,19 +25,24 @@ namespace SnakeOnlineCore
         REQUEST_LOBBY_PEOPLE_LIST_UPDATE = 2,
 
         /// <summary>
+        ///     Used when a regular client types and sends a text message in the lobby chat.
+        /// </summary>
+        CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY = 3,
+
+        /// <summary>
         ///     Used when a client attempts to start a new game and a game manager is spawned.
         ///     This will cause the server to create a new manager and send an ID back to the client(s).
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        CREATE_GAME = 3,
+        CREATE_GAME = 4,
 
         /// <summary>
         ///     Used when the client joins a match and it requires a snake to take control of during gameplay.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        SPAWN_SNAKE = 4,
+        SPAWN_SNAKE = 5,
 
 
         // Server to client "commands".
@@ -49,7 +54,7 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_CLIENT_TEMP_UNIQUE_ID = 11,
+        SEND_CLIENT_TEMP_UNIQUE_ID = 100,
 
         /// <summary>
         ///     Used when the player joins the lobby and provides a unique name for themselves.
@@ -58,7 +63,7 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        ACCEPT_NEW_CLIENT_WITH_NICKNAME = 12,
+        ACCEPT_NEW_CLIENT_WITH_NICKNAME = 101,
 
         /// <summary>
         ///     Used by the server to inform all clients about the change(s) which occured recently in the
@@ -68,7 +73,12 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_CONNECTED_CLIENTS_COLLECTION = 13,
+        SEND_CONNECTED_CLIENTS_COLLECTION = 102,
+
+        /// <summary>
+        ///     Used when the server sends a text message to all clients in the lobby chat.
+        /// </summary>
+        SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY = 103,
 
         /// <summary>
         ///     Used whenever a new game is going to be created and a game manager is born.
@@ -76,13 +86,13 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_GAME_MANAGER_ID = 14,
+        SEND_GAME_MANAGER_ID = 104,
 
         /// <summary>
         ///     Used whenever the arena matrix is changed in some way and the clients need to be aware of that change.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_ARENA_MATRIX = 15
+        SEND_ARENA_MATRIX = 105
     }
 }

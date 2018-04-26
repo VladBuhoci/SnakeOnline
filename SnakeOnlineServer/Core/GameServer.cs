@@ -201,6 +201,21 @@ namespace SnakeOnlineServer.Core
                             break;
                         }
 
+                    case CommunicationProtocol.CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY:
+                        {
+                            string clientName = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
+                            string message = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                            string finalChatMsg = String.Format("{0}: {1}", clientName, message);
+
+                            // Send the chat message to every client.
+                            foreach (Socket client in idClientSocketPairs.Values)
+                            {
+                                client.Send(CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY, finalChatMsg));
+                            }
+
+                            break;
+                        }
+
                     case CommunicationProtocol.CREATE_GAME:
                         {
                             LogMessage("New game request.");

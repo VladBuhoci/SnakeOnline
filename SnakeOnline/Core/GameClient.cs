@@ -111,52 +111,71 @@ namespace SnakeOnline.Core
                     switch (command)
                     {
                         case CommunicationProtocol.SEND_CLIENT_TEMP_UNIQUE_ID:
-                            // Store the temporary id.
-                            uniquePlayerID = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
-                            
-                            break;
+                            {
+                                // Store the temporary id.
+                                uniquePlayerID = (string)CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+
+                                break;
+                            }
 
                         case CommunicationProtocol.ACCEPT_NEW_CLIENT_WITH_NICKNAME:
-                            string chosenNickname = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
-                            if (chosenNickname != "")
                             {
-                                uniquePlayerID = chosenNickname;
+                                string chosenNickname = (string)CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                                if (chosenNickname != "")
+                                {
+                                    uniquePlayerID = chosenNickname;
 
-                                ClientLobbyWindow lobbyWindow = new ClientLobbyWindow(this);
+                                    ClientLobbyWindow lobbyWindow = new ClientLobbyWindow(this);
 
-                                this.clientLobbyWindow = lobbyWindow;
-                                this.clientMenuWindow.Visible = false;
-                                this.clientLobbyWindow.ShowDialog(clientMenuWindow);
+                                    this.clientLobbyWindow = lobbyWindow;
+                                    this.clientMenuWindow.Visible = false;
+                                    this.clientLobbyWindow.ShowDialog(clientMenuWindow);
+                                }
+                                else
+                                {
+                                    MessageBox.Show(clientMenuWindow, "Name already used.", "Nickname taken", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                }
+
+                                break;
                             }
-                            else
-                            {
-                                MessageBox.Show(clientMenuWindow, "Name already used.", "Nickname taken", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            }
-                        
-                            break;
 
                         case CommunicationProtocol.SEND_CONNECTED_CLIENTS_COLLECTION:
-                            if (clientLobbyWindow != null)
                             {
-                                string[] names = (string[]) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
-                                
-                                clientLobbyWindow.UpdateConnectedClientsList(names);
+                                if (clientLobbyWindow != null)
+                                {
+                                    string[] names = (string[])CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+
+                                    clientLobbyWindow.UpdateConnectedClientsList(names);
+                                }
+
+                                break;
                             }
 
-                            break;
+                        case CommunicationProtocol.SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY:
+                            {
+                                string message = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+
+                                clientLobbyWindow.UpdateLobbyChat(message);
+
+                                break;
+                            }
 
                         case CommunicationProtocol.SEND_GAME_MANAGER_ID:
-                            currentUniqueGameManagerID = CommunicationProtocolUtils.GetGameManagerIDFromCommand(dataBuffer);
+                            {
+                                currentUniqueGameManagerID = CommunicationProtocolUtils.GetGameManagerIDFromCommand(dataBuffer);
 
-                            Form gameWindow = new ClientGameWindow(this, clientLobbyWindow, currentUniqueGameManagerID);
-                            clientLobbyWindow.Visible = false;
-                            gameWindow.ShowDialog(clientLobbyWindow);
+                                Form gameWindow = new ClientGameWindow(this, clientLobbyWindow, currentUniqueGameManagerID);
+                                clientLobbyWindow.Visible = false;
+                                gameWindow.ShowDialog(clientLobbyWindow);
 
-                            break;
+                                break;
+                            }
 
                         case CommunicationProtocol.SEND_ARENA_MATRIX:
-                            // TODO
-                            break;
+                            {
+                                // TODO
+                                break;
+                            }
                     }
                 }
             }
@@ -178,6 +197,11 @@ namespace SnakeOnline.Core
         public void SendUpdatedLobbyPeopleListRequest()
         {
             socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.REQUEST_LOBBY_PEOPLE_LIST_UPDATE, ""));
+        }
+
+        public void SendChatMessageInLobby(string message)
+        {
+            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY, message));
         }
 
         public void SendCreateGameRequestToServer()

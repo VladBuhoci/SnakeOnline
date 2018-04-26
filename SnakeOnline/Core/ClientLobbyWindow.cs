@@ -27,9 +27,20 @@ namespace SnakeOnline.Core
             clientsList.DataSource = names;
         }
 
+        public void UpdateLobbyChat(string newMessage)
+        {
+            lobbyChat_ChatBox.AppendText(newMessage + "\n");
+        }
+
         private void lobbyChat_SendButton_Click(object sender, EventArgs e)
         {
+            if (! String.IsNullOrEmpty(lobbyChat_TextToSendBox.Text))
+            {
+                socket.SendChatMessageInLobby(lobbyChat_TextToSendBox.Text);
 
+                // Clear the text box after sending the message.
+                lobbyChat_TextToSendBox.Clear();
+            }
         }
 
         private void createRoomButton_Click(object sender, EventArgs e)
