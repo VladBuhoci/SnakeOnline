@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SnakeOnline.Core
+namespace SnakeOnline
 {
     partial class ClientLobbyWindow : Form
     {

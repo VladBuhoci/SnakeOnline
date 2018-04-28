@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace SnakeOnline.Core
+namespace SnakeOnline
 {
     partial class ClientMenuWindow : Form
     {

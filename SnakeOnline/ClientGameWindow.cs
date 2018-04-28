@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using SnakeOnlineCore;
 
-namespace SnakeOnline.Core
+namespace SnakeOnline
 {
     partial class ClientGameWindow : Form
     {

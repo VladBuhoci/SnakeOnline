@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SnakeOnline.Core
+namespace SnakeOnline
 {
     sealed class SnakeGameManagerCL
     {

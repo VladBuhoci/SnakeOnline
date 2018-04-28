@@ -1,4 +1,4 @@
-﻿namespace SnakeOnline.Core
+﻿namespace SnakeOnline
 {
     partial class ClientMenuWindow
     {
