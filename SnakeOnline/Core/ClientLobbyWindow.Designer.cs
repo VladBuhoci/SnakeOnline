@@ -142,6 +142,7 @@
             this.lobbyChat_TextToSendBox.Name = "lobbyChat_TextToSendBox";
             this.lobbyChat_TextToSendBox.Size = new System.Drawing.Size(437, 20);
             this.lobbyChat_TextToSendBox.TabIndex = 1;
+            this.lobbyChat_TextToSendBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lobbyChat_TextToSendBox_KeyDown);
             // 
             // lobbyChat_ChatBox
             // 

@@ -20,6 +20,19 @@ namespace SnakeOnline.Core
             mainMenuPanel.Enabled = true;
         }
 
+        private void nicknameTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            // When pressing enter, simulate a "Connect" button click.
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                connectToServerButton_Click(sender, e);
+
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
         private void connectToServerButton_Click(object sender, EventArgs e)
         {
             if (nicknameTextBox.Text.Trim().Length > 0)

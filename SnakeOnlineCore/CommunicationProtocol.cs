@@ -77,6 +77,8 @@ namespace SnakeOnlineCore
 
         /// <summary>
         ///     Used when the server sends a text message to all clients in the lobby chat.
+        ///     <para/>
+        ///     USAGE: server to client.
         /// </summary>
         SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY = 103,
 

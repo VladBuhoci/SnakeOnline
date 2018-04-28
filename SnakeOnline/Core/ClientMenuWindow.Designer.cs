@@ -76,6 +76,7 @@
             this.nicknameTextBox.Name = "nicknameTextBox";
             this.nicknameTextBox.Size = new System.Drawing.Size(105, 20);
             this.nicknameTextBox.TabIndex = 1;
+            this.nicknameTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.nicknameTextBox_KeyDown);
             // 
             // ClientMenuWindow
             // 

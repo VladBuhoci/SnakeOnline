@@ -113,14 +113,15 @@ namespace SnakeOnline.Core
                         case CommunicationProtocol.SEND_CLIENT_TEMP_UNIQUE_ID:
                             {
                                 // Store the temporary id.
-                                uniquePlayerID = (string)CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                                uniquePlayerID = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
 
                                 break;
                             }
 
                         case CommunicationProtocol.ACCEPT_NEW_CLIENT_WITH_NICKNAME:
                             {
-                                string chosenNickname = (string)CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                                string chosenNickname = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+
                                 if (chosenNickname != "")
                                 {
                                     uniquePlayerID = chosenNickname;
@@ -143,7 +144,7 @@ namespace SnakeOnline.Core
                             {
                                 if (clientLobbyWindow != null)
                                 {
-                                    string[] names = (string[])CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                                    string[] names = (string[]) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
 
                                     clientLobbyWindow.UpdateConnectedClientsList(names);
                                 }
@@ -153,9 +154,12 @@ namespace SnakeOnline.Core
 
                         case CommunicationProtocol.SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY:
                             {
-                                string message = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                                if (clientLobbyWindow != null)
+                                {
+                                    string message = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
 
-                                clientLobbyWindow.UpdateLobbyChat(message);
+                                    clientLobbyWindow.UpdateLobbyChat(message);
+                                }
 
                                 break;
                             }
