@@ -48,17 +48,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\GameServer.cs" />
-    <Compile Include="Core\ServerControlWindow.cs">
+    <Compile Include="GameServer.cs" />
+    <Compile Include="ServerControlWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Core\ServerControlWindow.Designer.cs">
+    <Compile Include="ServerControlWindow.Designer.cs">
       <DependentUpon>ServerControlWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="Core\Program.cs" />
-    <Compile Include="Core\SnakeGameManagerSV.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="SnakeGameManagerSV.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Core\ServerControlWindow.resx">
+    <EmbeddedResource Include="ServerControlWindow.resx">
       <DependentUpon>ServerControlWindow.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

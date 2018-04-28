@@ -80,7 +80,7 @@ namespace SnakeOnline.Core
             {
                 int receivedDataSize = socket.EndReceive(AR);
                 byte[] actualDataBuffer = new byte[receivedDataSize];
-                                
+                
                 Array.Copy(rawDataBufferQueue.Dequeue(), actualDataBuffer, receivedDataSize);
 
                 // Resume receiving data from the server.
