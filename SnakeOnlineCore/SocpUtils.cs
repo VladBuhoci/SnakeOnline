@@ -8,33 +8,33 @@ using System.Threading.Tasks;
 
 namespace SnakeOnlineCore
 {
-    public sealed class CommunicationProtocolUtils
+    public sealed class SocpUtils
     {
         private static BinaryFormatter binaryFormatter = new BinaryFormatter();
 
         /// <summary>
         ///     Private constructor, so the class cannot be instantiated..
         /// </summary>
-        private CommunicationProtocolUtils() { }
+        private SocpUtils() { }
 
         /// <summary>
         ///     Wraps up the data in an array of bytes, ready to be sent over the network.
         /// </summary>
         /// 
-        /// <param name="uniquePlayerID">Unique ID of the user's socket, or null string if it's the server.</param>
-        /// <param name="uniqueGameManagerID">Unique ID of the game manager handling the match running on the client.</param>
         /// <param name="command">Any of the enumerated values.</param>
         /// <param name="dataToSend">Actual data that needs to be sent to other sockets. This can be anything.</param>
+        /// <param name="uniquePlayerID">Unique ID of the user's socket, or null string if it's the server.</param>
+        /// <param name="uniqueGameManagerID">Unique ID of the game manager handling the match running on the client.</param>
         /// 
         /// <returns>
         ///     Returns an array of bytes which can be sent to other sockets, where it can be deserialized
         ///         and thus, have its data accessed.
         /// </returns>
-        public static byte[] MakeNetworkCommand(string uniquePlayerID, int uniqueGameManagerID, CommunicationProtocol command, Object dataToSend)
+        public static byte[] MakeNetworkCommand(Socp command, Object dataToSend, string uniquePlayerID = null, int uniqueGameManagerID = -1)
         {
             uniquePlayerID = uniquePlayerID != null ? uniquePlayerID : "";
 
-            CommunicationPacketWrapper wrapper = new CommunicationPacketWrapper(uniquePlayerID, uniqueGameManagerID, command, dataToSend);
+            SocpMessageContainer wrapper = new SocpMessageContainer(uniquePlayerID, uniqueGameManagerID, command, dataToSend);
             MemoryStream stream = new MemoryStream();
 
             binaryFormatter.Serialize(stream, wrapper);
@@ -55,7 +55,7 @@ namespace SnakeOnlineCore
         public static string GetPlayerIDFromCommand(byte[] commandData)
         {
             MemoryStream stream = new MemoryStream(commandData);
-            CommunicationPacketWrapper wrapper = (CommunicationPacketWrapper) binaryFormatter.Deserialize(stream);
+            SocpMessageContainer wrapper = (SocpMessageContainer) binaryFormatter.Deserialize(stream);
 
             return wrapper.uniquePlayerID;
         }
@@ -63,15 +63,15 @@ namespace SnakeOnlineCore
         public static int GetGameManagerIDFromCommand(byte[] commandData)
         {
             MemoryStream stream = new MemoryStream(commandData);
-            CommunicationPacketWrapper wrapper = (CommunicationPacketWrapper)binaryFormatter.Deserialize(stream);
+            SocpMessageContainer wrapper = (SocpMessageContainer)binaryFormatter.Deserialize(stream);
 
             return wrapper.uniqueGameManagerID;
         }
 
-        public static CommunicationProtocol GetProtocolValueFromCommand(byte[] commandData)
+        public static Socp GetProtocolValueFromCommand(byte[] commandData)
         {
             MemoryStream stream = new MemoryStream(commandData);
-            CommunicationPacketWrapper wrapper = (CommunicationPacketWrapper) binaryFormatter.Deserialize(stream);
+            SocpMessageContainer wrapper = (SocpMessageContainer) binaryFormatter.Deserialize(stream);
 
             return wrapper.protocolCommand;
         }
@@ -79,7 +79,7 @@ namespace SnakeOnlineCore
         public static Object GetDataFromCommand(byte[] commandData)
         {
             MemoryStream stream = new MemoryStream(commandData);
-            CommunicationPacketWrapper wrapper = (CommunicationPacketWrapper) binaryFormatter.Deserialize(stream);
+            SocpMessageContainer wrapper = (SocpMessageContainer) binaryFormatter.Deserialize(stream);
 
             return wrapper.data;
         }

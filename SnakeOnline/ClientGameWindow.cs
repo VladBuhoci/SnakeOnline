@@ -27,17 +27,20 @@ namespace SnakeOnline
             gameClient = client;
             gameClient.snakeGameManagerCL = snakeGameManagerCL;
             clientMenuWindow = clientMainMenuWindow;
-            snakeController = new SnakeController(client, 19, 30, Color.Red);
 
-            SnakeGameManager.GetInstance().SetGameArenaPane(gameArenaPane);
+            // TODO: should be created as a request from the server once the match has begun.
+            //       Have some sort of method here that will be called by the client, in order to instantiate a controller.
+            //snakeController = new SnakeController(client, 19, 30, Color.Red);
+
+            //SnakeGameManager.GetInstance().SetGameArenaPane(gameArenaPane);
             
             //bApplicationAttemptsClosing = false;
 
             // Snake handling will be migrated on the server.
-            SnakeGameManager.GetInstance().AddSnake(snakeController.GetControlledSnake());
+            //SnakeGameManager.GetInstance().AddSnake(snakeController.GetControlledSnake());
 
             // Food spawning will be migrated on the server.
-            SnakeGameManager.GetInstance().SpawnFood(snakeController.GetControlledSnake().GetSnakeBodyParts().FirstOrDefault().color);
+            //SnakeGameManager.GetInstance().SpawnFood(snakeController.GetControlledSnake().GetSnakeBodyParts().FirstOrDefault().color);
         }
 
         private void gameArenaPane_Paint(object sender, PaintEventArgs e)
@@ -70,34 +73,33 @@ namespace SnakeOnline
         
         private void gameWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode)
+            if (snakeController != null)
             {
-                case Keys.W:
-                    snakeController.ChangeDirectionUp();
-                    break;
+                switch (e.KeyCode)
+                {
+                    case Keys.W:
+                        snakeController.ChangeDirectionUp();
+                        break;
 
-                case Keys.D:
-                    snakeController.ChangeDirectionRight();
-                    break;
+                    case Keys.D:
+                        snakeController.ChangeDirectionRight();
+                        break;
 
-                case Keys.S:
-                    snakeController.ChangeDirectionDown();
-                    break;
+                    case Keys.S:
+                        snakeController.ChangeDirectionDown();
+                        break;
 
-                case Keys.A:
-                    snakeController.ChangeDirectionLeft();
-                    break;
+                    case Keys.A:
+                        snakeController.ChangeDirectionLeft();
+                        break;
+                }
             }
         }
         
         private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             snakeGameManagerCL = null;
-            //gameClient.DisconnectFromServer();
-            //gameClient = null;
             snakeController = null;
-
-            clientMenuWindow.Visible = true;
         }
     }
 }

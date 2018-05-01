@@ -3,14 +3,14 @@
 namespace SnakeOnlineCore
 {
     [Serializable]
-    class CommunicationPacketWrapper
+    struct SocpMessageContainer
     {
         public string uniquePlayerID { get; set; }
         public int uniqueGameManagerID { get; set; }
-        public CommunicationProtocol protocolCommand { get; set; }
+        public Socp protocolCommand { get; set; }
         public Object data { get; set; }
 
-        public CommunicationPacketWrapper(string uniquePlayerID, int uniqueGameManagerID, CommunicationProtocol protocolCommand, Object data)
+        public SocpMessageContainer(string uniquePlayerID, int uniqueGameManagerID, Socp protocolCommand, Object data)
         {
             this.uniquePlayerID = uniquePlayerID;
             this.uniqueGameManagerID = uniqueGameManagerID;

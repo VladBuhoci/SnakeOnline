@@ -44,5 +44,13 @@ namespace SnakeOnline
                 MessageBox.Show(this, "Please enter a name.", "No input", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void ClientMenuWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (socket != null)
+            {
+                socket.SendDisconnectFromServerRequest();
+            }
+        }
     }
 }

@@ -89,6 +89,7 @@
             this.MaximumSize = new System.Drawing.Size(1024, 768);
             this.Name = "ClientMenuWindow";
             this.Text = "Snake Online - Menu";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ClientMenuWindow_FormClosing);
             this.mainMenuPanel.ResumeLayout(false);
             this.mainMenuPanel.PerformLayout();
             this.ResumeLayout(false);

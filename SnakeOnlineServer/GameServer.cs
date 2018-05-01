@@ -47,16 +47,7 @@ namespace SnakeOnlineServer
 
             LogMessage("Server has started.");
         }
-
-        private void CreateNewGameAndGameManager(int arenaWidth, int arenaHeight, Dictionary<int, Snake> idSnakePairs)
-        {
-            SnakeGameManagerSV manager = new SnakeGameManagerSV(arenaWidth, arenaHeight, idSnakePairs);
-
-            snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, manager);
-
-            uniqueGameManagerIDCounter += 1;
-        }
-
+        
         private void ServerAcceptConnectionCallback(IAsyncResult AR)
         {
             try
@@ -69,7 +60,7 @@ namespace SnakeOnlineServer
                 // Let the client know of its temporary ID.
                 // The client will later send this back along with their chosen nickname, which replaces
                 //      the temporary identifier.
-                newClientSocket.Send(CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.SEND_CLIENT_TEMP_UNIQUE_ID, uniquePlayerTempIDCounter.ToString()));
+                newClientSocket.Send(SocpUtils.MakeNetworkCommand(Socp.SEND_CLIENT_TEMP_UNIQUE_ID, uniquePlayerTempIDCounter.ToString()));
                 
                 LogMessage(String.Format("New client has connected to the server. (temporary id: {0})", uniquePlayerTempIDCounter));
 
@@ -84,13 +75,18 @@ namespace SnakeOnlineServer
             }
             catch
             {
-                //MessageBox.Show(null, "There was a problem in trying to accept a new client connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show(null, "There was a problem while trying to accept a new client connection.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void ServerBeginReceiveDataFromClient(IAsyncResult AR)
         {
             Socket clientSocket = (Socket) AR.AsyncState;
+           
+            if (! clientSocket.Connected)
+            {
+                return;
+            }
 
             try
             {
@@ -102,10 +98,6 @@ namespace SnakeOnlineServer
                 // Handle the received data.
                 HandleReceivedData(actualDataBuffer, clientSocket);
                 
-                // TODO #1: after handling the data, send things back to the client(s).
-                // TODO #2: is this really where (and how) to do it?
-                //SendDataToClient();
-
                 // Resume receiving data from this client socket.
                 clientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), clientSocket);
             }
@@ -138,20 +130,20 @@ namespace SnakeOnlineServer
                 clientSocket = null;
             }
         }
-
+        
         private void HandleReceivedData(byte[] dataBuffer, Socket clientSocket)
         {
             // TODO
             //if (CommunicationProtocolUtils.IsCommandNotEmpty(dataBuffer))
             {
-                CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
+                Socp command = SocpUtils.GetProtocolValueFromCommand(dataBuffer);
 
                 switch (command)
                 {
-                    case CommunicationProtocol.CONNECT_TO_LOBBY_WITH_NICNKNAME:
+                    case Socp.CONNECT_TO_LOBBY_WITH_NICNKNAME:
                         {
-                            string tempID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
-                            string chosenNickname = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                            string tempID = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            string chosenNickname = (string) SocpUtils.GetDataFromCommand(dataBuffer);
 
                             // Make sure this new name is not already in use by another player.
                             // If it is, we will let the player know about this.
@@ -170,83 +162,117 @@ namespace SnakeOnlineServer
 
                                 LogMessage(String.Format("Client \"" + chosenNickname + "\" (previous temporary id: {0}) has joined the lobby.", tempID));
 
-                                clientSocketWithNickname.Send(CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.ACCEPT_NEW_CLIENT_WITH_NICKNAME, chosenNickname));
+                                clientSocketWithNickname.Send(SocpUtils.MakeNetworkCommand(Socp.ACCEPT_NEW_CLIENT_WITH_NICKNAME, chosenNickname));
 
                                 // Inform every client that a new user has connected to the server, by sending
                                 //      a new collection of names to each client to be seen in their lobby.
-                                string[] clientsNames = idClientSocketPairs.Keys.ToArray();
-                                byte[] connectedClientsCollection = CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.SEND_CONNECTED_CLIENTS_COLLECTION, clientsNames);
-
-                                foreach (Socket socket in idClientSocketPairs.Values)
-                                {
-                                    socket.Send(connectedClientsCollection);
-                                }
+                                BroadcastClientsListForLobby();
                             }
                             else
                             {
-                                clientSocket.Send(CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.ACCEPT_NEW_CLIENT_WITH_NICKNAME, ""));
+                                clientSocket.Send(SocpUtils.MakeNetworkCommand(Socp.ACCEPT_NEW_CLIENT_WITH_NICKNAME, ""));
                             }
 
                             break;
                         }
 
-                    case CommunicationProtocol.REQUEST_LOBBY_PEOPLE_LIST_UPDATE:
+                    case Socp.REQUEST_LOBBY_PEOPLE_LIST_UPDATE:
                         {
-                            string clientID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
+                            string clientID = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
                             string[] clientsNames = idClientSocketPairs.Keys.ToArray();
-                            byte[] connectedClientsCollection = CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.SEND_CONNECTED_CLIENTS_COLLECTION, clientsNames);
+                            byte[] connectedClientsCollection = SocpUtils.MakeNetworkCommand(Socp.SEND_CONNECTED_CLIENTS_COLLECTION, clientsNames);
 
                             idClientSocketPairs[clientID].Send(connectedClientsCollection);
 
                             break;
                         }
 
-                    case CommunicationProtocol.CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY:
+                    case Socp.CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY:
                         {
-                            string clientName = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
-                            string message = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                            string clientName = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            string message = (string) SocpUtils.GetDataFromCommand(dataBuffer);
                             string finalChatMsg = String.Format("{0}: {1}", clientName, message);
 
                             // Send the chat message to every client.
                             foreach (Socket client in idClientSocketPairs.Values)
                             {
-                                client.Send(CommunicationProtocolUtils.MakeNetworkCommand(null, -1, CommunicationProtocol.SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY, finalChatMsg));
+                                client.Send(SocpUtils.MakeNetworkCommand(Socp.SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY, finalChatMsg));
                             }
 
                             break;
                         }
 
-                    case CommunicationProtocol.CREATE_GAME:
+                    case Socp.REQUEST_GAME_ROOM_CREATION:
                         {
-                            LogMessage("New game request.");
+                            SnakeGameDescriptor gameDescriptor = (SnakeGameDescriptor) SocpUtils.GetDataFromCommand(dataBuffer);
+                            string playerID = gameDescriptor.roomLeaderID;
 
-                            string playerID = CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer);
+                            LogMessage(String.Format("New game room request from \"{0}.\"", playerID));
 
-                            // Create the game manager here and do thingies for it.
-                            // ... also add it to the dictionary.
-                            // ... NOTE: the command wrapper should contain every client ID that will participate in this match in the data field.
+                            // Create the game manager here and store it in the coresponding collection.
+                            SnakeGameManagerSV gameManager = new SnakeGameManagerSV(gameDescriptor.arenaWidth, gameDescriptor.arenaHeight, gameDescriptor.foodEffect, gameDescriptor.matchDuration, this);
 
-                            // foreach (clientID in list of IDs)
-                            // Think of the data that could be sent here...
-                            byte[] newManagerResultCommand = CommunicationProtocolUtils.MakeNetworkCommand(null, uniqueGameManagerIDCounter, CommunicationProtocol.SEND_GAME_MANAGER_ID, playerID);
+                            snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, gameManager);
 
-                            // Send the result back.
-                            idClientSocketPairs[playerID].Send(newManagerResultCommand);
+                            gameDescriptor.gameManagerID = uniqueGameManagerIDCounter;
+                            
+                            // Send the result back to the client (the new room leader).
+                            idClientSocketPairs[playerID].Send(SocpUtils.MakeNetworkCommand(Socp.GAME_ROOM_REQUEST_ACCEPTED, gameDescriptor));
 
-                            //snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, newManager);
-
+                            // Increment the counter.
                             uniqueGameManagerIDCounter += 1;
 
                             break;
                         }
 
-                    case CommunicationProtocol.SPAWN_SNAKE:
+                    case Socp.SPAWN_SNAKE:
                         {
                             LogMessage("Player requested a snake to be created.");
 
                             // Create a snake and a unique ID and return the ID to the player.
                             // ... but not here. The right place is the game manager.
                             // ... also, it might be better to just generate an ID for each player when they connect for the first time.
+
+                            break;
+                        }
+
+                    case Socp.REQUEST_DISCONNECT_FROM_GAME_ROOM:
+                        {
+                            string playerName = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+
+                            LogMessage(String.Format("Client \"{0}\" wants to disconnect from the current game room.", playerName));
+
+                            // TODO
+
+                            break;
+                        }
+
+                    case Socp.REQUEST_DISCONNECT_FROM_SERVER:
+                        {
+                            string playerName = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
+
+                            LogMessage(String.Format("Client \"{0}\" wants to disconnect from the server.", playerName));
+
+                            // If the player is connected to a game room at the moment, first attempt to get him/her
+                            //      out of there and only then disconnect the client from the server.
+                            if (gameManagerID > -1)
+                            {
+                                // TODO
+                            }
+
+                            byte[] response = SocpUtils.MakeNetworkCommand(Socp.RESPONSE_DISCONNECT_FROM_SERVER, "");
+
+                            clientSocket.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(RequestDisconnectFromServerCallback), clientSocket);
+
+                            // Remove it from the collection and close it.
+                            if (tempIdClientSocketPairs.ContainsKey(playerName))
+                                tempIdClientSocketPairs.Remove(playerName);
+                            else
+                                idClientSocketPairs.Remove(playerName);
+                            
+                            // Send an updated list of connected users to every single one of them.
+                            BroadcastClientsListForLobby();
 
                             break;
                         }
@@ -260,19 +286,29 @@ namespace SnakeOnlineServer
             }
         }
 
-        private void SendDataToClient()
-        {
-            //byte[] dataToSendBackToClient = ...
-            //clientSocket.BeginSend(dataToSendBackToClient, 0, dataToSendBackToClient.Length, SocketFlags.None, new AsyncCallback(ServerSendToClientCallback), clientSocket);
+        private void BroadcastClientsListForLobby()
+        {            
+            string[] clientsNames = idClientSocketPairs.Keys.ToArray();
+            byte[] connectedClientsCollection = SocpUtils.MakeNetworkCommand(Socp.SEND_CONNECTED_CLIENTS_COLLECTION, clientsNames);
+
+            foreach (Socket socket in idClientSocketPairs.Values)
+            {
+                socket.Send(connectedClientsCollection);
+            }
         }
 
-        private void ServerSendToClientCallback(IAsyncResult AR)
+        private void RequestDisconnectFromServerCallback(IAsyncResult AR)
         {
             Socket clientSocket = (Socket) AR.AsyncState;
 
             clientSocket.EndSend(AR);
-        }
+            clientSocket.Shutdown(SocketShutdown.Send);
+            clientSocket.Disconnect(false);
+            clientSocket.Close();
 
+            LogMessage("A client has disconnected from the server.");
+        }
+        
         private void LogMessage(String text)
         {
             if (serverLogTextBox != null)

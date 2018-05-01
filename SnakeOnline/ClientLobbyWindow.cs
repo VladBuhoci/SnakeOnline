@@ -58,7 +58,9 @@ namespace SnakeOnline
 
         private void createRoomButton_Click(object sender, EventArgs e)
         {
+            ClientGameParamsWindow clientGameParamsWindow = new ClientGameParamsWindow(socket);
 
+            clientGameParamsWindow.ShowDialog(this);
         }
 
         private void joinRoomButton_Click(object sender, EventArgs e)
@@ -68,7 +70,7 @@ namespace SnakeOnline
 
         private void disconnectButton_Click(object sender, EventArgs e)
         {
-
+            this.Close();
         }
 
         /// <summary>
@@ -76,11 +78,18 @@ namespace SnakeOnline
         /// </summary>
         private void ClientLobbyWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (socket != null)
-            {
-                socket.CleanUp();
+            var result = MessageBox.Show(this, "Are you sure you want to exit?", "Abandon", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
 
-                Application.Exit();
+            if (result == DialogResult.Yes)
+            {
+                if (socket != null)
+                {
+                    socket.SendDisconnectFromServerRequest();
+                }
+            }
+            else
+            {
+                e.Cancel = true;
             }
         }
     }

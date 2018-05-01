@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SnakeOnlineCore
 {
-    public enum CommunicationProtocol : Int32
+    /// <summary>
+    ///     Snake Online Communication Protocol.
+    /// </summary>
+    public enum Socp : Int32
     {
         // Client to server "commands".
 
@@ -30,12 +29,13 @@ namespace SnakeOnlineCore
         CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY = 3,
 
         /// <summary>
-        ///     Used when a client attempts to start a new game and a game manager is spawned.
-        ///     This will cause the server to create a new manager and send an ID back to the client(s).
+        ///     Used when a client attempts to open a new game room.
+        ///     A game manager is spawned on the server.
+        ///     The server will create a new manager and send its ID back to the room leader (client) along with other room info.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        CREATE_GAME = 4,
+        REQUEST_GAME_ROOM_CREATION = 4,
 
         /// <summary>
         ///     Used when the client joins a match and it requires a snake to take control of during gameplay.
@@ -43,6 +43,23 @@ namespace SnakeOnlineCore
         ///     USAGE: client to server.
         /// </summary>
         SPAWN_SNAKE = 5,
+
+        /// <summary>
+        ///     Used when a player wants to leave a game room and return to the lobby.
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_DISCONNECT_FROM_GAME_ROOM = 6,
+
+        /// <summary>
+        ///     Used when the client closes the program and thus, disconnects from the server.
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_DISCONNECT_FROM_SERVER = 7,
+
+
+        // ===================================================================================================
 
 
         // Server to client "commands".
@@ -83,18 +100,37 @@ namespace SnakeOnlineCore
         SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY = 103,
 
         /// <summary>
-        ///     Used whenever a new game is going to be created and a game manager is born.
+        ///     Used whenever a new game (and a game manager) is created .
         ///     Every manager needs to be identified by using a unique ID.
+        ///     This ID, along with all the important room/game info is sent back to the client that created the room.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_GAME_MANAGER_ID = 104,
+        GAME_ROOM_REQUEST_ACCEPTED = 104,
 
         /// <summary>
         ///     Used whenever the arena matrix is changed in some way and the clients need to be aware of that change.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_ARENA_MATRIX = 105
+        SEND_ARENA_MATRIX = 105,
+
+        /// <summary>
+        ///     Lets the user know that the server has accepted their request of leaving a room.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        RESPONSE_DISCONNECT_FROM_GAME_ROOM = 106,
+
+        /// <summary>
+        ///     The server is ready to release all resources and the client's application can close.
+        ///     <para/>
+        ///     TECH NOTE: this will not use the regular flow of callback functions in the server's socket wrapper class.
+        ///                Instead, it will use an asynchronous Send method, so when it is done, the server knows that
+        ///                it can close the client's socket and release used resources.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        RESPONSE_DISCONNECT_FROM_SERVER = 107
     }
 }

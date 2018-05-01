@@ -14,6 +14,8 @@ namespace SnakeOnline
         private bool bApplicationAttemptsClosing;
         private int uniqueGameManagerID;
 
+        // TODO: we need more variables here, such as game window refresh rate (difficulty for players).
+
         public SnakeGameArenaObject[,] gameArenaObjects;
 
         public SnakeGameManagerCL(PictureBox gameArenaPane, int uniqueGameManagerID)

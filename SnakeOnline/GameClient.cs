@@ -102,25 +102,25 @@ namespace SnakeOnline
 
         private void HandleReceivedData(byte[] dataBuffer)
         {
-            if (CommunicationProtocolUtils.IsCommandNotEmpty(dataBuffer))
+            if (SocpUtils.IsCommandNotEmpty(dataBuffer))
             {
-                if (CommunicationProtocolUtils.GetPlayerIDFromCommand(dataBuffer) == "")
+                if (SocpUtils.GetPlayerIDFromCommand(dataBuffer) == "")
                 {
-                    CommunicationProtocol command = CommunicationProtocolUtils.GetProtocolValueFromCommand(dataBuffer);
+                    Socp command = SocpUtils.GetProtocolValueFromCommand(dataBuffer);
 
                     switch (command)
                     {
-                        case CommunicationProtocol.SEND_CLIENT_TEMP_UNIQUE_ID:
+                        case Socp.SEND_CLIENT_TEMP_UNIQUE_ID:
                             {
                                 // Store the temporary id.
-                                uniquePlayerID = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                                uniquePlayerID = (string) SocpUtils.GetDataFromCommand(dataBuffer);
 
                                 break;
                             }
 
-                        case CommunicationProtocol.ACCEPT_NEW_CLIENT_WITH_NICKNAME:
+                        case Socp.ACCEPT_NEW_CLIENT_WITH_NICKNAME:
                             {
-                                string chosenNickname = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                                string chosenNickname = (string) SocpUtils.GetDataFromCommand(dataBuffer);
 
                                 if (chosenNickname != "")
                                 {
@@ -140,11 +140,11 @@ namespace SnakeOnline
                                 break;
                             }
 
-                        case CommunicationProtocol.SEND_CONNECTED_CLIENTS_COLLECTION:
+                        case Socp.SEND_CONNECTED_CLIENTS_COLLECTION:
                             {
                                 if (clientLobbyWindow != null)
                                 {
-                                    string[] names = (string[]) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                                    string[] names = (string[]) SocpUtils.GetDataFromCommand(dataBuffer);
 
                                     clientLobbyWindow.UpdateConnectedClientsList(names);
                                 }
@@ -152,11 +152,11 @@ namespace SnakeOnline
                                 break;
                             }
 
-                        case CommunicationProtocol.SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY:
+                        case Socp.SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY:
                             {
                                 if (clientLobbyWindow != null)
                                 {
-                                    string message = (string) CommunicationProtocolUtils.GetDataFromCommand(dataBuffer);
+                                    string message = (string) SocpUtils.GetDataFromCommand(dataBuffer);
 
                                     clientLobbyWindow.UpdateLobbyChat(message);
                                 }
@@ -164,25 +164,45 @@ namespace SnakeOnline
                                 break;
                             }
 
-                        case CommunicationProtocol.SEND_GAME_MANAGER_ID:
+                        case Socp.GAME_ROOM_REQUEST_ACCEPTED:
                             {
-                                currentUniqueGameManagerID = CommunicationProtocolUtils.GetGameManagerIDFromCommand(dataBuffer);
+                                SnakeGameDescriptor gameDescriptor = (SnakeGameDescriptor) SocpUtils.GetDataFromCommand(dataBuffer);
+                                currentUniqueGameManagerID = gameDescriptor.gameManagerID;
 
                                 Form gameWindow = new ClientGameWindow(this, clientLobbyWindow, currentUniqueGameManagerID);
-                                clientLobbyWindow.Visible = false;
                                 gameWindow.ShowDialog(clientLobbyWindow);
+                                
+                                break;
+                            }
+
+                        case Socp.SEND_ARENA_MATRIX:
+                            {
+                                // TODO
 
                                 break;
                             }
 
-                        case CommunicationProtocol.SEND_ARENA_MATRIX:
+                        case Socp.RESPONSE_DISCONNECT_FROM_GAME_ROOM:
                             {
                                 // TODO
+
+                                break;
+                            }
+
+                        case Socp.RESPONSE_DISCONNECT_FROM_SERVER:
+                            {
+                                Application.Exit();
+
                                 break;
                             }
                     }
                 }
             }
+        }
+
+        public string GetUniquePlayerID()
+        {
+            return uniquePlayerID;
         }
 
         // TODO: useful?
@@ -195,28 +215,40 @@ namespace SnakeOnline
         {
             // Currently, uniquePlayerID is the temporary identifier sent by the server.
             // The server will replace it with the chosen nickname.
-            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.CONNECT_TO_LOBBY_WITH_NICNKNAME, nickname));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.CONNECT_TO_LOBBY_WITH_NICNKNAME, nickname, uniquePlayerID));
         }
 
         public void SendUpdatedLobbyPeopleListRequest()
         {
-            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.REQUEST_LOBBY_PEOPLE_LIST_UPDATE, ""));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_LOBBY_PEOPLE_LIST_UPDATE, "", uniquePlayerID));
         }
 
         public void SendChatMessageInLobby(string message)
         {
-            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY, message));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY, message, uniquePlayerID));
         }
 
-        public void SendCreateGameRequestToServer()
+        public void SendCreateGameRequestToServer(SnakeGameDescriptor descriptor)
         {
-            // TODO: add every client id in the data field?
-            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, -1, CommunicationProtocol.CREATE_GAME, "NODATA YET | probably many client IDs"));
+            // TODO: add every client id in the data field? (probably not.. this will happen at game start)
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_GAME_ROOM_CREATION, descriptor, uniquePlayerID));
         }
 
         public void SendSnakeSpawnRequestToServer()
         {
-            socket.Send(CommunicationProtocolUtils.MakeNetworkCommand(uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID(), CommunicationProtocol.SPAWN_SNAKE, "add snake properties here"));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.SPAWN_SNAKE, "add snake properties here", uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+        }
+
+        public void SendDisconnectFromGameRoomRequest()
+        {
+            // TODO
+        }
+
+        public void SendDisconnectFromServerRequest()
+        {
+            int gameManagerID = snakeGameManagerCL != null ? snakeGameManagerCL.GetUniqueGameManagerID() : -1;
+
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_DISCONNECT_FROM_SERVER, "", uniquePlayerID, gameManagerID));
         }
 
         private void SetUpClientSocket()
@@ -224,37 +256,6 @@ namespace SnakeOnline
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverPortNumber = 1702;
             currentUniqueGameManagerID = -1;
-        }
-
-        /// <summary>
-        ///     Clean up method for when the client disconnects from the server.
-        /// </summary>
-        public void DisconnectFromServer()
-        {
-            if (socket != null)
-            {
-                socket.Disconnect(true);
-                socket = null;
-            }
-        }
-
-        /// <summary>
-        ///     Final clean up method used when the program closes.
-        /// </summary>
-        public void CleanUp()
-        {
-            if (socket != null)
-            {
-                socket.Close();
-                socket.Dispose();
-                socket = null;
-
-                if (snakeGameManagerCL != null)
-                {
-                    snakeGameManagerCL.RequestAuxGameLoopThreadToEnd();
-                    snakeGameManagerCL = null;
-                }
-            }
-        }
+        }        
     }
 }
