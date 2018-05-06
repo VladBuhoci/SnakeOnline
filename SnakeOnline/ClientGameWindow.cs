@@ -14,19 +14,20 @@ namespace SnakeOnline
 {
     partial class ClientGameWindow : Form
     {
-        private SnakeGameManagerCL snakeGameManagerCL;
         private GameClient gameClient;
-        private Form clientMenuWindow;
+        private ClientLobbyWindow clientLobbyWindow;
+        private SnakeGameManagerCL snakeGameManagerCL;
         private SnakeController snakeController;
 
-        public ClientGameWindow(GameClient client, Form clientMainMenuWindow, int uniqueGameManagerID)
+        public ClientGameWindow(GameClient client, ClientLobbyWindow lobbyWindow, int uniqueGameManagerID)
         {
             InitializeComponent();
-            
+
+            clientLobbyWindow = lobbyWindow;
             snakeGameManagerCL = new SnakeGameManagerCL(gameArenaPane, uniqueGameManagerID);
+
             gameClient = client;
             gameClient.snakeGameManagerCL = snakeGameManagerCL;
-            clientMenuWindow = clientMainMenuWindow;
 
             // TODO: should be created as a request from the server once the match has begun.
             //       Have some sort of method here that will be called by the client, in order to instantiate a controller.
@@ -98,8 +99,7 @@ namespace SnakeOnline
         
         private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            snakeGameManagerCL = null;
-            snakeController = null;
+            gameClient.SendDisconnectFromGameRoomRequest();
         }
     }
 }

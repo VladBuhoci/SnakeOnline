@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SnakeOnlineCore
 {
@@ -32,14 +31,21 @@ namespace SnakeOnlineCore
         /// </returns>
         public static byte[] MakeNetworkCommand(Socp command, Object dataToSend, string uniquePlayerID = null, int uniqueGameManagerID = -1)
         {
-            uniquePlayerID = uniquePlayerID != null ? uniquePlayerID : "";
+            uniquePlayerID = uniquePlayerID ?? "";
 
+            byte[] packetData;
             SocpMessageContainer wrapper = new SocpMessageContainer(uniquePlayerID, uniqueGameManagerID, command, dataToSend);
-            MemoryStream stream = new MemoryStream();
 
-            binaryFormatter.Serialize(stream, wrapper);
+            using (MemoryStream stream = new MemoryStream())
+            {
+                binaryFormatter.Serialize(stream, wrapper);
 
-            return stream.ToArray();
+                stream.Dispose();
+
+                packetData = stream.ToArray();
+            }
+            
+            return packetData;
         }
 
         public static bool IsCommandNotEmpty(byte[] commandData)

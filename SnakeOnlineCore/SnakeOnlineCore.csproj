@@ -46,6 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GameRoomState.cs" />
+    <Compile Include="SnakeGameShortDescriptor.cs" />
     <Compile Include="SocpMessageContainer.cs" />
     <Compile Include="Socp.cs" />
     <Compile Include="SocpUtils.cs" />

@@ -8,12 +8,12 @@ namespace SnakeOnlineCore
         // Room properties.
         public int gameManagerID { get; set; }
         public string roomName { get; set; }
-        public string ipAddress { get; set; }
         public string roomPassword { get; set; }
         public string roomLeaderID { get; set; }
         public int currentPlayerCount { get; set; }
         public int currentSpectatorCount { get; set; }
         public int totalGameRoomTime { get; set; }
+        public GameRoomState roomState { get; set; }
 
         // Game properties. (or rules)
         public int arenaWidth { get; set; }

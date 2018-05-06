@@ -38,25 +38,32 @@ namespace SnakeOnlineCore
         REQUEST_GAME_ROOM_CREATION = 4,
 
         /// <summary>
+        ///     Used by the client when he/she needs to have an updated list of game rooms (in the lobby).
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_GAME_ROOM_COLLECTION_UPDATE = 5,
+
+        /// <summary>
         ///     Used when the client joins a match and it requires a snake to take control of during gameplay.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        SPAWN_SNAKE = 5,
+        SPAWN_SNAKE = 6,
 
         /// <summary>
         ///     Used when a player wants to leave a game room and return to the lobby.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        REQUEST_DISCONNECT_FROM_GAME_ROOM = 6,
+        REQUEST_DISCONNECT_FROM_GAME_ROOM = 7,
 
         /// <summary>
         ///     Used when the client closes the program and thus, disconnects from the server.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        REQUEST_DISCONNECT_FROM_SERVER = 7,
+        REQUEST_DISCONNECT_FROM_SERVER = 8,
 
 
         // ===================================================================================================
@@ -109,18 +116,26 @@ namespace SnakeOnlineCore
         GAME_ROOM_REQUEST_ACCEPTED = 104,
 
         /// <summary>
+        ///     Used when a change occurs in the collection of rooms on the server
+        ///         and the clients have to receive the updated data.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        SERVER_BROADCAST_GAME_ROOM_COLLECTION = 105,
+
+        /// <summary>
         ///     Used whenever the arena matrix is changed in some way and the clients need to be aware of that change.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_ARENA_MATRIX = 105,
+        SEND_ARENA_MATRIX = 106,
 
         /// <summary>
         ///     Lets the user know that the server has accepted their request of leaving a room.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        RESPONSE_DISCONNECT_FROM_GAME_ROOM = 106,
+        RESPONSE_DISCONNECT_FROM_GAME_ROOM = 107,
 
         /// <summary>
         ///     The server is ready to release all resources and the client's application can close.
@@ -131,6 +146,19 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        RESPONSE_DISCONNECT_FROM_SERVER = 107
+        RESPONSE_DISCONNECT_FROM_SERVER = 108,
+
+
+        // ===================================================================================================
+
+
+        // Test "commands".
+
+        /// <summary>
+        ///     Used to test if communication between two sockets works as expected.
+        ///     <para/>
+        ///     USAGE: client to server (and probably vice versa too).
+        /// </summary>
+        PING = 1000
     }
 }

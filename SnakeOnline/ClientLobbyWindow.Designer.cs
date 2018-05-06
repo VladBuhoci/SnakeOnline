@@ -42,7 +42,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.roomsDataGridView = new System.Windows.Forms.DataGridView();
             this.RoomName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IPAddress = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.HasPassword = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.Players = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Spectators = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.State = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -199,7 +199,7 @@
             this.roomsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.roomsDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.RoomName,
-            this.IPAddress,
+            this.HasPassword,
             this.Players,
             this.Spectators,
             this.State});
@@ -217,11 +217,13 @@
             this.RoomName.Name = "RoomName";
             this.RoomName.ReadOnly = true;
             // 
-            // IPAddress
+            // HasPassword
             // 
-            this.IPAddress.HeaderText = "IP Address";
-            this.IPAddress.Name = "IPAddress";
-            this.IPAddress.ReadOnly = true;
+            this.HasPassword.HeaderText = "Has Password";
+            this.HasPassword.Name = "HasPassword";
+            this.HasPassword.ReadOnly = true;
+            this.HasPassword.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.HasPassword.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             // 
             // Players
             // 
@@ -279,7 +281,7 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.DataGridView roomsDataGridView;
         private System.Windows.Forms.DataGridViewTextBoxColumn RoomName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn IPAddress;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn HasPassword;
         private System.Windows.Forms.DataGridViewTextBoxColumn Players;
         private System.Windows.Forms.DataGridViewTextBoxColumn Spectators;
         private System.Windows.Forms.DataGridViewTextBoxColumn State;

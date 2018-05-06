@@ -18,23 +18,24 @@ namespace SnakeOnlineServer
         private Dictionary<string, Socket> tempIdClientSocketPairs;
         private Dictionary<string, Socket> idClientSocketPairs;
         private Dictionary<int, SnakeGameManagerSV> snakeGameManagerSVCollection;
+        private Dictionary<int, SnakeGameDescriptor> snakeGameRoomDescrCollection;  // TODO: is this even needed? we could just use the managers..
 
-        private byte[] rawDataBuffer = new byte[1024];  // TODO: needed as a class field?
+        private byte[] rawDataBuffer = new byte[1024];
         private int uniquePlayerTempIDCounter;
         private int uniqueGameManagerIDCounter;
 
         public GameServer(TextBox _serverLogTextBox)
         {
             serverLogTextBox             = _serverLogTextBox;
-            snakeGameManagerSVCollection = new Dictionary<int, SnakeGameManagerSV>();
 
             serverSocket                 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tempIdClientSocketPairs      = new Dictionary<string, Socket>();
             idClientSocketPairs          = new Dictionary<string, Socket>();
+            snakeGameManagerSVCollection = new Dictionary<int, SnakeGameManagerSV>();
+            snakeGameRoomDescrCollection = new Dictionary<int, SnakeGameDescriptor>();
+            rawDataBuffer                = new byte[1024];
             uniquePlayerTempIDCounter    = 0;
             uniqueGameManagerIDCounter   = 0;
-
-            //CreateNewGameAndGameManager();      // TODO: shouldn't be done here.
         }
 
         public void SetUpServer()
@@ -66,7 +67,7 @@ namespace SnakeOnlineServer
 
                 // Increment the counter.
                 uniquePlayerTempIDCounter += 1;
-
+                
                 // Begin receiving data from this client.
                 newClientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), newClientSocket);
                 
@@ -83,6 +84,7 @@ namespace SnakeOnlineServer
         {
             Socket clientSocket = (Socket) AR.AsyncState;
            
+            // TODO: should probably get rid of this.
             if (! clientSocket.Connected)
             {
                 return;
@@ -92,24 +94,27 @@ namespace SnakeOnlineServer
             {
                 int receivedDataSize = clientSocket.EndReceive(AR);
                 byte[] actualDataBuffer = new byte[receivedDataSize];
-
+                
                 Array.Copy(rawDataBuffer, actualDataBuffer, receivedDataSize);
-
-                // Handle the received data.
-                HandleReceivedData(actualDataBuffer, clientSocket);
                 
                 // Resume receiving data from this client socket.
                 clientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), clientSocket);
+                
+                // Handle the received data.
+                HandleReceivedData(actualDataBuffer, clientSocket);
             }
-            catch (Exception e)
+            catch (SocketException ex)
             {
-                LogMessage("~ Client disconnected.");
-                LogMessage(e.Message);
-                LogMessage(e.StackTrace);
+                LogMessage("\n~~~~~~~~~~~~~~~~~");
+                LogMessage("~ Client disconnected unexpectedly!");
+                LogMessage(ex.Message);
+                LogMessage(ex.StackTrace);
+                LogMessage("~~~~~~~~~~~~~~~~~\n");
 
                 string key = null;
                 var enumerator = idClientSocketPairs.GetEnumerator();
 
+                // TODO: does this even work?
                 while (enumerator.Current.Value != null)
                 {
                     if (enumerator.Current.Value == clientSocket)
@@ -125,16 +130,11 @@ namespace SnakeOnlineServer
                 {
                     idClientSocketPairs.Remove(key);
                 }
-
-                clientSocket.Disconnect(true);
-                clientSocket = null;
             }
         }
         
         private void HandleReceivedData(byte[] dataBuffer, Socket clientSocket)
         {
-            // TODO
-            //if (CommunicationProtocolUtils.IsCommandNotEmpty(dataBuffer))
             {
                 Socp command = SocpUtils.GetProtocolValueFromCommand(dataBuffer);
 
@@ -166,7 +166,7 @@ namespace SnakeOnlineServer
 
                                 // Inform every client that a new user has connected to the server, by sending
                                 //      a new collection of names to each client to be seen in their lobby.
-                                BroadcastClientsListForLobby();
+                                BroadcastClientListForLobby(chosenNickname);
                             }
                             else
                             {
@@ -179,10 +179,10 @@ namespace SnakeOnlineServer
                     case Socp.REQUEST_LOBBY_PEOPLE_LIST_UPDATE:
                         {
                             string clientID = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
-                            string[] clientsNames = idClientSocketPairs.Keys.ToArray();
-                            byte[] connectedClientsCollection = SocpUtils.MakeNetworkCommand(Socp.SEND_CONNECTED_CLIENTS_COLLECTION, clientsNames);
 
-                            idClientSocketPairs[clientID].Send(connectedClientsCollection);
+                            LogMessage(String.Format("Client \"{0}\" requests a client list update for his/her lobby window.", clientID));
+
+                            SendClientListForLobbyTo(clientID);
 
                             break;
                         }
@@ -210,14 +210,19 @@ namespace SnakeOnlineServer
                             LogMessage(String.Format("New game room request from \"{0}.\"", playerID));
 
                             // Create the game manager here and store it in the coresponding collection.
-                            SnakeGameManagerSV gameManager = new SnakeGameManagerSV(gameDescriptor.arenaWidth, gameDescriptor.arenaHeight, gameDescriptor.foodEffect, gameDescriptor.matchDuration, this);
-
-                            snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, gameManager);
+                            SnakeGameManagerSV gameManager = new SnakeGameManagerSV(gameDescriptor.arenaWidth, gameDescriptor.arenaHeight, gameDescriptor.foodEffect, gameDescriptor.matchDuration, this, playerID);
 
                             gameDescriptor.gameManagerID = uniqueGameManagerIDCounter;
-                            
+
+                            // Store the game's manager and descriptor using the same ID.
+                            snakeGameManagerSVCollection.Add(uniqueGameManagerIDCounter, gameManager);
+                            snakeGameRoomDescrCollection.Add(uniqueGameManagerIDCounter, gameDescriptor);
+
                             // Send the result back to the client (the new room leader).
                             idClientSocketPairs[playerID].Send(SocpUtils.MakeNetworkCommand(Socp.GAME_ROOM_REQUEST_ACCEPTED, gameDescriptor));
+
+                            // Send the collection of rooms to every client.
+                            BroadcastRoomListForLobby();
 
                             // Increment the counter.
                             uniqueGameManagerIDCounter += 1;
@@ -225,6 +230,18 @@ namespace SnakeOnlineServer
                             break;
                         }
 
+                    case Socp.REQUEST_GAME_ROOM_COLLECTION_UPDATE:
+                        {
+                            string clientID = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+
+                            LogMessage(String.Format("Client \"{0}\" requests a room list update for his/her lobby window.", clientID));
+
+                            SendRoomListForLobbyTo(clientID);
+
+                            break;
+                        }
+
+                        // TODO: needed anymore??
                     case Socp.SPAWN_SNAKE:
                         {
                             LogMessage("Player requested a snake to be created.");
@@ -239,10 +256,28 @@ namespace SnakeOnlineServer
                     case Socp.REQUEST_DISCONNECT_FROM_GAME_ROOM:
                         {
                             string playerName = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
 
-                            LogMessage(String.Format("Client \"{0}\" wants to disconnect from the current game room.", playerName));
+                            LogMessage(String.Format("Client \"{0}\" wants to disconnect from the current game room. (id: {1})", playerName, gameManagerID));
 
-                            // TODO
+                            // TODO: get the player out of the game manager's collection and stuff, then
+                            //          declare another player as the new room leader, if there is one,
+                            //          or destroy the room.
+                            {
+                                // for now, just remove the room from the collection.
+                                snakeGameManagerSVCollection[gameManagerID].RemovePlayerFromGame(playerName);
+
+                                if (snakeGameManagerSVCollection[gameManagerID].IsGameEmpty())
+                                {
+                                    snakeGameManagerSVCollection.Remove(gameManagerID);
+                                    snakeGameRoomDescrCollection.Remove(gameManagerID);
+                                }
+                            }
+
+                            // Update the list of rooms for everyone.
+                            BroadcastRoomListForLobby();
+
+                            idClientSocketPairs[playerName].Send(SocpUtils.MakeNetworkCommand(Socp.RESPONSE_DISCONNECT_FROM_GAME_ROOM, ""));
 
                             break;
                         }
@@ -272,7 +307,17 @@ namespace SnakeOnlineServer
                                 idClientSocketPairs.Remove(playerName);
                             
                             // Send an updated list of connected users to every single one of them.
-                            BroadcastClientsListForLobby();
+                            BroadcastClientListForLobby();
+
+                            break;
+                        }
+
+                    case Socp.PING:
+                        {
+                            string clientName = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            string msgData = (string) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                            LogMessage(String.Format("Client \"{0}\" pinged server. Additional message: {1}", clientName, msgData));
 
                             break;
                         }
@@ -286,15 +331,77 @@ namespace SnakeOnlineServer
             }
         }
 
-        private void BroadcastClientsListForLobby()
-        {            
+        private void SendClientListForLobbyTo(string clientID)
+        {
+            byte[] connectedClientsPacket = PrepareClientListForLobby();
+
+            idClientSocketPairs[clientID].Send(connectedClientsPacket);
+        }
+
+        private void BroadcastClientListForLobby()
+        {
+            BroadcastClientListForLobby("");
+        }
+
+        private void BroadcastClientListForLobby(string exceptionClientID)
+        {
+            byte[] connectedClientsPacket = PrepareClientListForLobby();
+
+            foreach (string id in idClientSocketPairs.Keys)
+            {
+                if (id != exceptionClientID)
+                {
+                    idClientSocketPairs[id].Send(connectedClientsPacket);
+                }
+            }
+        }
+
+        private byte[] PrepareClientListForLobby()
+        {
             string[] clientsNames = idClientSocketPairs.Keys.ToArray();
-            byte[] connectedClientsCollection = SocpUtils.MakeNetworkCommand(Socp.SEND_CONNECTED_CLIENTS_COLLECTION, clientsNames);
+            byte[] connectedClientsPacket = SocpUtils.MakeNetworkCommand(Socp.SEND_CONNECTED_CLIENTS_COLLECTION, clientsNames);
+
+            return connectedClientsPacket;
+        }
+
+        private void SendRoomListForLobbyTo(string clientID)
+        {
+            byte[] roomsShortDescrCollectionPacket = PrepareRoomListForLobbyNetworkPacket();
+
+            idClientSocketPairs[clientID].Send(roomsShortDescrCollectionPacket);
+        }
+
+        private void BroadcastRoomListForLobby()
+        {
+            byte[] roomsShortDescrCollectionPacket = PrepareRoomListForLobbyNetworkPacket();
 
             foreach (Socket socket in idClientSocketPairs.Values)
             {
-                socket.Send(connectedClientsCollection);
+                socket.Send(roomsShortDescrCollectionPacket);
             }
+        }
+
+        private byte[] PrepareRoomListForLobbyNetworkPacket()
+        {
+            List<SnakeGameShortDescriptor> snakeGameShortDescriptors = new List<SnakeGameShortDescriptor>();
+
+            foreach (SnakeGameDescriptor gameDescriptor in snakeGameRoomDescrCollection.Values.ToArray())
+            {
+                SnakeGameShortDescriptor gameShortDescriptor = new SnakeGameShortDescriptor()
+                {
+                    roomName = gameDescriptor.roomName,
+                    hasPassword = String.IsNullOrEmpty(gameDescriptor.roomPassword.Trim()) ? false : true,
+                    currentPlayerCount = gameDescriptor.currentPlayerCount,
+                    currentSpectatorCount = gameDescriptor.currentSpectatorCount,
+                    roomState = gameDescriptor.roomState
+                };
+
+                snakeGameShortDescriptors.Add(gameShortDescriptor);
+            }
+
+            byte[] roomsShortDescrCollectionPacket = SocpUtils.MakeNetworkCommand(Socp.SERVER_BROADCAST_GAME_ROOM_COLLECTION, snakeGameShortDescriptors.ToArray());
+
+            return roomsShortDescrCollectionPacket;
         }
 
         private void RequestDisconnectFromServerCallback(IAsyncResult AR)

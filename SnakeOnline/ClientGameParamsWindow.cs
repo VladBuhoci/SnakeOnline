@@ -17,13 +17,9 @@ namespace SnakeOnline
 
         public ClientGameParamsWindow(GameClient clientSocket)
         {
-            string publicIP = new System.Net.WebClient().DownloadString("https://api.ipify.org");
-
             InitializeComponent();
 
             socket = clientSocket;
-            
-            ipAddressTextBox.Text = publicIP;
 
             growPartsRadioButton.Text = FoodObject.EFFECT_GROW_PARTS;
             nothingRadioButton.Text = FoodObject.EFFECT_NOTHING;
@@ -54,10 +50,10 @@ namespace SnakeOnline
             {
                 gameManagerID = -1,                                             // Temporary.
                 roomName = roomNameTextBox.Text.Trim(),
-                ipAddress = ipAddressTextBox.Text,
                 roomPassword = passwordMaskedTextBox.Text,
                 roomLeaderID = socket.GetUniquePlayerID(),
-                
+                currentPlayerCount = 1,
+                roomState = GameRoomState.WAITING,
 
                 arenaWidth = Decimal.ToInt32(arenaWidthBox.Value),
                 arenaHeight = Decimal.ToInt32(arenaHeightBox.Value),

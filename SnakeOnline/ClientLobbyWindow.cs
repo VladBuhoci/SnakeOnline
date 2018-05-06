@@ -1,10 +1,12 @@
-﻿using System;
+﻿using SnakeOnlineCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -20,16 +22,33 @@ namespace SnakeOnline
 
             this.socket = socket;
             this.socket.SendUpdatedLobbyPeopleListRequest();
+            this.socket.SendUpdatedLobbyRoomListRequest();
         }
 
-        public void UpdateConnectedClientsList(string[] names)
+        public void UpdateLobbyConnectedClientsList(string[] names)
         {
             clientsList.DataSource = names;
+
+            socket.SendPingToServer("Bing clients!");
         }
 
         public void UpdateLobbyChat(string newMessage)
         {
             lobbyChat_ChatBox.AppendText(newMessage + "\n");
+        }
+
+        public void UpdateLobbyRoomList(SnakeGameShortDescriptor[] rooms)
+        {
+            // Clear the table.
+            roomsDataGridView.Rows.Clear();
+
+            // Populate the table.
+            foreach (SnakeGameShortDescriptor roomDescr in rooms)
+            {
+                roomsDataGridView.Rows.Add(roomDescr.roomName, roomDescr.hasPassword, roomDescr.currentPlayerCount, roomDescr.currentSpectatorCount, roomDescr.roomState.ToString());
+            }
+
+            socket.SendPingToServer("Bing rooms!");
         }
 
         private void lobbyChat_TextToSendBox_KeyDown(object sender, KeyEventArgs e)
