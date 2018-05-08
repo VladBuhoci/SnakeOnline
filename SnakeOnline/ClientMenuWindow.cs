@@ -11,8 +11,7 @@ namespace SnakeOnline
         {
             InitializeComponent();
 
-            socket = new GameClient(this);
-            socket.LoopConnect();
+            serverAddressTextBox.Select();
         }
 
         public void ConnectionWasSuccessful()
@@ -20,7 +19,14 @@ namespace SnakeOnline
             mainMenuPanel.Enabled = true;
         }
 
-        private void nicknameTextBox_KeyDown(object sender, KeyEventArgs e)
+        public void PromptClientForUsername()
+        {
+            connectToServerPanel.Enabled = false;
+            connectWithUsernamePanel.Enabled = true;
+            nicknameTextBox.Select();
+        }
+
+        private void serverAddressTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             // When pressing enter, simulate a "Connect" button click.
 
@@ -34,6 +40,25 @@ namespace SnakeOnline
         }
 
         private void connectToServerButton_Click(object sender, EventArgs e)
+        {
+            socket = new GameClient(this);
+            socket.LoopConnect(serverAddressTextBox.Text);
+        }
+        
+        private void nicknameTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            // When pressing enter, simulate a "Proceed" button click.
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                proceedToLobbyButton_Click(sender, e);
+
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private void proceedToLobbyButton_Click(object sender, EventArgs e)
         {
             if (nicknameTextBox.Text.Trim().Length > 0)
             {

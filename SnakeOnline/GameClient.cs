@@ -33,7 +33,7 @@ namespace SnakeOnline
             clientMenuWindow = menuWindow;
         }
 
-        public void LoopConnect()
+        public void LoopConnect(string ipAddress)
         {
             int attempts = 0;
 
@@ -49,15 +49,13 @@ namespace SnakeOnline
 
                 try
                 {
-                    socket.Connect(IPAddress.Loopback, serverPortNumber);
+                    socket.Connect(IPAddress.Parse(ipAddress), serverPortNumber);
                 }
                 catch (SocketException ex)
                 {
                     //MessageBox.Show("Cannot connect to server :(");
                 }
             }
-
-            clientMenuWindow.ConnectionWasSuccessful();
 
             // Now that we're connected, we can send and receive messages from the server.
             WaitReceiveAndHandleDataFromServer();
@@ -112,6 +110,8 @@ namespace SnakeOnline
                             {
                                 // Store the temporary id.
                                 uniquePlayerID = (string) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                                clientMenuWindow.PromptClientForUsername();
 
                                 break;
                             }
@@ -280,6 +280,6 @@ namespace SnakeOnline
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             serverPortNumber = 1702;
-        }        
+        }
     }
 }

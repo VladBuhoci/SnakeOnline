@@ -14,6 +14,7 @@ namespace SnakeOnlineServer
     {
         private TextBox serverLogTextBox;
 
+        private int serverPortNumber;
         private Socket serverSocket;
         private Dictionary<string, Socket> tempIdClientSocketPairs;
         private Dictionary<string, Socket> idClientSocketPairs;
@@ -28,6 +29,7 @@ namespace SnakeOnlineServer
         {
             serverLogTextBox             = _serverLogTextBox;
 
+            serverPortNumber             = 1702;
             serverSocket                 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tempIdClientSocketPairs      = new Dictionary<string, Socket>();
             idClientSocketPairs          = new Dictionary<string, Socket>();
@@ -42,8 +44,8 @@ namespace SnakeOnlineServer
         {
             LogMessage("Attempting to start server...");
 
-            serverSocket.Bind(new IPEndPoint(IPAddress.Any, 1702));
-            serverSocket.Listen(10);
+            serverSocket.Bind(new IPEndPoint(IPAddress.Any, serverPortNumber));
+            serverSocket.Listen(100);
             serverSocket.BeginAccept(new AsyncCallback(ServerAcceptConnectionCallback), null);
 
             LogMessage("Server has started.");
