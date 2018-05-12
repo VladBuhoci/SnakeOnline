@@ -95,6 +95,7 @@
             this.serverAddressTextBox.Name = "serverAddressTextBox";
             this.serverAddressTextBox.Size = new System.Drawing.Size(105, 20);
             this.serverAddressTextBox.TabIndex = 4;
+            this.serverAddressTextBox.Text = "127.0.0.1";
             this.serverAddressTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.serverAddressTextBox_KeyDown);
             // 
             // label2

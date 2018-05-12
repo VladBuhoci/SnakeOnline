@@ -28,8 +28,6 @@ namespace SnakeOnline
         public void UpdateLobbyConnectedClientsList(string[] names)
         {
             clientsList.DataSource = names;
-
-            socket.SendPingToServer("Bing clients!");
         }
 
         public void UpdateLobbyChat(string newMessage)
@@ -47,8 +45,6 @@ namespace SnakeOnline
             {
                 roomsDataGridView.Rows.Add(roomDescr.roomName, roomDescr.hasPassword, roomDescr.currentPlayerCount, roomDescr.currentSpectatorCount, roomDescr.roomState.ToString());
             }
-
-            socket.SendPingToServer("Bing rooms!");
         }
 
         private void lobbyChat_TextToSendBox_KeyDown(object sender, KeyEventArgs e)

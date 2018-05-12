@@ -3,7 +3,7 @@
 namespace SnakeOnlineCore
 {
     /// <summary>
-    ///     Snake Online Communication Protocol.
+    ///     Snake Online Communication Protocol message types.
     /// </summary>
     public enum Socp : Int32
     {
@@ -21,12 +21,47 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        REQUEST_LOBBY_PEOPLE_LIST_UPDATE = 2,
+        REQUEST_LOBBY_PEOPLE_LIST_UPDATE,
+
+        /// <summary>
+        ///     Used by the clients to get a new list of users who joined as players, currently connected to a specific room
+        ///         (room/game manager ID must exist within the message object.)
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_ROOM_PLAYER_LIST_UPDATE,
+
+        /// <summary>
+        ///     Used by the clients to get a new list of users who joined as spectators, currently connected to a specific room
+        ///         (room/game manager ID must exist within the message object.)
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_ROOM_SPECTATOR_LIST_UPDATE,
+
+        /// <summary>
+        ///     Used when a client wants to switch sides (from players to spectators or vice versa) in a room,
+        ///         but only if there isn't an ongoing match linked to this room.
+        ///         (room/game manager ID must exist within the message object.)
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_SWITCH_SIDES_ROOM,
 
         /// <summary>
         ///     Used when a regular client types and sends a text message in the lobby chat.
+        ///     <para/>
+        ///     USAGE: client to server.
         /// </summary>
-        CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY = 3,
+        CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY,
+
+        /// <summary>
+        ///     Used when a regular client types and sends a text message in a specific room chat.
+        ///         (room/game manager ID must exist within the message object.)
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        CLIENT_POST_NEW_CHAT_MESSAGE_ROOM,
 
         /// <summary>
         ///     Used when a client attempts to open a new game room.
@@ -35,35 +70,35 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        REQUEST_GAME_ROOM_CREATION = 4,
+        REQUEST_GAME_ROOM_CREATION,
 
         /// <summary>
         ///     Used by the client when he/she needs to have an updated list of game rooms (in the lobby).
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        REQUEST_GAME_ROOM_COLLECTION_UPDATE = 5,
+        REQUEST_GAME_ROOM_COLLECTION_UPDATE,
 
         /// <summary>
         ///     Used when the client joins a match and it requires a snake to take control of during gameplay.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        SPAWN_SNAKE = 6,
+        SPAWN_SNAKE,
 
         /// <summary>
         ///     Used when a player wants to leave a game room and return to the lobby.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        REQUEST_DISCONNECT_FROM_GAME_ROOM = 7,
+        REQUEST_DISCONNECT_FROM_GAME_ROOM,
 
         /// <summary>
         ///     Used when the client closes the program and thus, disconnects from the server.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        REQUEST_DISCONNECT_FROM_SERVER = 8,
+        REQUEST_DISCONNECT_FROM_SERVER,
 
 
         // ===================================================================================================
@@ -87,7 +122,7 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        ACCEPT_NEW_CLIENT_WITH_NICKNAME = 101,
+        ACCEPT_NEW_CLIENT_WITH_NICKNAME,
 
         /// <summary>
         ///     Used by the server to inform all clients about the change(s) which occured recently in the
@@ -97,14 +132,51 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_CONNECTED_CLIENTS_COLLECTION = 102,
+        SEND_CONNECTED_CLIENTS_COLLECTION,
+
+        /// <summary>
+        ///     Used by the server to inform all clients about the change(s) which occured recently in the
+        ///         collection of players in a room, such as a new user who has just connected or somebody who left.
+        ///     <para/>
+        ///     Good for updating the list of players in a specific room window of each client.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        SEND_ROOM_PLAYER_COLLECTION,
+
+        /// <summary>
+        ///     Used by the server to inform all clients about the change(s) which occured recently in the
+        ///         collection of spectators in a room, such as a new user who has just connected or somebody who left.
+        ///     <para/>
+        ///     Good for updating the list of spectators in a specific room window of each client.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        SEND_ROOM_SPECTATOR_COLLECTION,
+
+        /// <summary>
+        ///     Used when the server (and related game manager) accept a client's request to switch sides in a room
+        ///         (from players to spectators or vice versa), but only if there isn't an ongoing match linked to this room.
+        ///         (room/game manager ID must exist within the message object.)
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        ACCEPT_PLAYER_SWITCH_SIDES_ROOM,
 
         /// <summary>
         ///     Used when the server sends a text message to all clients in the lobby chat.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY = 103,
+        SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY,
+
+        /// <summary>
+        ///     Used when the server sends a text message to all clients in a specific room chat.
+        ///         (room/game manager ID must exist within the message object.)
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        SERVER_BROADCAST_NEW_CHAT_MESSAGE_ROOM,
 
         /// <summary>
         ///     Used whenever a new game (and a game manager) is created .
@@ -113,7 +185,7 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        GAME_ROOM_REQUEST_ACCEPTED = 104,
+        GAME_ROOM_REQUEST_ACCEPTED,
 
         /// <summary>
         ///     Used when a change occurs in the collection of rooms on the server
@@ -121,21 +193,21 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SERVER_BROADCAST_GAME_ROOM_COLLECTION = 105,
+        SERVER_BROADCAST_GAME_ROOM_COLLECTION,
 
         /// <summary>
         ///     Used whenever the arena matrix is changed in some way and the clients need to be aware of that change.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_ARENA_MATRIX = 106,
+        SEND_ARENA_MATRIX,
 
         /// <summary>
         ///     Lets the user know that the server has accepted their request of leaving a room.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        RESPONSE_DISCONNECT_FROM_GAME_ROOM = 107,
+        RESPONSE_DISCONNECT_FROM_GAME_ROOM,
 
         /// <summary>
         ///     The server is ready to release all resources and the client's application can close.
@@ -146,7 +218,7 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        RESPONSE_DISCONNECT_FROM_SERVER = 108,
+        RESPONSE_DISCONNECT_FROM_SERVER,
 
 
         // ===================================================================================================

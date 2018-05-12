@@ -23,8 +23,8 @@ namespace SnakeOnline
             this.bApplicationAttemptsClosing = false;
             this.uniqueGameManagerID = uniqueGameManagerID;
 
-            Thread auxGameLoopThread = new Thread(() => RenderLoop(gameArenaPane));
-            auxGameLoopThread.Start();
+            //Thread auxGameLoopThread = new Thread(() => RenderLoop(gameArenaPane));
+            //auxGameLoopThread.Start();
         }
 
         public int GetUniqueGameManagerID()
@@ -43,7 +43,7 @@ namespace SnakeOnline
 
                 Thread.Sleep(100);
             }
-            
+
             Thread.CurrentThread.Abort();
         }
 

@@ -28,13 +28,17 @@ namespace SnakeOnline
 
             gameClient = client;
             gameClient.snakeGameManagerCL = snakeGameManagerCL;
+            
+            // Update the player and spectator lists.
+            gameClient.SendUpdatedRoomPlayerListRequest();
+            gameClient.SendUpdatedRoomSpectatorListRequest();
 
             // TODO: should be created as a request from the server once the match has begun.
             //       Have some sort of method here that will be called by the client, in order to instantiate a controller.
             //snakeController = new SnakeController(client, 19, 30, Color.Red);
 
             //SnakeGameManager.GetInstance().SetGameArenaPane(gameArenaPane);
-            
+
             //bApplicationAttemptsClosing = false;
 
             // Snake handling will be migrated on the server.
@@ -97,9 +101,80 @@ namespace SnakeOnline
             }
         }
         
+        public void UpdateRoomPlayerList(string[] playerNames)
+        {
+            playerListBox.DataSource = playerNames;
+        }
+
+        public void UpdateRoomSpectatorList(string[] spectatorNames)
+        {
+            spectatorListBox.DataSource = spectatorNames;
+        }
+
+        public void UpdateRoomChat(string newMessage)
+        {
+            roomChatTextBox.AppendText(newMessage + "\n");
+        }
+
+        private void startMatchButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void roomSettingsButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void switchSidesButton_Click(object sender, EventArgs e)
+        {
+            gameClient.SendPlayerSwitchSidesInRoomRequest();
+        }
+
+        private void disconnectButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void roomChatTextToSendTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            // When pressing enter, simulate a "Send" button click.
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                sendRoomChatMessageButton_Click(sender, e);
+
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private void sendRoomChatMessageButton_Click(object sender, EventArgs e)
+        {
+            if (! String.IsNullOrEmpty(roomChatTextToSendTextBox.Text.Trim()))
+            {
+                gameClient.SendChatMessageInRoom(roomChatTextToSendTextBox.Text.Trim());
+
+                // Clear the text box after sending the message.
+                roomChatTextToSendTextBox.Clear();
+            }
+        }
+
         private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
-            gameClient.SendDisconnectFromGameRoomRequest();
+            var result = MessageBox.Show(this, "Are you sure you want to leave?", "Abandon room", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+
+            if (result == DialogResult.Yes)
+            {
+                if (gameClient != null)
+                {
+                    gameClient.SendDisconnectFromGameRoomRequest();
+                }
+            }
+            else
+            {
+                e.Cancel = true;
+            }
         }
     }
 }

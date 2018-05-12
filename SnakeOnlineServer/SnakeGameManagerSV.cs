@@ -11,6 +11,8 @@ namespace SnakeOnlineServer
     {
         private bool bApplicationAttemptsClosing;
 
+        private int id;
+
         private int gameArenaWidth;
         private int gameArenaHeight;
         private SnakeGameArenaObject[,] gameArenaObjects;
@@ -23,9 +25,11 @@ namespace SnakeOnlineServer
 
         private string roomLeaderID;
 
-        public SnakeGameManagerSV(int arenaWidth, int arenaHeight, string foodEffect, int duration, GameServer server, string leaderID)
+        public SnakeGameManagerSV(int managerID, int arenaWidth, int arenaHeight, string foodEffect, int duration, GameServer server, string leaderID)
         {
             bApplicationAttemptsClosing = false;
+
+            id = managerID;
 
             gameArenaWidth = arenaWidth;
             gameArenaHeight = arenaHeight;
@@ -43,19 +47,38 @@ namespace SnakeOnlineServer
             playerWithSnakeCollection.Add(roomLeaderID, null);
         }
 
-        public void RemovePlayerFromGame(string playerID)
+        public void SwitchSidesForClient(string clientID)
         {
-            if (playerWithSnakeCollection.Keys.Contains(playerID))
+            if (playerWithSnakeCollection.Keys.Contains(clientID))
             {
-                playerWithSnakeCollection.Remove(playerID);
+                playerWithSnakeCollection.Remove(clientID);
 
-                // TODO
+                spectatorList.Add(clientID);
             }
-            else if (spectatorList.Contains(playerID))
+            else if (spectatorList.Contains(clientID))
             {
-                spectatorList.Remove(playerID);
+                spectatorList.Remove(clientID);
 
-                // TODO
+                playerWithSnakeCollection.Add(clientID, null);
+            }
+
+            gameServer.BroadcastPlayerListForRoom(id);
+            gameServer.BroadcastSpectatorListForRoom(id);
+        }
+
+        public void RemoveClientFromGame(string clientID)
+        {
+            if (playerWithSnakeCollection.Keys.Contains(clientID))
+            {
+                playerWithSnakeCollection.Remove(clientID);
+
+                gameServer.BroadcastPlayerListForRoom(id);
+            }
+            else if (spectatorList.Contains(clientID))
+            {
+                spectatorList.Remove(clientID);
+
+                gameServer.BroadcastSpectatorListForRoom(id);
             }
 
             // TODO: more actions to be handled here, including a check whether this
@@ -69,6 +92,22 @@ namespace SnakeOnlineServer
         public bool IsGameEmpty()
         {
             return playerWithSnakeCollection.Count == 0 && spectatorList.Count == 0;
+        }
+
+        public string[] Players
+        {
+            get
+            {
+                return playerWithSnakeCollection.Keys.ToArray();
+            }
+        }
+
+        public string[] Spectators
+        {
+            get
+            {
+                return spectatorList.ToArray();
+            }
         }
 
         public void RequestAuxGameLoopThreadToEnd()

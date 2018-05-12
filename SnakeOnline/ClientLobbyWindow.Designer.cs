@@ -124,7 +124,7 @@
             this.groupBox3.Size = new System.Drawing.Size(550, 197);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Lobby chat";
+            this.groupBox3.Text = "Lobby Chat";
             // 
             // lobbyChat_SendButton
             // 

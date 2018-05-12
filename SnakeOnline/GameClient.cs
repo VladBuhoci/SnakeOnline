@@ -22,7 +22,8 @@ namespace SnakeOnline
         private byte[] rawDataBuffer = new byte[1024];
 
         private ClientMenuWindow clientMenuWindow;
-        private ClientLobbyWindow clientLobbyWindow { get; set; }
+        private ClientLobbyWindow clientLobbyWindow;
+        private ClientGameWindow clientGameWindow;
 
         public SnakeGameManagerCL snakeGameManagerCL { get; set; }
 
@@ -151,6 +152,30 @@ namespace SnakeOnline
                                 break;
                             }
 
+                        case Socp.SEND_ROOM_PLAYER_COLLECTION:
+                            {
+                                if (clientGameWindow != null)
+                                {
+                                    string[] names = (string[]) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                                    clientGameWindow.UpdateRoomPlayerList(names);
+                                }
+
+                                break;
+                            }
+
+                        case Socp.SEND_ROOM_SPECTATOR_COLLECTION:
+                            {
+                                if (clientGameWindow != null)
+                                {
+                                    string[] names = (string[]) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                                    clientGameWindow.UpdateRoomSpectatorList(names);
+                                }
+
+                                break;
+                            }
+
                         case Socp.SERVER_BROADCAST_NEW_CHAT_MESSAGE_LOBBY:
                             {
                                 if (clientLobbyWindow != null)
@@ -163,14 +188,28 @@ namespace SnakeOnline
                                 break;
                             }
 
+                        case Socp.SERVER_BROADCAST_NEW_CHAT_MESSAGE_ROOM:
+                            {
+                                if (clientLobbyWindow != null)
+                                {
+                                    string message = (string) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                                    clientGameWindow.UpdateRoomChat(message);
+                                }
+
+                                break;
+                            }
+
                         case Socp.GAME_ROOM_REQUEST_ACCEPTED:
                             {
                                 SnakeGameDescriptor gameDescriptor = (SnakeGameDescriptor) SocpUtils.GetDataFromCommand(dataBuffer);
                                 int currentUniqueGameManagerID = gameDescriptor.gameManagerID;
 
                                 ClientGameWindow gameWindow = new ClientGameWindow(this, clientLobbyWindow, currentUniqueGameManagerID);
-                                gameWindow.ShowDialog(clientLobbyWindow);
-                                
+
+                                clientGameWindow = gameWindow;
+                                clientGameWindow.ShowDialog(clientLobbyWindow);
+
                                 break;
                             }
 
@@ -241,6 +280,21 @@ namespace SnakeOnline
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_LOBBY_PEOPLE_LIST_UPDATE, "", uniquePlayerID));
         }
 
+        public void SendUpdatedRoomPlayerListRequest()
+        {
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_ROOM_PLAYER_LIST_UPDATE, "", uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+        }
+
+        public void SendUpdatedRoomSpectatorListRequest()
+        {
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_ROOM_SPECTATOR_LIST_UPDATE, "", uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+        }
+
+        public void SendPlayerSwitchSidesInRoomRequest()
+        {
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_SWITCH_SIDES_ROOM, "", uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+        }
+
         public void SendUpdatedLobbyRoomListRequest()
         {
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_GAME_ROOM_COLLECTION_UPDATE, "", uniquePlayerID));
@@ -249,6 +303,11 @@ namespace SnakeOnline
         public void SendChatMessageInLobby(string message)
         {
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY, message, uniquePlayerID));
+        }
+
+        public void SendChatMessageInRoom(string message)
+        {
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.CLIENT_POST_NEW_CHAT_MESSAGE_ROOM, message, uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
         }
 
         public void SendCreateGameRequestToServer(SnakeGameDescriptor descriptor)

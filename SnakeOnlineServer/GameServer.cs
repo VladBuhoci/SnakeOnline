@@ -189,6 +189,36 @@ namespace SnakeOnlineServer
                             break;
                         }
 
+                    case Socp.REQUEST_ROOM_PLAYER_LIST_UPDATE:
+                        {
+                            string clientID = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
+                            
+                            BroadcastPlayerListForRoom(gameManagerID);
+
+                            break;
+                        }
+
+                    case Socp.REQUEST_ROOM_SPECTATOR_LIST_UPDATE:
+                        {
+                            string clientID = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
+                            
+                            BroadcastSpectatorListForRoom(gameManagerID);
+
+                            break;
+                        }
+
+                    case Socp.REQUEST_SWITCH_SIDES_ROOM:
+                        {
+                            string clientID = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
+
+                            snakeGameManagerSVCollection[gameManagerID].SwitchSidesForClient(clientID);
+
+                            break;
+                        }
+
                     case Socp.CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY:
                         {
                             string clientName = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
@@ -204,6 +234,25 @@ namespace SnakeOnlineServer
                             break;
                         }
 
+                    case Socp.CLIENT_POST_NEW_CHAT_MESSAGE_ROOM:
+                        {
+                            string clientName = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
+                            string message = (string) SocpUtils.GetDataFromCommand(dataBuffer);
+                            string allegiance = snakeGameManagerSVCollection[gameManagerID].Players.Contains(clientName) ? "SNAK" : "SPEC";
+                            string finalChatMsg = String.Format("[{0}] {1}: {2}", allegiance, clientName, message);
+
+                            string[] roomClients = snakeGameManagerSVCollection[gameManagerID].Players.Concat(snakeGameManagerSVCollection[gameManagerID].Spectators).ToArray();
+
+                            // Send the chat message to every client in that room.
+                            foreach (string name in roomClients)
+                            {
+                                idClientSocketPairs[name].Send(SocpUtils.MakeNetworkCommand(Socp.SERVER_BROADCAST_NEW_CHAT_MESSAGE_ROOM, finalChatMsg));
+                            }
+
+                            break;
+                        }
+
                     case Socp.REQUEST_GAME_ROOM_CREATION:
                         {
                             SnakeGameDescriptor gameDescriptor = (SnakeGameDescriptor) SocpUtils.GetDataFromCommand(dataBuffer);
@@ -212,7 +261,7 @@ namespace SnakeOnlineServer
                             LogMessage(String.Format("New game room request from \"{0}.\"", playerID));
 
                             // Create the game manager here and store it in the coresponding collection.
-                            SnakeGameManagerSV gameManager = new SnakeGameManagerSV(gameDescriptor.arenaWidth, gameDescriptor.arenaHeight, gameDescriptor.foodEffect, gameDescriptor.matchDuration, this, playerID);
+                            SnakeGameManagerSV gameManager = new SnakeGameManagerSV(uniqueGameManagerIDCounter, gameDescriptor.arenaWidth, gameDescriptor.arenaHeight, gameDescriptor.foodEffect, gameDescriptor.matchDuration, this, playerID);
 
                             gameDescriptor.gameManagerID = uniqueGameManagerIDCounter;
 
@@ -267,7 +316,7 @@ namespace SnakeOnlineServer
                             //          or destroy the room.
                             {
                                 // for now, just remove the room from the collection.
-                                snakeGameManagerSVCollection[gameManagerID].RemovePlayerFromGame(playerName);
+                                snakeGameManagerSVCollection[gameManagerID].RemoveClientFromGame(playerName);
 
                                 if (snakeGameManagerSVCollection[gameManagerID].IsGameEmpty())
                                 {
@@ -333,6 +382,20 @@ namespace SnakeOnlineServer
             }
         }
 
+        private void RequestDisconnectFromServerCallback(IAsyncResult AR)
+        {
+            Socket clientSocket = (Socket) AR.AsyncState;
+
+            clientSocket.EndSend(AR);
+            clientSocket.Shutdown(SocketShutdown.Send);
+            clientSocket.Disconnect(false);
+            clientSocket.Close();
+
+            LogMessage("A client has disconnected from the server.");
+        }
+
+        #region Network utils.
+
         private void SendClientListForLobbyTo(string clientID)
         {
             byte[] connectedClientsPacket = PrepareClientListForLobby();
@@ -354,6 +417,42 @@ namespace SnakeOnlineServer
                 if (id != exceptionClientID)
                 {
                     idClientSocketPairs[id].Send(connectedClientsPacket);
+                }
+            }
+        }
+
+        public void BroadcastPlayerListForRoom(int gameManagerID)
+        {
+            BroadcastPlayerListForRoom(gameManagerID, "");
+        }
+
+        private void BroadcastPlayerListForRoom(int gameManagerID, string exceptionClientID)
+        {
+            string[] playerNames = snakeGameManagerSVCollection[gameManagerID].Players;
+
+            foreach (string id in idClientSocketPairs.Keys)
+            {
+                if (id != exceptionClientID)
+                {
+                    idClientSocketPairs[id].Send(SocpUtils.MakeNetworkCommand(Socp.SEND_ROOM_PLAYER_COLLECTION, playerNames));
+                }
+            }
+        }
+
+        public void BroadcastSpectatorListForRoom(int gameManagerID)
+        {
+            BroadcastSpectatorListForRoom(gameManagerID, "");
+        }
+
+        private void BroadcastSpectatorListForRoom(int gameManagerID, string exceptionClientID)
+        {
+            string[] spectatorNames = snakeGameManagerSVCollection[gameManagerID].Spectators;
+
+            foreach (string id in idClientSocketPairs.Keys)
+            {
+                if (id != exceptionClientID)
+                {
+                    idClientSocketPairs[id].Send(SocpUtils.MakeNetworkCommand(Socp.SEND_ROOM_SPECTATOR_COLLECTION, spectatorNames));
                 }
             }
         }
@@ -406,18 +505,8 @@ namespace SnakeOnlineServer
             return roomsShortDescrCollectionPacket;
         }
 
-        private void RequestDisconnectFromServerCallback(IAsyncResult AR)
-        {
-            Socket clientSocket = (Socket) AR.AsyncState;
+        #endregion
 
-            clientSocket.EndSend(AR);
-            clientSocket.Shutdown(SocketShutdown.Send);
-            clientSocket.Disconnect(false);
-            clientSocket.Close();
-
-            LogMessage("A client has disconnected from the server.");
-        }
-        
         private void LogMessage(String text)
         {
             if (serverLogTextBox != null)

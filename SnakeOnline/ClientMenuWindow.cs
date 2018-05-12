@@ -14,11 +14,6 @@ namespace SnakeOnline
             serverAddressTextBox.Select();
         }
 
-        public void ConnectionWasSuccessful()
-        {
-            mainMenuPanel.Enabled = true;
-        }
-
         public void PromptClientForUsername()
         {
             connectToServerPanel.Enabled = false;
