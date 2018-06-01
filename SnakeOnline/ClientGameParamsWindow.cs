@@ -15,7 +15,10 @@ namespace SnakeOnline
     {
         private GameClient socket;
 
-        public ClientGameParamsWindow(GameClient clientSocket)
+        private int roomID;
+        private string roomPassword;
+
+        public ClientGameParamsWindow(GameClient clientSocket, SnakeGameDescriptor? roomDescr)
         {
             InitializeComponent();
 
@@ -24,6 +27,61 @@ namespace SnakeOnline
             growPartsRadioButton.Text = FoodObject.EFFECT_GROW_PARTS;
             nothingRadioButton.Text = FoodObject.EFFECT_NOTHING;
             losePartsRadioButton.Text = FoodObject.EFFECT_LOSE_PARTS;
+
+            if (roomDescr != null)
+            {
+                roomNameTextBox.Enabled = false;
+                roomNameTextBox.Text = roomDescr.Value.roomName;
+
+                // Clients will have to type this password in order to connect to the room.
+                roomPassword = roomDescr.Value.roomPassword;
+
+                if (roomPassword.Length == 0)
+                {
+                    passwordMaskedTextBox.Enabled = false;
+                }
+
+                //arenaWidthBox.Enabled = false;
+                arenaWidthBox.Text = roomDescr.Value.arenaWidth.ToString();
+
+                //arenaHeightBox.Enabled = false;
+                arenaHeightBox.Text = roomDescr.Value.arenaHeight.ToString();
+
+                //maxSnakesAllowedBox.Enabled = false;
+                maxSnakesAllowedBox.Text = roomDescr.Value.maxSnakesAllowed.ToString();
+
+                //growPartsRadioButton.Enabled = false;
+                growPartsRadioButton.Checked = false;
+
+                //nothingRadioButton.Enabled = false;
+                nothingRadioButton.Checked = false;
+
+                //losePartsRadioButton.Enabled = false;
+                losePartsRadioButton.Checked = false;
+
+                gameProps.Enabled = false;
+
+                switch (roomDescr.Value.foodEffect)
+                {
+                    case FoodObject.EFFECT_GROW_PARTS:
+                        growPartsRadioButton.Checked = true;
+                        break;
+
+                    case FoodObject.EFFECT_NOTHING:
+                        nothingRadioButton.Checked = true;
+                        break;
+
+                    case FoodObject.EFFECT_LOSE_PARTS:
+                        losePartsRadioButton.Checked = true;
+                        break;
+                }
+                
+                matchDurationBox.Enabled = false;
+                matchDurationBox.Text = roomDescr.Value.matchDuration.ToString();
+
+                createRoomPanel.Visible = false;
+                joinRoomPanel.Visible = true;
+            }
         }
 
         private void arenaWidthBox_ValueChanged(object sender, EventArgs e)
@@ -46,11 +104,11 @@ namespace SnakeOnline
                 return;
             }
 
-            SnakeGameDescriptor propertiesWrapper = new SnakeGameDescriptor
+            SnakeGameDescriptor propertiesWrapper = new SnakeGameDescriptor()
             {
                 gameManagerID = -1,                                             // Temporary.
                 roomName = roomNameTextBox.Text.Trim(),
-                roomPassword = passwordMaskedTextBox.Text,
+                roomPassword = passwordMaskedTextBox.Text.Trim(),
                 roomLeaderID = socket.GetUniquePlayerID(),
                 currentPlayerCount = 1,
                 roomState = GameRoomState.WAITING,
@@ -65,6 +123,26 @@ namespace SnakeOnline
             socket.SendCreateGameRequestToServer(propertiesWrapper);
 
             Dispose();
+        }
+
+        private void joinRoomButton_Click(object sender, EventArgs e)
+        {
+            // Validate password.
+            if (roomPassword.Length > 0)
+            {
+                if (! String.Equals(roomPassword, passwordMaskedTextBox.Text.Trim()))
+                {
+                    MessageBox.Show(this, "Wrong password!", "Connection failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    return;
+                }
+            }
+            else
+            {
+                socket.SendJoinGameRequestToServer(roomID);
+
+                Dispose();
+            }
         }
 
         private void ClampAllowedSnakesAmount()

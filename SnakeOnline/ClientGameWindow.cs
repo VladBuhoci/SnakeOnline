@@ -14,24 +14,23 @@ namespace SnakeOnline
 {
     partial class ClientGameWindow : Form
     {
-        private GameClient gameClient;
-        private ClientLobbyWindow clientLobbyWindow;
+        private GameClient socket;
+        //private ClientLobbyWindow clientLobbyWindow;
         private SnakeGameManagerCL snakeGameManagerCL;
         private SnakeController snakeController;
+        private int gameRoomID;
 
-        public ClientGameWindow(GameClient client, ClientLobbyWindow lobbyWindow, int uniqueGameManagerID)
+        // Refresh rate of the room, in seconds.
+        private static int ROOM_REFRESH_RATE = 3;
+
+        public ClientGameWindow(GameClient _socket, /*ClientLobbyWindow lobbyWindow,*/ int uniqueGameManagerID)
         {
             InitializeComponent();
 
-            clientLobbyWindow = lobbyWindow;
+            //clientLobbyWindow = lobbyWindow;
             snakeGameManagerCL = new SnakeGameManagerCL(gameArenaPane, uniqueGameManagerID);
-
-            gameClient = client;
-            gameClient.snakeGameManagerCL = snakeGameManagerCL;
-            
-            // Update the player and spectator lists.
-            gameClient.SendUpdatedRoomPlayerListRequest();
-            gameClient.SendUpdatedRoomSpectatorListRequest();
+            gameRoomID = uniqueGameManagerID;
+            socket = _socket;
 
             // TODO: should be created as a request from the server once the match has begun.
             //       Have some sort of method here that will be called by the client, in order to instantiate a controller.
@@ -46,6 +45,23 @@ namespace SnakeOnline
 
             // Food spawning will be migrated on the server.
             //SnakeGameManager.GetInstance().SpawnFood(snakeController.GetControlledSnake().GetSnakeBodyParts().FirstOrDefault().color);
+
+            Thread refreshRoomThread = new Thread(() => RefreshRoomLoop(socket));
+            refreshRoomThread.Start();
+        }
+
+        private void RefreshRoomLoop(GameClient socket)
+        {
+            while (true)
+            {
+                if (socket != null)
+                {
+                    socket.SendUpdatedRoomPlayerListRequest(gameRoomID);
+                    socket.SendUpdatedRoomSpectatorListRequest(gameRoomID);
+                }
+
+                Thread.Sleep(ROOM_REFRESH_RATE * 1000);
+            }
         }
 
         private void gameArenaPane_Paint(object sender, PaintEventArgs e)
@@ -128,7 +144,7 @@ namespace SnakeOnline
 
         private void switchSidesButton_Click(object sender, EventArgs e)
         {
-            gameClient.SendPlayerSwitchSidesInRoomRequest();
+            socket.SendPlayerSwitchSidesInRoomRequest(gameRoomID);
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)
@@ -153,11 +169,24 @@ namespace SnakeOnline
         {
             if (! String.IsNullOrEmpty(roomChatTextToSendTextBox.Text.Trim()))
             {
-                gameClient.SendChatMessageInRoom(roomChatTextToSendTextBox.Text.Trim());
+                socket.SendChatMessageInRoom(roomChatTextToSendTextBox.Text.Trim(), gameRoomID);
 
                 // Clear the text box after sending the message.
                 roomChatTextToSendTextBox.Clear();
             }
+        }
+
+        public void RequestGameToEnd()
+        {
+            if (snakeGameManagerCL != null)
+            {
+                snakeGameManagerCL.RequestAuxGameLoopThreadToEnd();
+            }
+        }
+
+        public SnakeGameManagerCL GetSnakeGameManagerCL()
+        {
+            return snakeGameManagerCL;
         }
 
         private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
@@ -166,9 +195,9 @@ namespace SnakeOnline
 
             if (result == DialogResult.Yes)
             {
-                if (gameClient != null)
+                if (socket != null)
                 {
-                    gameClient.SendDisconnectFromGameRoomRequest();
+                    socket.SendDisconnectFromGameRoomRequest(gameRoomID);
                 }
             }
             else

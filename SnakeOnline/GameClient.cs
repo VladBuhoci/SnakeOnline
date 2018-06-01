@@ -4,10 +4,12 @@ using SnakeOnlineCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -19,19 +21,23 @@ namespace SnakeOnline
 
         private int serverPortNumber;
         private string uniquePlayerID;
-        private byte[] rawDataBuffer = new byte[1024];
+        //private byte[] rawDataBuffer = new byte[1024];
 
         private ClientMenuWindow clientMenuWindow;
         private ClientLobbyWindow clientLobbyWindow;
         private ClientGameWindow clientGameWindow;
-
-        public SnakeGameManagerCL snakeGameManagerCL { get; set; }
 
         public GameClient(ClientMenuWindow menuWindow)
         {
             SetUpClientSocket();
 
             clientMenuWindow = menuWindow;
+        }
+
+        private void SetUpClientSocket()
+        {
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            serverPortNumber = 1702;
         }
 
         public void LoopConnect(string ipAddress)
@@ -64,24 +70,29 @@ namespace SnakeOnline
 
         private void WaitReceiveAndHandleDataFromServer()
         {
+            AsyncStateContainer stateContainer = new AsyncStateContainer(socket);
+
             // Begin receiving data from the server.
-            socket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(BeginReceiveDataFromServer), socket);
+            socket.BeginReceive(stateContainer.dataBuffer, 0, stateContainer.dataBuffer.Length, SocketFlags.None, new AsyncCallback(BeginReceiveDataFromServer), stateContainer);
         }
         
         private void BeginReceiveDataFromServer(IAsyncResult AR)
         {
-            Socket socket = (Socket) AR.AsyncState;
+            //Socket socket = (Socket) AR.AsyncState;
+            AsyncStateContainer stateContainer = (AsyncStateContainer) AR.AsyncState;
 
             try
             {
                 int receivedDataSize = socket.EndReceive(AR);
                 byte[] actualDataBuffer = new byte[receivedDataSize];
-                
-                Array.Copy(rawDataBuffer, actualDataBuffer, receivedDataSize);
-                
+
+                Array.Copy(stateContainer.dataBuffer, actualDataBuffer, receivedDataSize);
+
+                AsyncStateContainer nextStateContainer = new AsyncStateContainer(socket);
+
                 // Resume receiving data from the server.
-                socket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(BeginReceiveDataFromServer), socket);
-                
+                socket.BeginReceive(nextStateContainer.dataBuffer, 0, nextStateContainer.dataBuffer.Length, SocketFlags.None, new AsyncCallback(BeginReceiveDataFromServer), nextStateContainer);
+
                 // Deal with the received data.
                 HandleReceivedData(actualDataBuffer);
             }
@@ -200,15 +211,50 @@ namespace SnakeOnline
                                 break;
                             }
 
-                        case Socp.GAME_ROOM_REQUEST_ACCEPTED:
+                        case Socp.GAME_ROOM_CREATION_REQUEST_ACCEPTED:
                             {
                                 SnakeGameDescriptor gameDescriptor = (SnakeGameDescriptor) SocpUtils.GetDataFromCommand(dataBuffer);
                                 int currentUniqueGameManagerID = gameDescriptor.gameManagerID;
 
-                                ClientGameWindow gameWindow = new ClientGameWindow(this, clientLobbyWindow, currentUniqueGameManagerID);
+                                if (clientLobbyWindow != null)
+                                {
+                                    clientGameWindow = clientLobbyWindow.InstantiateGameRoomWindow(currentUniqueGameManagerID);
+                                    clientGameWindow.ShowDialog();
 
-                                clientGameWindow = gameWindow;
-                                clientGameWindow.ShowDialog(clientLobbyWindow);
+                                    // Update the player and spectator lists.
+                                    SendUpdatedRoomPlayerListRequest(currentUniqueGameManagerID);
+                                    SendUpdatedRoomSpectatorListRequest(currentUniqueGameManagerID);
+                                }
+
+                                break;
+                            }
+
+                        case Socp.SEND_GAME_ROOM_DESCRIPTION:
+                            {
+                                SnakeGameDescriptor gameDescriptor = (SnakeGameDescriptor) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                                if (clientLobbyWindow != null)
+                                {
+                                    clientLobbyWindow.InstantiateGameParamsWindow(this, gameDescriptor);
+                                }
+
+                                break;
+                            }
+
+                        case Socp.GAME_ROOM_JOIN_REQUEST_ACCEPTED:
+                            {
+                                SnakeGameDescriptor gameDescriptor = (SnakeGameDescriptor) SocpUtils.GetDataFromCommand(dataBuffer);
+                                int currentUniqueGameManagerID = gameDescriptor.gameManagerID;
+
+                                if (clientLobbyWindow != null)
+                                {
+                                    clientGameWindow = clientLobbyWindow.InstantiateGameRoomWindow(currentUniqueGameManagerID);
+                                    clientGameWindow.ShowDialog();
+
+                                    // Update the player and spectator lists.
+                                    SendUpdatedRoomPlayerListRequest(currentUniqueGameManagerID);
+                                    SendUpdatedRoomSpectatorListRequest(currentUniqueGameManagerID);
+                                }
 
                                 break;
                             }
@@ -234,9 +280,12 @@ namespace SnakeOnline
 
                         case Socp.RESPONSE_DISCONNECT_FROM_GAME_ROOM:
                             {
-                                snakeGameManagerCL.RequestAuxGameLoopThreadToEnd();
-                                snakeGameManagerCL = null;
-
+                                if (clientGameWindow != null && ! clientGameWindow.IsDisposed)
+                                {
+                                    clientGameWindow.RequestGameToEnd();
+                                    clientGameWindow = null;
+                                }
+                                
                                 // TODO: Anything to handle here?
 
                                 break;
@@ -245,6 +294,16 @@ namespace SnakeOnline
                         case Socp.RESPONSE_DISCONNECT_FROM_SERVER:
                             {
                                 Application.Exit();
+                                Application.ExitThread();
+                                Environment.Exit(0);
+                                Process.GetCurrentProcess().CloseMainWindow();
+
+                                break;
+                            }
+
+                        default:
+                            {
+                                // Do nothing...?
 
                                 break;
                             }
@@ -263,7 +322,7 @@ namespace SnakeOnline
         public void SendPingToServer(string additionalMessage)
         {
             string msgToSend = String.IsNullOrEmpty(additionalMessage.Trim()) ? "" : additionalMessage.Trim();
-            int gameManagerID = snakeGameManagerCL != null ? snakeGameManagerCL.GetUniqueGameManagerID() : -1;
+            int gameManagerID = clientGameWindow != null ? clientGameWindow.GetSnakeGameManagerCL().GetUniqueGameManagerID() : -1;
 
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.PING, msgToSend, uniquePlayerID, gameManagerID));
         }
@@ -280,19 +339,19 @@ namespace SnakeOnline
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_LOBBY_PEOPLE_LIST_UPDATE, "", uniquePlayerID));
         }
 
-        public void SendUpdatedRoomPlayerListRequest()
+        public void SendUpdatedRoomPlayerListRequest(int gameRoomID)
         {
-            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_ROOM_PLAYER_LIST_UPDATE, "", uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_ROOM_PLAYER_LIST_UPDATE, "", uniquePlayerID, gameRoomID));
         }
 
-        public void SendUpdatedRoomSpectatorListRequest()
+        public void SendUpdatedRoomSpectatorListRequest(int gameRoomID)
         {
-            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_ROOM_SPECTATOR_LIST_UPDATE, "", uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_ROOM_SPECTATOR_LIST_UPDATE, "", uniquePlayerID, gameRoomID));
         }
 
-        public void SendPlayerSwitchSidesInRoomRequest()
+        public void SendPlayerSwitchSidesInRoomRequest(int gameRoomID)
         {
-            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_SWITCH_SIDES_ROOM, "", uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_SWITCH_SIDES_ROOM, "", uniquePlayerID, gameRoomID));
         }
 
         public void SendUpdatedLobbyRoomListRequest()
@@ -305,40 +364,43 @@ namespace SnakeOnline
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.CLIENT_POST_NEW_CHAT_MESSAGE_LOBBY, message, uniquePlayerID));
         }
 
-        public void SendChatMessageInRoom(string message)
+        public void SendChatMessageInRoom(string message, int roomID)
         {
-            socket.Send(SocpUtils.MakeNetworkCommand(Socp.CLIENT_POST_NEW_CHAT_MESSAGE_ROOM, message, uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.CLIENT_POST_NEW_CHAT_MESSAGE_ROOM, message, uniquePlayerID, roomID));
         }
 
         public void SendCreateGameRequestToServer(SnakeGameDescriptor descriptor)
         {
-            // TODO: add every client id in the data field? (probably not.. this will happen at game start)
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_GAME_ROOM_CREATION, descriptor, uniquePlayerID));
+        }
+
+        public void SendGameDescriptionRequestToServer(int roomID)
+        {
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_GAME_ROOM_DESCRIPTION, roomID, uniquePlayerID));
+        }
+
+        public void SendJoinGameRequestToServer(int roomID)
+        {
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_GAME_ROOM_JOIN, roomID, uniquePlayerID));
         }
 
         public void SendSnakeSpawnRequestToServer()
         {
-            socket.Send(SocpUtils.MakeNetworkCommand(Socp.SPAWN_SNAKE, "add snake properties here", uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.SPAWN_SNAKE, "add snake properties here", uniquePlayerID, clientGameWindow.GetSnakeGameManagerCL().GetUniqueGameManagerID()));
         }
 
-        public void SendDisconnectFromGameRoomRequest()
+        public void SendDisconnectFromGameRoomRequest(int roomID)
         {
-            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_DISCONNECT_FROM_GAME_ROOM, "", uniquePlayerID, snakeGameManagerCL.GetUniqueGameManagerID()));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_DISCONNECT_FROM_GAME_ROOM, "", uniquePlayerID, roomID));
         }
 
         public void SendDisconnectFromServerRequest()
         {
-            int gameManagerID = snakeGameManagerCL != null ? snakeGameManagerCL.GetUniqueGameManagerID() : -1;
+            int gameManagerID = clientGameWindow != null ? clientGameWindow.GetSnakeGameManagerCL().GetUniqueGameManagerID() : -1;
 
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_DISCONNECT_FROM_SERVER, "", uniquePlayerID, gameManagerID));
         }
 
         #endregion
-
-        private void SetUpClientSocket()
-        {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            serverPortNumber = 1702;
-        }
     }
 }

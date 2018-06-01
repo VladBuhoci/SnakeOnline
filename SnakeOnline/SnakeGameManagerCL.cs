@@ -12,7 +12,7 @@ namespace SnakeOnline
     sealed class SnakeGameManagerCL
     {
         private bool bApplicationAttemptsClosing;
-        private int uniqueGameManagerID;
+        private int uniqueGameManagerID;            // TODO: needed?
 
         // TODO: we need more variables here, such as game window refresh rate (difficulty for players).
 

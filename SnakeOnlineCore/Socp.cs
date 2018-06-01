@@ -73,6 +73,20 @@ namespace SnakeOnlineCore
         REQUEST_GAME_ROOM_CREATION,
 
         /// <summary>
+        ///     Used when a client wants to see more information about a specific room.
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_GAME_ROOM_DESCRIPTION,
+
+        /// <summary>
+        ///     Used when a client decides to join a room from the lobby list.
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_GAME_ROOM_JOIN,
+
+        /// <summary>
         ///     Used by the client when he/she needs to have an updated list of game rooms (in the lobby).
         ///     <para/>
         ///     USAGE: client to server.
@@ -185,7 +199,21 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        GAME_ROOM_REQUEST_ACCEPTED,
+        GAME_ROOM_CREATION_REQUEST_ACCEPTED,
+
+        /// <summary>
+        ///     Used to send back more information about a specific room to the client demanding it.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        SEND_GAME_ROOM_DESCRIPTION,
+
+        /// <summary>
+        ///     Used when a client requested to join an existing room and the server has established the link.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        GAME_ROOM_JOIN_REQUEST_ACCEPTED,
 
         /// <summary>
         ///     Used when a change occurs in the collection of rooms on the server

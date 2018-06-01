@@ -16,13 +16,33 @@ namespace SnakeOnline
     {
         private GameClient socket;
 
+        // Refresh rate of the lobby, in seconds.
+        private static int LOBBY_REFRESH_RATE = 3;
+
         public ClientLobbyWindow(GameClient socket)
         {
             InitializeComponent();
-
+            
             this.socket = socket;
             this.socket.SendUpdatedLobbyPeopleListRequest();
             this.socket.SendUpdatedLobbyRoomListRequest();
+
+            Thread refreshLobbyThread = new Thread(() => RefreshLobbyLoop(socket));
+            refreshLobbyThread.Start();
+        }
+
+        private void RefreshLobbyLoop(GameClient socket)
+        {
+            while (true)
+            {
+                if (socket != null)
+                {
+                    socket.SendUpdatedLobbyPeopleListRequest();
+                    socket.SendUpdatedLobbyRoomListRequest();
+                }
+
+                Thread.Sleep(LOBBY_REFRESH_RATE * 1000);
+            }
         }
 
         public void UpdateLobbyConnectedClientsList(string[] names)
@@ -43,7 +63,7 @@ namespace SnakeOnline
             // Populate the table.
             foreach (SnakeGameShortDescriptor roomDescr in rooms)
             {
-                roomsDataGridView.Rows.Add(roomDescr.roomName, roomDescr.hasPassword, roomDescr.currentPlayerCount, roomDescr.currentSpectatorCount, roomDescr.roomState.ToString());
+                roomsDataGridView.Rows.Add(roomDescr.roomName, roomDescr.hasPassword, roomDescr.currentPlayerCount, roomDescr.currentSpectatorCount, roomDescr.roomState.ToString(), roomDescr.gameManagerID);
             }
         }
 
@@ -73,19 +93,43 @@ namespace SnakeOnline
 
         private void createRoomButton_Click(object sender, EventArgs e)
         {
-            ClientGameParamsWindow clientGameParamsWindow = new ClientGameParamsWindow(socket);
-
-            clientGameParamsWindow.ShowDialog(this);
+            InstantiateGameParamsWindow(socket, null);
         }
 
         private void joinRoomButton_Click(object sender, EventArgs e)
         {
+            int roomID = -1;
 
+            if (roomsDataGridView.SelectedRows != null && roomsDataGridView.SelectedRows.Count > 0)
+            {
+                roomID = (int) roomsDataGridView.SelectedRows[0].Cells["Id"].Value;
+            }
+
+            if (roomID != -1)
+            {
+                socket.SendGameDescriptionRequestToServer(roomID);
+            }
         }
 
         private void disconnectButton_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        public void InstantiateGameParamsWindow(GameClient _socket, SnakeGameDescriptor? descriptor)
+        {
+            ClientGameParamsWindow clientGameParamsWindow = new ClientGameParamsWindow(_socket, descriptor);
+
+            clientGameParamsWindow.ShowDialog(this);
+        }
+
+        public ClientGameWindow InstantiateGameRoomWindow(int roomID)
+        {
+            ClientGameWindow gameWindow = new ClientGameWindow(socket, roomID);
+            
+            //gameWindow.ShowDialog(this);
+
+            return gameWindow;
         }
 
         /// <summary>

@@ -46,6 +46,7 @@
             this.Players = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Spectators = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.State = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Id = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lobbyPanel.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -202,12 +203,15 @@
             this.HasPassword,
             this.Players,
             this.Spectators,
-            this.State});
+            this.State,
+            this.Id});
             this.roomsDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.roomsDataGridView.GridColor = System.Drawing.Color.White;
             this.roomsDataGridView.Location = new System.Drawing.Point(3, 16);
+            this.roomsDataGridView.MultiSelect = false;
             this.roomsDataGridView.Name = "roomsDataGridView";
             this.roomsDataGridView.ReadOnly = true;
+            this.roomsDataGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.roomsDataGridView.Size = new System.Drawing.Size(544, 214);
             this.roomsDataGridView.TabIndex = 0;
             // 
@@ -242,6 +246,13 @@
             this.State.HeaderText = "State";
             this.State.Name = "State";
             this.State.ReadOnly = true;
+            // 
+            // Id
+            // 
+            this.Id.HeaderText = "Id";
+            this.Id.Name = "Id";
+            this.Id.ReadOnly = true;
+            this.Id.Visible = false;
             // 
             // ClientLobbyWindow
             // 
@@ -285,5 +296,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Players;
         private System.Windows.Forms.DataGridViewTextBoxColumn Spectators;
         private System.Windows.Forms.DataGridViewTextBoxColumn State;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Id;
     }
 }

@@ -28,12 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.roomProps = new System.Windows.Forms.GroupBox();
             this.passwordMaskedTextBox = new System.Windows.Forms.MaskedTextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.roomNameTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.gameProps = new System.Windows.Forms.GroupBox();
             this.matchDurationBox = new System.Windows.Forms.NumericUpDown();
             this.label8 = new System.Windows.Forms.Label();
             this.losePartsRadioButton = new System.Windows.Forms.RadioButton();
@@ -48,27 +48,30 @@
             this.label4 = new System.Windows.Forms.Label();
             this.createRoomPanel = new System.Windows.Forms.Panel();
             this.createRoomButton = new System.Windows.Forms.Button();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
+            this.joinRoomPanel = new System.Windows.Forms.Panel();
+            this.joinRoomButton = new System.Windows.Forms.Button();
+            this.roomProps.SuspendLayout();
+            this.gameProps.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.matchDurationBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxSnakesAllowedBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.arenaHeightBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.arenaWidthBox)).BeginInit();
             this.createRoomPanel.SuspendLayout();
+            this.joinRoomPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // groupBox1
+            // roomProps
             // 
-            this.groupBox1.Controls.Add(this.passwordMaskedTextBox);
-            this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.roomNameTextBox);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(13, 13);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(339, 103);
-            this.groupBox1.TabIndex = 0;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Room properties";
+            this.roomProps.Controls.Add(this.passwordMaskedTextBox);
+            this.roomProps.Controls.Add(this.label3);
+            this.roomProps.Controls.Add(this.roomNameTextBox);
+            this.roomProps.Controls.Add(this.label1);
+            this.roomProps.Location = new System.Drawing.Point(13, 13);
+            this.roomProps.Name = "roomProps";
+            this.roomProps.Size = new System.Drawing.Size(339, 103);
+            this.roomProps.TabIndex = 0;
+            this.roomProps.TabStop = false;
+            this.roomProps.Text = "Room properties";
             // 
             // passwordMaskedTextBox
             // 
@@ -105,26 +108,26 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Room Name";
             // 
-            // groupBox2
+            // gameProps
             // 
-            this.groupBox2.Controls.Add(this.matchDurationBox);
-            this.groupBox2.Controls.Add(this.label8);
-            this.groupBox2.Controls.Add(this.losePartsRadioButton);
-            this.groupBox2.Controls.Add(this.nothingRadioButton);
-            this.groupBox2.Controls.Add(this.growPartsRadioButton);
-            this.groupBox2.Controls.Add(this.label7);
-            this.groupBox2.Controls.Add(this.maxSnakesAllowedBox);
-            this.groupBox2.Controls.Add(this.label6);
-            this.groupBox2.Controls.Add(this.arenaHeightBox);
-            this.groupBox2.Controls.Add(this.label5);
-            this.groupBox2.Controls.Add(this.arenaWidthBox);
-            this.groupBox2.Controls.Add(this.label4);
-            this.groupBox2.Location = new System.Drawing.Point(13, 122);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(339, 217);
-            this.groupBox2.TabIndex = 1;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Game properties";
+            this.gameProps.Controls.Add(this.matchDurationBox);
+            this.gameProps.Controls.Add(this.label8);
+            this.gameProps.Controls.Add(this.losePartsRadioButton);
+            this.gameProps.Controls.Add(this.nothingRadioButton);
+            this.gameProps.Controls.Add(this.growPartsRadioButton);
+            this.gameProps.Controls.Add(this.label7);
+            this.gameProps.Controls.Add(this.maxSnakesAllowedBox);
+            this.gameProps.Controls.Add(this.label6);
+            this.gameProps.Controls.Add(this.arenaHeightBox);
+            this.gameProps.Controls.Add(this.label5);
+            this.gameProps.Controls.Add(this.arenaWidthBox);
+            this.gameProps.Controls.Add(this.label4);
+            this.gameProps.Location = new System.Drawing.Point(13, 122);
+            this.gameProps.Name = "gameProps";
+            this.gameProps.Size = new System.Drawing.Size(339, 217);
+            this.gameProps.TabIndex = 1;
+            this.gameProps.TabStop = false;
+            this.gameProps.Text = "Game properties";
             // 
             // matchDurationBox
             // 
@@ -307,40 +310,63 @@
             this.createRoomButton.UseVisualStyleBackColor = true;
             this.createRoomButton.Click += new System.EventHandler(this.createRoomButton_Click);
             // 
+            // joinRoomPanel
+            // 
+            this.joinRoomPanel.Controls.Add(this.joinRoomButton);
+            this.joinRoomPanel.Location = new System.Drawing.Point(13, 336);
+            this.joinRoomPanel.Name = "joinRoomPanel";
+            this.joinRoomPanel.Size = new System.Drawing.Size(339, 34);
+            this.joinRoomPanel.TabIndex = 3;
+            this.joinRoomPanel.Visible = false;
+            // 
+            // joinRoomButton
+            // 
+            this.joinRoomButton.AutoSize = true;
+            this.joinRoomButton.Location = new System.Drawing.Point(130, 5);
+            this.joinRoomButton.Name = "joinRoomButton";
+            this.joinRoomButton.Size = new System.Drawing.Size(79, 23);
+            this.joinRoomButton.TabIndex = 0;
+            this.joinRoomButton.Text = "Join Room";
+            this.joinRoomButton.UseVisualStyleBackColor = true;
+            this.joinRoomButton.Click += new System.EventHandler(this.joinRoomButton_Click);
+            // 
             // ClientGameParamsWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(364, 382);
+            this.Controls.Add(this.joinRoomPanel);
             this.Controls.Add(this.createRoomPanel);
-            this.Controls.Add(this.groupBox2);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.gameProps);
+            this.Controls.Add(this.roomProps);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "ClientGameParamsWindow";
             this.Text = "Game Room Info";
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
+            this.roomProps.ResumeLayout(false);
+            this.roomProps.PerformLayout();
+            this.gameProps.ResumeLayout(false);
+            this.gameProps.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.matchDurationBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.maxSnakesAllowedBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.arenaHeightBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.arenaWidthBox)).EndInit();
             this.createRoomPanel.ResumeLayout(false);
             this.createRoomPanel.PerformLayout();
+            this.joinRoomPanel.ResumeLayout(false);
+            this.joinRoomPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox roomProps;
         private System.Windows.Forms.TextBox roomNameTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.MaskedTextBox passwordMaskedTextBox;
-        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox gameProps;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown arenaWidthBox;
         private System.Windows.Forms.NumericUpDown arenaHeightBox;
@@ -355,5 +381,7 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Panel createRoomPanel;
         private System.Windows.Forms.Button createRoomButton;
+        private System.Windows.Forms.Panel joinRoomPanel;
+        private System.Windows.Forms.Button joinRoomButton;
     }
 }
