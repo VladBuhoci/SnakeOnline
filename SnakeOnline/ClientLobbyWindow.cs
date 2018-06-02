@@ -35,14 +35,18 @@ namespace SnakeOnline
         {
             while (true)
             {
+                Thread.Sleep(LOBBY_REFRESH_RATE * 1000);
+
                 if (socket != null)
                 {
                     socket.SendUpdatedLobbyPeopleListRequest();
                     socket.SendUpdatedLobbyRoomListRequest();
                 }
 
-                Thread.Sleep(LOBBY_REFRESH_RATE * 1000);
+                break;
             }
+
+            Thread.CurrentThread.Abort();
         }
 
         public void UpdateLobbyConnectedClientsList(string[] names)
@@ -122,16 +126,7 @@ namespace SnakeOnline
 
             clientGameParamsWindow.ShowDialog(this);
         }
-
-        public ClientGameWindow InstantiateGameRoomWindow(int roomID)
-        {
-            ClientGameWindow gameWindow = new ClientGameWindow(socket, roomID);
-            
-            //gameWindow.ShowDialog(this);
-
-            return gameWindow;
-        }
-
+        
         /// <summary>
         ///     Called when the window is being closed.
         /// </summary>

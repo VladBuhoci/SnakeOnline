@@ -97,19 +97,18 @@ namespace SnakeOnlineServer
                 // Handle the received data.
                 HandleReceivedData(actualDataBuffer, clientSocket);
             }
-            catch (SocketException ex)
+            catch (Exception se)
             {
                 LogMessage("\n~~~~~~~~~~~~~~~~~");
                 LogMessage("~ Client disconnected unexpectedly!");
-                LogMessage(ex.Message);
-                LogMessage(ex.StackTrace);
+                LogMessage(se.Message);
+                LogMessage(se.StackTrace);
                 LogMessage("~~~~~~~~~~~~~~~~~\n");
 
                 string key = null;
                 var enumerator = idClientSocketPairs.GetEnumerator();
                 enumerator.MoveNext();
-
-                // TODO: does this even work?
+                
                 while (enumerator.Current.Value != null)
                 {
                     if (enumerator.Current.Value == clientSocket)
@@ -301,6 +300,8 @@ namespace SnakeOnlineServer
 
                             idClientSocketPairs[playerID].Send(SocpUtils.MakeNetworkCommand(Socp.GAME_ROOM_JOIN_REQUEST_ACCEPTED, snakeGameManagerSVCollection[roomID].GetDescriptor()));
 
+                            BroadcastRoomListForLobby();
+
                             break;
                         }
 
@@ -342,10 +343,10 @@ namespace SnakeOnlineServer
                                 snakeGameManagerSVCollection.Remove(gameManagerID);
                             }
 
+                            idClientSocketPairs[playerName].Send(SocpUtils.MakeNetworkCommand(Socp.RESPONSE_DISCONNECT_FROM_GAME_ROOM, ""));
+
                             // Update the list of rooms for everyone.
                             BroadcastRoomListForLobby();
-
-                            idClientSocketPairs[playerName].Send(SocpUtils.MakeNetworkCommand(Socp.RESPONSE_DISCONNECT_FROM_GAME_ROOM, ""));
 
                             break;
                         }
@@ -528,6 +529,25 @@ namespace SnakeOnlineServer
             byte[] roomsShortDescrCollectionPacket = SocpUtils.MakeNetworkCommand(Socp.SERVER_BROADCAST_GAME_ROOM_COLLECTION, snakeGameShortDescriptors.ToArray());
 
             return roomsShortDescrCollectionPacket;
+        }
+
+        public void SendGameRoomLeaderHasChangedMessageToClients(int gameManagerID, string newLeaderID)
+        {
+            LogMessage("New leader: " + newLeaderID + " for room with id: " + gameManagerID + ".");
+
+            byte[] roomLeaderHasChangedMsg = SocpUtils.MakeNetworkCommand(Socp.GAME_ROOM_LEADER_HAS_CHANGED, newLeaderID);
+
+            foreach (string player in snakeGameManagerSVCollection[gameManagerID].Players)
+            {
+                idClientSocketPairs[player].Send(roomLeaderHasChangedMsg);
+            }
+
+            foreach (string spectator in snakeGameManagerSVCollection[gameManagerID].Spectators)
+            {
+                idClientSocketPairs[spectator].Send(roomLeaderHasChangedMsg);
+            }
+
+            LogMessage("Done with leader stuff.");
         }
 
         #endregion

@@ -15,7 +15,6 @@ namespace SnakeOnline
     partial class ClientGameWindow : Form
     {
         private GameClient socket;
-        //private ClientLobbyWindow clientLobbyWindow;
         private SnakeGameManagerCL snakeGameManagerCL;
         private SnakeController snakeController;
         private int gameRoomID;
@@ -23,23 +22,28 @@ namespace SnakeOnline
         // Refresh rate of the room, in seconds.
         private static int ROOM_REFRESH_RATE = 3;
 
-        public ClientGameWindow(GameClient _socket, /*ClientLobbyWindow lobbyWindow,*/ int uniqueGameManagerID)
+        public ClientGameWindow(GameClient _socket, int uniqueGameManagerID, bool bIsThisLeader, string roomLeaderID)
         {
             InitializeComponent();
-
-            //clientLobbyWindow = lobbyWindow;
+            
             snakeGameManagerCL = new SnakeGameManagerCL(gameArenaPane, uniqueGameManagerID);
             gameRoomID = uniqueGameManagerID;
             socket = _socket;
+
+            roomLeaderLabel.Text = roomLeaderID;
+
+            if (! bIsThisLeader)
+            {
+                startMatchButton.Enabled = false;
+                roomSettingsButton.Enabled = false;
+            }
 
             // TODO: should be created as a request from the server once the match has begun.
             //       Have some sort of method here that will be called by the client, in order to instantiate a controller.
             //snakeController = new SnakeController(client, 19, 30, Color.Red);
 
             //SnakeGameManager.GetInstance().SetGameArenaPane(gameArenaPane);
-
-            //bApplicationAttemptsClosing = false;
-
+            
             // Snake handling will be migrated on the server.
             //SnakeGameManager.GetInstance().AddSnake(snakeController.GetControlledSnake());
 
@@ -54,14 +58,32 @@ namespace SnakeOnline
         {
             while (true)
             {
+                Thread.Sleep(ROOM_REFRESH_RATE * 1000);
+
                 if (socket != null)
                 {
                     socket.SendUpdatedRoomPlayerListRequest(gameRoomID);
                     socket.SendUpdatedRoomSpectatorListRequest(gameRoomID);
                 }
 
-                Thread.Sleep(ROOM_REFRESH_RATE * 1000);
+                break;
             }
+
+            Thread.CurrentThread.Abort();
+        }
+
+        public void ChangeRoomLeader(string newLeaderID, bool bIsThisNewLeader)
+        {
+            roomLeaderLabel.Text = newLeaderID;
+
+            if (bIsThisNewLeader)
+            {
+                startMatchButton.Enabled = true;
+                roomSettingsButton.Enabled = true;
+            }
+            // else is redudant, since the client can never lose his/her leader rank, except when he/she disconnects.
+
+            roomChatTextBox.AppendText(String.Format("[SYST]: New room leader is \"{0}\"", newLeaderID));
         }
 
         private void gameArenaPane_Paint(object sender, PaintEventArgs e)

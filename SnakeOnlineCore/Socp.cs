@@ -248,6 +248,14 @@ namespace SnakeOnlineCore
         /// </summary>
         RESPONSE_DISCONNECT_FROM_SERVER,
 
+        /// <summary>
+        ///     The server sends this message to every client connected to a specific game room
+        ///         when the leader of the room left it and a new leader has been chosen.
+        ///        <para />
+        ///        USAGE: server to client.
+        /// </summary>
+        GAME_ROOM_LEADER_HAS_CHANGED,
+
 
         // ===================================================================================================
 

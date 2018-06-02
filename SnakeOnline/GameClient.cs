@@ -96,7 +96,7 @@ namespace SnakeOnline
                 // Deal with the received data.
                 HandleReceivedData(actualDataBuffer);
             }
-            catch (SocketException ex)
+            catch (Exception ex)
             {
                 socket.Disconnect(true);
                 socket = null;
@@ -215,10 +215,11 @@ namespace SnakeOnline
                             {
                                 SnakeGameDescriptor gameDescriptor = (SnakeGameDescriptor) SocpUtils.GetDataFromCommand(dataBuffer);
                                 int currentUniqueGameManagerID = gameDescriptor.gameManagerID;
+                                string leaderID = gameDescriptor.roomLeaderID;
 
                                 if (clientLobbyWindow != null)
                                 {
-                                    clientGameWindow = clientLobbyWindow.InstantiateGameRoomWindow(currentUniqueGameManagerID);
+                                    clientGameWindow = new ClientGameWindow(this, currentUniqueGameManagerID, true, leaderID);
                                     clientGameWindow.ShowDialog();
 
                                     // Update the player and spectator lists.
@@ -245,10 +246,11 @@ namespace SnakeOnline
                             {
                                 SnakeGameDescriptor gameDescriptor = (SnakeGameDescriptor) SocpUtils.GetDataFromCommand(dataBuffer);
                                 int currentUniqueGameManagerID = gameDescriptor.gameManagerID;
+                                string leaderID = gameDescriptor.roomLeaderID;
 
                                 if (clientLobbyWindow != null)
                                 {
-                                    clientGameWindow = clientLobbyWindow.InstantiateGameRoomWindow(currentUniqueGameManagerID);
+                                    clientGameWindow = new ClientGameWindow(this, currentUniqueGameManagerID, false, leaderID);
                                     clientGameWindow.ShowDialog();
 
                                     // Update the player and spectator lists.
@@ -265,7 +267,10 @@ namespace SnakeOnline
                                 {
                                     SnakeGameShortDescriptor[] rooms = (SnakeGameShortDescriptor[]) SocpUtils.GetDataFromCommand(dataBuffer);
 
-                                    clientLobbyWindow.UpdateLobbyRoomList(rooms);
+                                    if (rooms != null)
+                                    {
+                                        clientLobbyWindow.UpdateLobbyRoomList(rooms);
+                                    }
                                 }
 
                                 break;
@@ -297,6 +302,19 @@ namespace SnakeOnline
                                 Application.ExitThread();
                                 Environment.Exit(0);
                                 Process.GetCurrentProcess().CloseMainWindow();
+
+                                break;
+                            }
+
+                        case Socp.GAME_ROOM_LEADER_HAS_CHANGED:
+                            {
+                                string newLeaderID = (string) SocpUtils.GetDataFromCommand(dataBuffer);
+                                bool bIsThisLeader = String.Equals(newLeaderID, uniquePlayerID);
+
+                                if (clientGameWindow != null && !clientGameWindow.IsDisposed)
+                                {
+                                    clientGameWindow.ChangeRoomLeader(newLeaderID, bIsThisLeader);
+                                }
 
                                 break;
                             }

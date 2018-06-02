@@ -77,14 +77,17 @@ namespace SnakeOnlineServer
 
                 gameServer.BroadcastSpectatorListForRoom(gameDescriptor.gameManagerID);
             }
-
-            gameServer.BroadcastRoomListForLobby();
         }
 
         public void RemoveClientFromGameRoom(string clientID)
         {
             if (playerWithSnakeCollection.Keys.Contains(clientID))
             {
+                // TODO: handle this player's now-orphan snake.
+                {
+
+                }
+
                 playerWithSnakeCollection.Remove(clientID);
                 gameDescriptor.currentPlayerCount -= 1;
 
@@ -106,11 +109,20 @@ namespace SnakeOnlineServer
 
             if (! IsGameEmpty())
             {
-                // TODO: more actions to be handled here, including a check whether this
-                //          was the room leader, in which case we have to find a new leader.
-                //          If there are no players left, perhaps ask the server to kill the room.
+                // If the removed client was the room's leader, find a new one.
+                if (String.Equals(clientID, gameDescriptor.roomLeaderID))
+                {
+                    if (Players.Length > 0)
+                    {
+                        gameDescriptor.roomLeaderID = Players[0];
+                    }
+                    else //if (Spectators.Length > 0)
+                    {
+                        gameDescriptor.roomLeaderID = Spectators[0];
+                    }
+                }
 
-                
+                gameServer.SendGameRoomLeaderHasChangedMessageToClients(gameDescriptor.gameManagerID, gameDescriptor.roomLeaderID);
             }
         }
 

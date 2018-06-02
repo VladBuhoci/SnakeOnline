@@ -128,14 +128,11 @@ namespace SnakeOnline
         private void joinRoomButton_Click(object sender, EventArgs e)
         {
             // Validate password.
-            if (roomPassword.Length > 0)
+            if (roomPassword.Length > 0 && ! String.Equals(roomPassword, passwordMaskedTextBox.Text.Trim()))
             {
-                if (! String.Equals(roomPassword, passwordMaskedTextBox.Text.Trim()))
-                {
-                    MessageBox.Show(this, "Wrong password!", "Connection failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, "Wrong password!", "Connection failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
-                    return;
-                }
+                return;
             }
             else
             {

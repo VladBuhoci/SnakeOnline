@@ -45,6 +45,7 @@
             this.sendRoomChatMessageButton = new System.Windows.Forms.Button();
             this.roomChatTextToSendTextBox = new System.Windows.Forms.TextBox();
             this.roomChatTextBox = new System.Windows.Forms.TextBox();
+            this.roomLeaderLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.gameArenaPane)).BeginInit();
             this.gameViewportPanel.SuspendLayout();
             this.playersGroupBox.SuspendLayout();
@@ -76,7 +77,7 @@
             this.playersGroupBox.Controls.Add(this.playerListBox);
             this.playersGroupBox.Location = new System.Drawing.Point(518, 12);
             this.playersGroupBox.Name = "playersGroupBox";
-            this.playersGroupBox.Size = new System.Drawing.Size(170, 200);
+            this.playersGroupBox.Size = new System.Drawing.Size(170, 186);
             this.playersGroupBox.TabIndex = 3;
             this.playersGroupBox.TabStop = false;
             this.playersGroupBox.Text = "Players";
@@ -87,7 +88,7 @@
             this.playerListBox.FormattingEnabled = true;
             this.playerListBox.Location = new System.Drawing.Point(7, 20);
             this.playerListBox.Name = "playerListBox";
-            this.playerListBox.Size = new System.Drawing.Size(157, 171);
+            this.playerListBox.Size = new System.Drawing.Size(157, 158);
             this.playerListBox.TabIndex = 0;
             // 
             // spectatorsGroupBox
@@ -95,7 +96,7 @@
             this.spectatorsGroupBox.Controls.Add(this.spectatorListBox);
             this.spectatorsGroupBox.Location = new System.Drawing.Point(702, 13);
             this.spectatorsGroupBox.Name = "spectatorsGroupBox";
-            this.spectatorsGroupBox.Size = new System.Drawing.Size(170, 200);
+            this.spectatorsGroupBox.Size = new System.Drawing.Size(170, 185);
             this.spectatorsGroupBox.TabIndex = 4;
             this.spectatorsGroupBox.TabStop = false;
             this.spectatorsGroupBox.Text = "Spectators";
@@ -106,25 +107,26 @@
             this.spectatorListBox.FormattingEnabled = true;
             this.spectatorListBox.Location = new System.Drawing.Point(6, 19);
             this.spectatorListBox.Name = "spectatorListBox";
-            this.spectatorListBox.Size = new System.Drawing.Size(158, 171);
+            this.spectatorListBox.Size = new System.Drawing.Size(158, 158);
             this.spectatorListBox.TabIndex = 0;
             // 
             // roomMenuGroupBox
             // 
+            this.roomMenuGroupBox.Controls.Add(this.roomLeaderLabel);
             this.roomMenuGroupBox.Controls.Add(this.switchSidesButton);
             this.roomMenuGroupBox.Controls.Add(this.disconnectButton);
             this.roomMenuGroupBox.Controls.Add(this.roomSettingsButton);
             this.roomMenuGroupBox.Controls.Add(this.startMatchButton);
-            this.roomMenuGroupBox.Location = new System.Drawing.Point(518, 219);
+            this.roomMenuGroupBox.Location = new System.Drawing.Point(518, 204);
             this.roomMenuGroupBox.Name = "roomMenuGroupBox";
-            this.roomMenuGroupBox.Size = new System.Drawing.Size(354, 56);
+            this.roomMenuGroupBox.Size = new System.Drawing.Size(354, 97);
             this.roomMenuGroupBox.TabIndex = 5;
             this.roomMenuGroupBox.TabStop = false;
             this.roomMenuGroupBox.Text = "Room Menu";
             // 
             // switchSidesButton
             // 
-            this.switchSidesButton.Location = new System.Drawing.Point(184, 19);
+            this.switchSidesButton.Location = new System.Drawing.Point(184, 68);
             this.switchSidesButton.Name = "switchSidesButton";
             this.switchSidesButton.Size = new System.Drawing.Size(75, 23);
             this.switchSidesButton.TabIndex = 2;
@@ -134,7 +136,7 @@
             // 
             // disconnectButton
             // 
-            this.disconnectButton.Location = new System.Drawing.Point(273, 19);
+            this.disconnectButton.Location = new System.Drawing.Point(273, 68);
             this.disconnectButton.Name = "disconnectButton";
             this.disconnectButton.Size = new System.Drawing.Size(75, 23);
             this.disconnectButton.TabIndex = 3;
@@ -144,7 +146,7 @@
             // 
             // roomSettingsButton
             // 
-            this.roomSettingsButton.Location = new System.Drawing.Point(95, 19);
+            this.roomSettingsButton.Location = new System.Drawing.Point(95, 68);
             this.roomSettingsButton.Name = "roomSettingsButton";
             this.roomSettingsButton.Size = new System.Drawing.Size(75, 23);
             this.roomSettingsButton.TabIndex = 1;
@@ -154,7 +156,7 @@
             // 
             // startMatchButton
             // 
-            this.startMatchButton.Location = new System.Drawing.Point(6, 19);
+            this.startMatchButton.Location = new System.Drawing.Point(6, 68);
             this.startMatchButton.Name = "startMatchButton";
             this.startMatchButton.Size = new System.Drawing.Size(75, 23);
             this.startMatchButton.TabIndex = 0;
@@ -167,16 +169,16 @@
             this.roomChatGroupBox.Controls.Add(this.sendRoomChatMessageButton);
             this.roomChatGroupBox.Controls.Add(this.roomChatTextToSendTextBox);
             this.roomChatGroupBox.Controls.Add(this.roomChatTextBox);
-            this.roomChatGroupBox.Location = new System.Drawing.Point(518, 281);
+            this.roomChatGroupBox.Location = new System.Drawing.Point(518, 307);
             this.roomChatGroupBox.Name = "roomChatGroupBox";
-            this.roomChatGroupBox.Size = new System.Drawing.Size(354, 231);
+            this.roomChatGroupBox.Size = new System.Drawing.Size(354, 205);
             this.roomChatGroupBox.TabIndex = 6;
             this.roomChatGroupBox.TabStop = false;
             this.roomChatGroupBox.Text = "Room Chat";
             // 
             // sendRoomChatMessageButton
             // 
-            this.sendRoomChatMessageButton.Location = new System.Drawing.Point(273, 205);
+            this.sendRoomChatMessageButton.Location = new System.Drawing.Point(272, 179);
             this.sendRoomChatMessageButton.Name = "sendRoomChatMessageButton";
             this.sendRoomChatMessageButton.Size = new System.Drawing.Size(75, 20);
             this.sendRoomChatMessageButton.TabIndex = 2;
@@ -187,7 +189,7 @@
             // roomChatTextToSendTextBox
             // 
             this.roomChatTextToSendTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.roomChatTextToSendTextBox.Location = new System.Drawing.Point(7, 205);
+            this.roomChatTextToSendTextBox.Location = new System.Drawing.Point(6, 179);
             this.roomChatTextToSendTextBox.Name = "roomChatTextToSendTextBox";
             this.roomChatTextToSendTextBox.Size = new System.Drawing.Size(260, 20);
             this.roomChatTextToSendTextBox.TabIndex = 1;
@@ -196,13 +198,23 @@
             // roomChatTextBox
             // 
             this.roomChatTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.roomChatTextBox.Location = new System.Drawing.Point(7, 20);
+            this.roomChatTextBox.Location = new System.Drawing.Point(6, 19);
             this.roomChatTextBox.Multiline = true;
             this.roomChatTextBox.Name = "roomChatTextBox";
             this.roomChatTextBox.ReadOnly = true;
             this.roomChatTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.roomChatTextBox.Size = new System.Drawing.Size(341, 179);
+            this.roomChatTextBox.Size = new System.Drawing.Size(341, 154);
             this.roomChatTextBox.TabIndex = 0;
+            // 
+            // roomLeaderLabel
+            // 
+            this.roomLeaderLabel.AutoSize = true;
+            this.roomLeaderLabel.Location = new System.Drawing.Point(142, 32);
+            this.roomLeaderLabel.Name = "roomLeaderLabel";
+            this.roomLeaderLabel.Size = new System.Drawing.Size(73, 13);
+            this.roomLeaderLabel.TabIndex = 4;
+            this.roomLeaderLabel.Text = "Room leader: ";
+            this.roomLeaderLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // ClientGameWindow
             // 
@@ -226,6 +238,7 @@
             this.playersGroupBox.ResumeLayout(false);
             this.spectatorsGroupBox.ResumeLayout(false);
             this.roomMenuGroupBox.ResumeLayout(false);
+            this.roomMenuGroupBox.PerformLayout();
             this.roomChatGroupBox.ResumeLayout(false);
             this.roomChatGroupBox.PerformLayout();
             this.ResumeLayout(false);
@@ -251,6 +264,7 @@
         private System.Windows.Forms.ListBox playerListBox;
         private System.Windows.Forms.ListBox spectatorListBox;
         private System.Windows.Forms.Button switchSidesButton;
+        private System.Windows.Forms.Label roomLeaderLabel;
     }
 }
 
