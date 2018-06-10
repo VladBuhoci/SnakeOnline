@@ -106,9 +106,15 @@ namespace SnakeOnline
             //gameArenaPane.Refresh();
         }
 
-        public void UpdateArenaData(SnakeGameArenaObject[, ] gameArenaObjects)
+        public void UpdateArenaData(SnakeGameArenaObject[, ] gameArenaObjects, int timeLeft)
         {
+            int min, sec;
+
+            min = timeLeft / 60;
+            sec = timeLeft - min * 60;
+
             this.gameArenaObjects = gameArenaObjects;
+            this.roomGameTimeLeft.Text = String.Format("Time left: {0} m {1} s", min, sec);
 
             gameArenaPane.Refresh();
         }

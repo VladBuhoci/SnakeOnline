@@ -37,6 +37,7 @@
             this.spectatorsGroupBox = new System.Windows.Forms.GroupBox();
             this.spectatorListBox = new System.Windows.Forms.ListBox();
             this.roomMenuGroupBox = new System.Windows.Forms.GroupBox();
+            this.roomGameTimeLeft = new System.Windows.Forms.Label();
             this.roomLeaderLabel = new System.Windows.Forms.Label();
             this.switchSidesButton = new System.Windows.Forms.Button();
             this.disconnectButton = new System.Windows.Forms.Button();
@@ -112,6 +113,7 @@
             // 
             // roomMenuGroupBox
             // 
+            this.roomMenuGroupBox.Controls.Add(this.roomGameTimeLeft);
             this.roomMenuGroupBox.Controls.Add(this.roomLeaderLabel);
             this.roomMenuGroupBox.Controls.Add(this.switchSidesButton);
             this.roomMenuGroupBox.Controls.Add(this.disconnectButton);
@@ -124,15 +126,25 @@
             this.roomMenuGroupBox.TabStop = false;
             this.roomMenuGroupBox.Text = "Room Menu";
             // 
+            // roomGameTimeLeft
+            // 
+            this.roomGameTimeLeft.AutoSize = true;
+            this.roomGameTimeLeft.Location = new System.Drawing.Point(255, 31);
+            this.roomGameTimeLeft.Name = "roomGameTimeLeft";
+            this.roomGameTimeLeft.Size = new System.Drawing.Size(53, 13);
+            this.roomGameTimeLeft.TabIndex = 5;
+            this.roomGameTimeLeft.Text = "Time left: ";
+            this.roomGameTimeLeft.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // roomLeaderLabel
             // 
             this.roomLeaderLabel.AutoSize = true;
-            this.roomLeaderLabel.Location = new System.Drawing.Point(142, 32);
+            this.roomLeaderLabel.Location = new System.Drawing.Point(8, 31);
             this.roomLeaderLabel.Name = "roomLeaderLabel";
             this.roomLeaderLabel.Size = new System.Drawing.Size(73, 13);
             this.roomLeaderLabel.TabIndex = 4;
             this.roomLeaderLabel.Text = "Room leader: ";
-            this.roomLeaderLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.roomLeaderLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // switchSidesButton
             // 
@@ -264,6 +276,7 @@
         private System.Windows.Forms.ListBox spectatorListBox;
         private System.Windows.Forms.Button switchSidesButton;
         private System.Windows.Forms.Label roomLeaderLabel;
+        private System.Windows.Forms.Label roomGameTimeLeft;
     }
 }
 

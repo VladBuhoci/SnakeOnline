@@ -19,8 +19,8 @@ namespace SnakeOnlineCore
         public int arenaWidth { get; set; }
         public int arenaHeight { get; set; }
         public int maxSnakesAllowed { get; set; }
-        public string foodEffect { get; set; }   // NOTE: there are constants defined in the FoodObject class for this.
-        public int matchDuration { get; set; }
+        public string foodEffect { get; set; }      // NOTE: there are constants defined in the FoodObject class for this.
+        public int matchDuration { get; set; }      // Measured in minutes.
 
         // TODO: store a dictionary or table for player scores?
         

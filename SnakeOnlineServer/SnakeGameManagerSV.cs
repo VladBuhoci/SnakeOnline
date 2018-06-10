@@ -127,7 +127,7 @@ namespace SnakeOnlineServer
                 gameServer.SendStartGameRequestToClient(spec, null);
             }
 
-            gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects);
+            gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects, gameDescriptor.matchDuration * 60);
 
             // Start the game.
             StartGameLoop();
@@ -135,6 +135,8 @@ namespace SnakeOnlineServer
 
         protected override void GameLoop(SnakeGameManager gameManager, List<Snake> snakeList)
         {
+            int gameDuration = gameDescriptor.matchDuration * 60000;
+
             Thread.Sleep(TIME_BEFORE_GAME_STARTS * 1000);
 
             while (true)
@@ -156,7 +158,20 @@ namespace SnakeOnlineServer
                     break;
                 }
 
-                gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects);
+                gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects, gameDuration / 1000);
+
+                // Check again.
+                if (bApplicationAttemptsClosing)
+                {
+                    break;
+                }
+
+                gameDuration -= 100;
+
+                if (gameDuration <= 0)
+                {
+                    EndGame(GameOverType.TIME_OUT);
+                }
 
                 Thread.Sleep(100);
             }
@@ -327,7 +342,7 @@ namespace SnakeOnlineServer
             RequestAuxGameLoopThreadToEnd();
 
             // Draw the arena's state one more time.
-            gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects);
+            gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects, 0);
             
             string resultMessage = "";
 

@@ -288,11 +288,13 @@ namespace SnakeOnline
 
                         case Socp.SEND_ARENA_DATA:
                             {
-                                SnakeGameArenaObject[, ] data = (SnakeGameArenaObject [, ]) SocpUtils.GetDataFromCommand(dataBuffer);
+                                Dictionary<string, object> receivedData = (Dictionary<string, object>) SocpUtils.GetDataFromCommand(dataBuffer);
+                                SnakeGameArenaObject[, ] arenaData = (SnakeGameArenaObject [, ]) receivedData["arenaData"];
+                                int timeLeft = (int) receivedData["timeLeft"];
 
                                 if (clientGameWindow != null)
                                 {
-                                    clientGameWindow.UpdateArenaData(data);
+                                    clientGameWindow.UpdateArenaData(arenaData, timeLeft);
                                 }
 
                                 break;

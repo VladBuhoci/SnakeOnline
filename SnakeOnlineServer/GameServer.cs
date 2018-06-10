@@ -576,9 +576,14 @@ namespace SnakeOnlineServer
             idClientSocketPairs[clientID].Send(SocpUtils.MakeNetworkCommand(Socp.RESPONSE_MATCH_STARTED, snakeOrientation));
         }
 
-        public void SendUpdatedArenaDataToClients(int gameManagerID, SnakeGameArenaObject[, ] data)
+        public void SendUpdatedArenaDataToClients(int gameManagerID, SnakeGameArenaObject[, ] data, int timeLeft)
         {
-            byte[] updatedDataMsg = SocpUtils.MakeNetworkCommand(Socp.SEND_ARENA_DATA, data);
+            Dictionary<string, object> dataToSend = new Dictionary<string, object>();
+
+            dataToSend.Add("arenaData", data);
+            dataToSend.Add("timeLeft", timeLeft);
+
+            byte[] updatedDataMsg = SocpUtils.MakeNetworkCommand(Socp.SEND_ARENA_DATA, dataToSend);
 
             foreach (string client in snakeGameManagerSVCollection[gameManagerID].AllClients)
             {
