@@ -133,7 +133,7 @@ namespace SnakeOnlineCore
 
         // ~ Begin movement interface.
 
-        public void ChangeDirection(SnakeOrientation newOrientation)
+        public void ChangeOrientation(SnakeOrientation newOrientation)
         {
             orientationQueue.Enqueue(newOrientation);
         }

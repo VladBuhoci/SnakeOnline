@@ -419,6 +419,11 @@ namespace SnakeOnline
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_GAME_ROOM_MATCH_START, "", uniquePlayerID, roomID));
         }
 
+        public void SendChangeSnakeOrientationRequest(int roomID, SnakeOrientation newOrientation)
+        {
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_CHANGE_SNAKE_ORIENTATION, newOrientation, uniquePlayerID, roomID));
+        }
+
         public void SendDisconnectFromGameRoomRequest(int roomID)
         {
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_DISCONNECT_FROM_GAME_ROOM, "", uniquePlayerID, roomID));

@@ -333,6 +333,17 @@ namespace SnakeOnlineServer
                             break;
                         }
 
+                    case Socp.REQUEST_CHANGE_SNAKE_ORIENTATION:
+                        {
+                            string playerName = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
+                            SnakeOrientation newOrientation = (SnakeOrientation) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                            snakeGameManagerSVCollection[gameManagerID].ChangeSnakeOrientation(playerName, newOrientation);
+
+                            break;
+                        }
+
                     case Socp.REQUEST_DISCONNECT_FROM_GAME_ROOM:
                         {
                             string playerName = SocpUtils.GetPlayerIDFromCommand(dataBuffer);

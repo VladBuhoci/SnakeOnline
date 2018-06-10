@@ -100,7 +100,8 @@ namespace SnakeOnline
 
             if (initialOrientation != null)
             {
-                snakeController = new SnakeController(socket, initialOrientation.Value);
+                MessageBox.Show(this, initialOrientation.ToString());
+                snakeController = new SnakeController(socket, gameRoomID, initialOrientation.Value);
             }
 
             //gameArenaPane.Refresh();
@@ -163,32 +164,47 @@ namespace SnakeOnline
                 }
             }
         }
-        
-        private void gameWindow_KeyDown(object sender, KeyEventArgs e)
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (gameRoomState == GameRoomState.PLAYING)
+            if (roomChatTextToSendTextBox.Focused)
             {
-                if (snakeController != null)
+                // If the text box is selected, let this be passed forward by returning false.
+                return false;
+            }
+            else
+            {
+                if (gameRoomState == GameRoomState.PLAYING)
                 {
-                    switch (e.KeyCode)
+                    if (snakeController != null)
                     {
-                        case Keys.W:
-                            snakeController.ChangeDirectionUp();
-                            break;
+                        switch (keyData)
+                        {
+                            case Keys.W:
+                                snakeController.ChangeDirectionUp();
+                                return true;
 
-                        case Keys.D:
-                            snakeController.ChangeDirectionRight();
-                            break;
+                            case Keys.D:
+                                snakeController.ChangeDirectionRight();
+                                return true;
 
-                        case Keys.S:
-                            snakeController.ChangeDirectionDown();
-                            break;
+                            case Keys.S:
+                                snakeController.ChangeDirectionDown();
+                                return true;
 
-                        case Keys.A:
-                            snakeController.ChangeDirectionLeft();
-                            break;
+                            case Keys.A:
+                                snakeController.ChangeDirectionLeft();
+                                return true;
+
+                            case Keys.T:
+                                roomChatTextToSendTextBox.Select();
+                                return true;
+                        }
                     }
                 }
+
+                // Call the base class.
+                return base.ProcessCmdKey(ref msg, keyData);
             }
         }
         
@@ -238,6 +254,13 @@ namespace SnakeOnline
             {
                 sendRoomChatMessageButton_Click(sender, e);
                 
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+            else if (e.KeyCode == Keys.Escape)
+            {
+                gameArenaPane.Select();
+
                 e.Handled = true;
                 e.SuppressKeyPress = true;
             }

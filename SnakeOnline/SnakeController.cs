@@ -12,15 +12,16 @@ namespace SnakeOnline
     class SnakeController
     {
         private GameClient socket;
-
+        private int gameRoomID;
         private SnakeOrientation currentOrientation;
 
         /// <summary>
         ///     Constructor.
         /// </summary>
-        public SnakeController(GameClient client, SnakeOrientation snakeOrientation)
+        public SnakeController(GameClient client, int roomID, SnakeOrientation snakeOrientation)
         {
             socket = client;
+            gameRoomID = roomID;
             currentOrientation = snakeOrientation;
         }
 
@@ -30,8 +31,7 @@ namespace SnakeOnline
             {
                 currentOrientation = SnakeOrientation.Up;
 
-                // TODO: temporary..
-                //controlledSnake.ChangeDirection(SnakeOrientation.Up);
+                socket.SendChangeSnakeOrientationRequest(gameRoomID, SnakeOrientation.Up);
             }
         }
 
@@ -41,8 +41,7 @@ namespace SnakeOnline
             {
                 currentOrientation = SnakeOrientation.Right;
 
-                // TODO: temporary..
-                //controlledSnake.ChangeDirection(SnakeOrientation.Right);
+                socket.SendChangeSnakeOrientationRequest(gameRoomID, SnakeOrientation.Right);
             }
         }
 
@@ -52,8 +51,7 @@ namespace SnakeOnline
             {
                 currentOrientation = SnakeOrientation.Down;
 
-                // TODO: temporary..
-                //controlledSnake.ChangeDirection(SnakeOrientation.Down);
+                socket.SendChangeSnakeOrientationRequest(gameRoomID, SnakeOrientation.Down);
             }
         }
 
@@ -63,8 +61,7 @@ namespace SnakeOnline
             {
                 currentOrientation = SnakeOrientation.Left;
 
-                // TODO: temporary..
-                //controlledSnake.ChangeDirection(SnakeOrientation.Left);
+                socket.SendChangeSnakeOrientationRequest(gameRoomID, SnakeOrientation.Left);
             }
         }
     }

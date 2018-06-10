@@ -37,6 +37,7 @@
             this.spectatorsGroupBox = new System.Windows.Forms.GroupBox();
             this.spectatorListBox = new System.Windows.Forms.ListBox();
             this.roomMenuGroupBox = new System.Windows.Forms.GroupBox();
+            this.roomLeaderLabel = new System.Windows.Forms.Label();
             this.switchSidesButton = new System.Windows.Forms.Button();
             this.disconnectButton = new System.Windows.Forms.Button();
             this.roomSettingsButton = new System.Windows.Forms.Button();
@@ -45,7 +46,6 @@
             this.sendRoomChatMessageButton = new System.Windows.Forms.Button();
             this.roomChatTextToSendTextBox = new System.Windows.Forms.TextBox();
             this.roomChatTextBox = new System.Windows.Forms.TextBox();
-            this.roomLeaderLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.gameArenaPane)).BeginInit();
             this.gameViewportPanel.SuspendLayout();
             this.playersGroupBox.SuspendLayout();
@@ -123,6 +123,16 @@
             this.roomMenuGroupBox.TabIndex = 5;
             this.roomMenuGroupBox.TabStop = false;
             this.roomMenuGroupBox.Text = "Room Menu";
+            // 
+            // roomLeaderLabel
+            // 
+            this.roomLeaderLabel.AutoSize = true;
+            this.roomLeaderLabel.Location = new System.Drawing.Point(142, 32);
+            this.roomLeaderLabel.Name = "roomLeaderLabel";
+            this.roomLeaderLabel.Size = new System.Drawing.Size(73, 13);
+            this.roomLeaderLabel.TabIndex = 4;
+            this.roomLeaderLabel.Text = "Room leader: ";
+            this.roomLeaderLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // switchSidesButton
             // 
@@ -206,16 +216,6 @@
             this.roomChatTextBox.Size = new System.Drawing.Size(341, 154);
             this.roomChatTextBox.TabIndex = 0;
             // 
-            // roomLeaderLabel
-            // 
-            this.roomLeaderLabel.AutoSize = true;
-            this.roomLeaderLabel.Location = new System.Drawing.Point(142, 32);
-            this.roomLeaderLabel.Name = "roomLeaderLabel";
-            this.roomLeaderLabel.Size = new System.Drawing.Size(73, 13);
-            this.roomLeaderLabel.TabIndex = 4;
-            this.roomLeaderLabel.Text = "Room leader: ";
-            this.roomLeaderLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // ClientGameWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -232,7 +232,6 @@
             this.Name = "ClientGameWindow";
             this.Text = "Snake Online Game Room";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GameWindow_FormClosing);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.gameWindow_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.gameArenaPane)).EndInit();
             this.gameViewportPanel.ResumeLayout(false);
             this.playersGroupBox.ResumeLayout(false);

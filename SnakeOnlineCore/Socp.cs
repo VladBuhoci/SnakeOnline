@@ -101,6 +101,13 @@ namespace SnakeOnlineCore
         REQUEST_GAME_ROOM_MATCH_START,
 
         /// <summary>
+        ///     Used when a player pressed a key to change the snake's orientation.
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_CHANGE_SNAKE_ORIENTATION,
+
+        /// <summary>
         ///     Used when a player wants to leave a game room and return to the lobby.
         ///     <para/>
         ///     USAGE: client to server.

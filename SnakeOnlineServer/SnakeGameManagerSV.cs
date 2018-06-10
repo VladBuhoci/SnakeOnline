@@ -157,7 +157,6 @@ namespace SnakeOnlineServer
 
         public override void KillSnake(string snakeID)
         {
-            //victim.bIsAlive = false;
             foreach (Snake snake in snakes)
             {
                 if (String.Equals(snake.GetID(), snakeID))
@@ -166,6 +165,19 @@ namespace SnakeOnlineServer
 
                     // other things like notifying the player or something...
 
+                    break;
+                }
+            }
+        }
+
+        public void ChangeSnakeOrientation(string playerID, SnakeOrientation newOrientation)
+        {
+            foreach (Snake snake in snakes)
+            {
+                if (String.Equals(snake.GetID(), playerID))
+                {
+                    snake.ChangeOrientation(newOrientation);
+                    
                     break;
                 }
             }
