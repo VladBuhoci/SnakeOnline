@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncStateContainer.cs" />
+    <Compile Include="GameOverType.cs" />
     <Compile Include="GameRoomState.cs" />
     <Compile Include="SnakeGameShortDescriptor.cs" />
     <Compile Include="SocpMessageContainer.cs" />

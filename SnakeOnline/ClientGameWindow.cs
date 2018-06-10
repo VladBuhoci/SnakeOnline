@@ -100,7 +100,6 @@ namespace SnakeOnline
 
             if (initialOrientation != null)
             {
-                MessageBox.Show(this, initialOrientation.ToString());
                 snakeController = new SnakeController(socket, gameRoomID, initialOrientation.Value);
             }
 
@@ -114,7 +113,7 @@ namespace SnakeOnline
             gameArenaPane.Refresh();
         }
 
-        public void EndGameMatch(bool bIsLeader)
+        public void EndGameMatch(bool bIsLeader, string gameOverResultMsg)
         {
             gameRoomState = GameRoomState.WAITING;
             gameArenaObjects = null;
@@ -123,12 +122,14 @@ namespace SnakeOnline
             // Enable menu buttons.
             if (bIsLeader)
             {
-                startMatchButton.Enabled = false;
-                roomSettingsButton.Enabled = false;
+                startMatchButton.Enabled = true;
+                roomSettingsButton.Enabled = true;
             }
             switchSidesButton.Enabled = true;
 
             gameArenaPane.BackColor = Color.White;
+
+            MessageBox.Show(this, gameOverResultMsg, "Game over", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
         }
 
         private void gameArenaPane_Paint(object sender, PaintEventArgs e)

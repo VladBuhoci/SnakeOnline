@@ -381,15 +381,7 @@ namespace SnakeOnlineServer
                                 // TODO
                             }
 
-                            byte[] response = SocpUtils.MakeNetworkCommand(Socp.RESPONSE_DISCONNECT_FROM_SERVER, "");
-
-                            clientSocket.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(RequestDisconnectFromServerCallback), clientSocket);
-
-                            // Remove it from the collection and close it.
-                            if (tempIdClientSocketPairs.ContainsKey(playerName))
-                                tempIdClientSocketPairs.Remove(playerName);
-                            else
-                                idClientSocketPairs.Remove(playerName);
+                            AttemptToDisconnectClientFromServer(clientSocket, playerName);
                             
                             // Send an updated list of connected users to every single one of them.
                             BroadcastClientListForLobby();
@@ -414,6 +406,19 @@ namespace SnakeOnlineServer
                         }
                 }
             }
+        }
+
+        private void AttemptToDisconnectClientFromServer(Socket clientSocket, string playerName)
+        {
+            byte[] response = SocpUtils.MakeNetworkCommand(Socp.RESPONSE_DISCONNECT_FROM_SERVER, "");
+
+            clientSocket.BeginSend(response, 0, response.Length, SocketFlags.None, new AsyncCallback(RequestDisconnectFromServerCallback), clientSocket);
+
+            // Remove it from the collection and close it.
+            if (tempIdClientSocketPairs.ContainsKey(playerName))
+                tempIdClientSocketPairs.Remove(playerName);
+            else
+                idClientSocketPairs.Remove(playerName);
         }
 
         private void RequestDisconnectFromServerCallback(IAsyncResult AR)
@@ -575,14 +580,26 @@ namespace SnakeOnlineServer
         {
             byte[] updatedDataMsg = SocpUtils.MakeNetworkCommand(Socp.SEND_ARENA_DATA, data);
 
-            foreach (string player in snakeGameManagerSVCollection[gameManagerID].Players)
+            foreach (string client in snakeGameManagerSVCollection[gameManagerID].AllClients)
             {
-                idClientSocketPairs[player].Send(updatedDataMsg);
+                idClientSocketPairs[client].Send(updatedDataMsg);
             }
+        }
 
-            foreach (string spec in snakeGameManagerSVCollection[gameManagerID].Spectators)
+        public void SendGameOverResultToClients(int gameManagerID, string resultMsg, string leaderID)
+        {
+            LogMessage(String.Format("Game over in room with id: {0}.", gameManagerID));
+
+            Dictionary<string, string> dataToSend = new Dictionary<string, string>();
+
+            dataToSend.Add("resultMsg", resultMsg);
+            dataToSend.Add("leaderID", leaderID);
+
+            byte[] gameOverResultMsg = SocpUtils.MakeNetworkCommand(Socp.SEND_GAME_OVER_RESULT, dataToSend);
+
+            foreach (string client in snakeGameManagerSVCollection[gameManagerID].AllClients)
             {
-                idClientSocketPairs[spec].Send(updatedDataMsg);
+                idClientSocketPairs[client].Send(gameOverResultMsg);
             }
         }
 
@@ -601,19 +618,31 @@ namespace SnakeOnlineServer
         /// </summary>
         public void CleanUp()
         {
-            serverLogTextBox.Clear();
-
-            // close all sockets
-            foreach (Socket clientSocket in tempIdClientSocketPairs.Values)
+            foreach (SnakeGameManagerSV manager in snakeGameManagerSVCollection.Values)
             {
-                clientSocket.Close();
-                clientSocket.Dispose();
+                manager.RequestAuxGameLoopThreadToEnd();
             }
 
-            foreach (Socket clientSocket in idClientSocketPairs.Values)
+            // Close all sockets
+
+            using (IEnumerator<string> enumerator = tempIdClientSocketPairs.Keys.ToList().GetEnumerator())
             {
-                clientSocket.Close();
-                clientSocket.Dispose();
+                while (enumerator.MoveNext())
+                {
+                    string clientID = enumerator.Current;
+
+                    AttemptToDisconnectClientFromServer(tempIdClientSocketPairs[clientID], clientID);
+                }
+            }
+
+            using (IEnumerator<string> enumerator = idClientSocketPairs.Keys.ToList().GetEnumerator())
+            {
+                while (enumerator.MoveNext())
+                {
+                    string clientID = enumerator.Current;
+
+                    AttemptToDisconnectClientFromServer(idClientSocketPairs[clientID], clientID);
+                }
             }
 
             tempIdClientSocketPairs.Clear();
@@ -622,11 +651,8 @@ namespace SnakeOnlineServer
             serverSocket.Close();
             serverSocket.Dispose();
             serverSocket = null;
-
-            foreach (SnakeGameManagerSV manager in snakeGameManagerSVCollection.Values)
-            {
-                manager.RequestAuxGameLoopThreadToEnd();
-            }
+            
+            serverLogTextBox.Clear();
         }
     }
 }

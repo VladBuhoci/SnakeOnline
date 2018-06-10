@@ -298,6 +298,19 @@ namespace SnakeOnline
                                 break;
                             }
 
+                        case Socp.SEND_GAME_OVER_RESULT:
+                            {
+                                Dictionary<string, string> receivedData = (Dictionary<string, string>) SocpUtils.GetDataFromCommand(dataBuffer);
+                                bool bIsThisLeader = String.Equals(uniquePlayerID, receivedData["leaderID"]);
+
+                                if (clientGameWindow != null)
+                                {
+                                    clientGameWindow.EndGameMatch(bIsThisLeader, receivedData["resultMsg"]);
+                                }
+
+                                break;
+                            }
+
                         case Socp.RESPONSE_DISCONNECT_FROM_GAME_ROOM:
                             {
                                 if (clientGameWindow != null && ! clientGameWindow.IsDisposed)

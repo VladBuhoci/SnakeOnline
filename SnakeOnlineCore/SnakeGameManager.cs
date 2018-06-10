@@ -14,6 +14,7 @@ namespace SnakeOnlineCore
         protected bool bApplicationAttemptsClosing;
 
         protected const int TIME_BEFORE_GAME_STARTS = 3;  // in seconds.
+        protected const int TIME_BEFORE_GAME_ENDS   = 3;  // in seconds.
 
         protected List<Snake> snakes = new List<Snake>();
 
@@ -32,6 +33,8 @@ namespace SnakeOnlineCore
 
         public void StartGameLoop()
         {
+            bApplicationAttemptsClosing = false;
+
             // Start the game loop thread.
 
             Thread auxGameLoopThread = new Thread(() => GameLoop(this, snakes));
@@ -85,5 +88,7 @@ namespace SnakeOnlineCore
         }
 
         public abstract void KillSnake(string snakeID);
+
+        public abstract void KillSnakes(params string[] snakeIDs);
     }
 }

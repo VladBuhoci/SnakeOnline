@@ -247,6 +247,15 @@ namespace SnakeOnlineCore
         SEND_ARENA_DATA,
 
         /// <summary>
+        ///     Used to send a message to every client connected to a room when the game has ended
+        ///         and the leaderboard is broadcasted so they know who has won.
+        ///     Clients that acted as players will be instructed to get rid of their snake controller.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        SEND_GAME_OVER_RESULT,
+
+        /// <summary>
         ///     Lets the user know that the server has accepted their request of leaving a room.
         ///     <para/>
         ///     USAGE: server to client.

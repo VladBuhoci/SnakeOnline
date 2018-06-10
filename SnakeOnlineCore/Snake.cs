@@ -187,15 +187,17 @@ namespace SnakeOnlineCore
             SnakeGameArenaObject gameArenaObj;
             if ((gameArenaObj = gameManager.gameArenaObjects[newHeadPosX, newHeadPosY]) != null)
             {
-                if (gameArenaObj is SnakeBodyObject)
+                if (gameArenaObj is SnakeBodyObject otherSnakeBodyObj)
                 {
-                    // Snake dies when hitting another snake (or itself)
-                    gameManager.KillSnake(this.snakeID);
-
-                    // See if it has hit another snake head, in which case both snakes die.
-                    if (((SnakeBodyObject) gameArenaObj).isHead)
+                    // See if it has hit another snake's head, in which case both snakes die.
+                    if (otherSnakeBodyObj.isHead && IsHeadOnHeadFight(otherSnakeBodyObj))
                     {
-                        gameManager.KillSnake(((SnakeBodyObject) gameArenaObj).snakeID);
+                        gameManager.KillSnakes(this.snakeID, otherSnakeBodyObj.snakeID);
+                    }
+                    else
+                    {
+                        // Snake dies when hitting another snake (or itself)
+                        gameManager.KillSnake(this.snakeID);
                     }
 
                     // Exit now.. no need to move anymore.
@@ -257,5 +259,42 @@ namespace SnakeOnlineCore
         }
 
         // ~ End movement interface.
+
+        private bool IsHeadOnHeadFight(SnakeBodyObject otherSnakeHead)
+        {
+            SnakeBodyObject thisSnakeHead = bodyParts.Last();
+
+            // Check this snake's head position relative to the other snake's.
+
+            // Left:
+            if (thisSnakeHead.posX == otherSnakeHead.posX - 1
+                && thisSnakeHead.posY == otherSnakeHead.posY)
+            {
+                return true;
+            }
+
+            // Right:
+            else if (thisSnakeHead.posX == otherSnakeHead.posX + 1
+                && thisSnakeHead.posY == otherSnakeHead.posY)
+            {
+                return true;
+            }
+
+            // Up:
+            else if (thisSnakeHead.posX == otherSnakeHead.posX
+                && thisSnakeHead.posY == otherSnakeHead.posY - 1)
+            {
+                return true;
+            }
+
+            // Down:
+            else if (thisSnakeHead.posX == otherSnakeHead.posX
+                && thisSnakeHead.posY == otherSnakeHead.posY + 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

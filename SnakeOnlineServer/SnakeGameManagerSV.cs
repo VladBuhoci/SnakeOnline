@@ -127,6 +127,8 @@ namespace SnakeOnlineServer
                 gameServer.SendStartGameRequestToClient(spec, null);
             }
 
+            gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects);
+
             // Start the game.
             StartGameLoop();
         }
@@ -137,14 +139,21 @@ namespace SnakeOnlineServer
 
             while (true)
             {
+                // Check if game loop is over.
                 if (bApplicationAttemptsClosing)
                 {
                     break;
                 }
 
-                foreach (Snake snake in snakeList)
+                for (int i = 0; i < snakeList.Count; i ++)
                 {
-                    snake.MoveSnake(gameManager);
+                    snakeList[i].MoveSnake(gameManager);
+                }
+
+                // Check again.
+                if (bApplicationAttemptsClosing)
+                {
+                    break;
                 }
 
                 gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects);
@@ -162,11 +171,48 @@ namespace SnakeOnlineServer
                 if (String.Equals(snake.GetID(), snakeID))
                 {
                     snake.bIsAlive = false;
-
-                    // other things like notifying the player or something...
-
+                    
                     break;
                 }
+            }
+
+            CheckIfGameShouldEnd();
+        }
+
+        public override void KillSnakes(params string[] snakeIDs)
+        {
+            foreach (Snake snake in snakes)
+            {
+                if (snakeIDs.Contains(snake.GetID()))
+                {
+                    snake.bIsAlive = false;
+
+                    // other things like notifying the player or something...
+                }
+            }
+
+            CheckIfGameShouldEnd();
+        }
+
+        private void CheckIfGameShouldEnd()
+        {
+            int aliveSnakes = 0;
+
+            foreach (Snake snake in snakes)
+            {
+                if (snake.bIsAlive)
+                {
+                    aliveSnakes += 1;
+                }
+            }
+
+            if (aliveSnakes == 0)
+            {
+                EndGame(GameOverType.ALL_DEAD);
+            }
+            else if (aliveSnakes == 1)
+            {
+                EndGame(GameOverType.LAST_ONE_STANDING);
             }
         }
 
@@ -272,6 +318,85 @@ namespace SnakeOnlineServer
             }
         }
 
+        private void EndGame(GameOverType gameOverType)
+        {
+            if (gameDescriptor.roomState == GameRoomState.WAITING)
+                return;
+
+            // End the game loop.
+            RequestAuxGameLoopThreadToEnd();
+
+            // Draw the arena's state one more time.
+            gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects);
+            
+            string resultMessage = "";
+
+            switch (gameOverType)
+            {
+                case GameOverType.LAST_ONE_STANDING:
+                    {
+                        resultMessage = String.Format("The winner is: {0} !", snakes.Where(snk => snk.bIsAlive).First().GetID());
+
+                        break;
+                    }
+
+                case GameOverType.ALL_DEAD:
+                    {
+                        resultMessage = "All snakes are dead. Nobody has won!";
+
+                        break;
+                    }
+
+                case GameOverType.TIME_OUT:
+                    {
+                        // Prepare the leaderboard.
+                        snakes.OrderBy(snk => snk.GetSnakeBodyParts().Count);
+
+                        // See if there is a draw.
+
+                        Snake[] winnerSnakes = snakes.Where(snk => snk.GetSnakeBodyParts().Count == snakes[0].GetSnakeBodyParts().Count).ToArray();
+                        string[] winners = new string[winnerSnakes.Length];
+
+                        for (int i = 0; i < winnerSnakes.Length; i++)
+                        {
+                            winners[i] = winnerSnakes[i].GetID();
+                        }
+
+                        if (winners.Length == 1)
+                        {
+                            resultMessage = String.Format("The winner is: {0} !", winners[0]);
+                        }
+                        else
+                        {
+                            resultMessage = String.Format("It is a draw between: {0} !", String.Join(", ", winners));
+                        }
+
+                        break;
+                    }
+            }
+
+            Thread gameOverAndCleanUpThread = new Thread(() => GameOverAndCleanUp(resultMessage));
+            gameOverAndCleanUpThread.Start();
+        }
+
+        private void GameOverAndCleanUp(string resultMessage)
+        {
+            Thread.Sleep(TIME_BEFORE_GAME_ENDS * 1000);
+
+            // Broadcast the message.
+            gameServer.SendGameOverResultToClients(gameDescriptor.gameManagerID, resultMessage, gameDescriptor.roomLeaderID);
+
+            // Clear the data structures.
+            // TODO: does it clear every row and/or column?
+            Array.Clear(gameArenaObjects, 0, gameArenaObjects.Length);
+            snakes.Clear();
+
+            // Room is ready for a new match.
+            gameDescriptor.roomState = GameRoomState.WAITING;
+
+            Thread.CurrentThread.Abort();
+        }
+
         public SnakeGameDescriptor GetDescriptor()
         {
             return gameDescriptor;
@@ -298,6 +423,14 @@ namespace SnakeOnlineServer
             get
             {
                 return spectatorList.ToArray();
+            }
+        }
+
+        public string[] AllClients
+        {
+            get
+            {
+                return Players.Union(Spectators).ToArray();
             }
         }
     }
