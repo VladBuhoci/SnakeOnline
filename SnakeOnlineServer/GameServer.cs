@@ -19,8 +19,7 @@ namespace SnakeOnlineServer
         private Dictionary<string, Socket> tempIdClientSocketPairs;
         private Dictionary<string, Socket> idClientSocketPairs;
         private Dictionary<int, SnakeGameManagerSV> snakeGameManagerSVCollection;
-
-        private byte[] rawDataBuffer = new byte[1024];
+        
         private int uniquePlayerTempIDCounter;
         private int uniqueGameManagerIDCounter;
 
@@ -33,7 +32,6 @@ namespace SnakeOnlineServer
             tempIdClientSocketPairs      = new Dictionary<string, Socket>();
             idClientSocketPairs          = new Dictionary<string, Socket>();
             snakeGameManagerSVCollection = new Dictionary<int, SnakeGameManagerSV>();
-            rawDataBuffer                = new byte[1024];
             uniquePlayerTempIDCounter    = 0;
             uniqueGameManagerIDCounter   = 0;
         }
@@ -67,9 +65,11 @@ namespace SnakeOnlineServer
 
                 // Increment the counter.
                 uniquePlayerTempIDCounter += 1;
-                
+
+                AsyncStateContainer nextStateContainer = new AsyncStateContainer(newClientSocket);
+
                 // Begin receiving data from this client.
-                newClientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), newClientSocket);
+                nextStateContainer.socket.BeginReceive(nextStateContainer.dataBuffer, 0, nextStateContainer.dataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), nextStateContainer);
                 
                 // Resume accepting connections.
                 serverSocket.BeginAccept(new AsyncCallback(ServerAcceptConnectionCallback), null);
@@ -82,20 +82,22 @@ namespace SnakeOnlineServer
 
         private void ServerBeginReceiveDataFromClient(IAsyncResult AR)
         {
-            Socket clientSocket = (Socket) AR.AsyncState;
+            AsyncStateContainer stateContainer = (AsyncStateContainer) AR.AsyncState;
             
             try
             {
-                int receivedDataSize = clientSocket.EndReceive(AR);
+                int receivedDataSize = stateContainer.socket.EndReceive(AR);
                 byte[] actualDataBuffer = new byte[receivedDataSize];
                 
-                Array.Copy(rawDataBuffer, actualDataBuffer, receivedDataSize);
-                
+                Array.Copy(stateContainer.dataBuffer, actualDataBuffer, receivedDataSize);
+
+                AsyncStateContainer nextStateContainer = new AsyncStateContainer(stateContainer.socket);
+
                 // Resume receiving data from this client socket.
-                clientSocket.BeginReceive(rawDataBuffer, 0, rawDataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), clientSocket);
+                nextStateContainer.socket.BeginReceive(nextStateContainer.dataBuffer, 0, nextStateContainer.dataBuffer.Length, SocketFlags.None, new AsyncCallback(ServerBeginReceiveDataFromClient), nextStateContainer);
                 
                 // Handle the received data.
-                HandleReceivedData(actualDataBuffer, clientSocket);
+                HandleReceivedData(actualDataBuffer, stateContainer.socket);
             }
             catch (Exception se)
             {
@@ -111,7 +113,7 @@ namespace SnakeOnlineServer
                 
                 while (enumerator.Current.Value != null)
                 {
-                    if (enumerator.Current.Value == clientSocket)
+                    if (enumerator.Current.Value == stateContainer.socket)
                     {
                         key = enumerator.Current.Key;
                         break;

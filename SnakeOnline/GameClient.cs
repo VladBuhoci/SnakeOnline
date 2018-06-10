@@ -217,7 +217,7 @@ namespace SnakeOnline
 
                                 if (clientLobbyWindow != null)
                                 {
-                                    clientGameWindow = new ClientGameWindow(this, currentUniqueGameManagerID, true, leaderID, gameDescriptor.roomState, gameDescriptor.arenaWidth, gameDescriptor.arenaHeight);
+                                    clientGameWindow = new ClientGameWindow(this, gameDescriptor.roomName, currentUniqueGameManagerID, true, leaderID, gameDescriptor.roomState, gameDescriptor.arenaWidth, gameDescriptor.arenaHeight);
                                     clientGameWindow.ShowDialog();
 
                                     // Update the player and spectator lists.
@@ -248,7 +248,7 @@ namespace SnakeOnline
 
                                 if (clientLobbyWindow != null)
                                 {
-                                    clientGameWindow = new ClientGameWindow(this, currentUniqueGameManagerID, false, leaderID, gameDescriptor.roomState, gameDescriptor.arenaWidth, gameDescriptor.arenaHeight);
+                                    clientGameWindow = new ClientGameWindow(this, gameDescriptor.roomName, currentUniqueGameManagerID, false, leaderID, gameDescriptor.roomState, gameDescriptor.arenaWidth, gameDescriptor.arenaHeight);
                                     clientGameWindow.ShowDialog();
 
                                     // Update the player and spectator lists.

@@ -5,9 +5,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SnakeOnline
+namespace SnakeOnlineCore
 {
-    class AsyncStateContainer
+    public class AsyncStateContainer
     {
         public Socket socket { get; set; }
         public byte[] dataBuffer;

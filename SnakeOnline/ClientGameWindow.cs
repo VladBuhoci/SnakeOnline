@@ -29,10 +29,13 @@ namespace SnakeOnline
         // Refresh rate of the room, in seconds.
         private static int ROOM_REFRESH_RATE = 1;
 
-        public ClientGameWindow(GameClient _socket, int uniqueGameManagerID, bool bIsThisLeader, string roomLeaderID, GameRoomState gameState, int arenaWidth, int arenaHeight)
+        public ClientGameWindow(GameClient _socket, string roomName, int uniqueGameManagerID, bool bIsThisLeader, string roomLeaderID, GameRoomState gameState, int arenaWidth, int arenaHeight)
         {
             InitializeComponent();
-            
+
+            // Set the title of the window.
+            this.Text = String.Format("Snake Online Room - {0}", roomName);
+
             socket = _socket;
             gameRoomID = uniqueGameManagerID;
             gameRoomState = gameState;
