@@ -21,7 +21,6 @@ namespace SnakeOnline
 
         private int serverPortNumber;
         private string uniquePlayerID;
-        //private byte[] rawDataBuffer = new byte[1024];
 
         private ClientMenuWindow clientMenuWindow;
         private ClientLobbyWindow clientLobbyWindow;
@@ -78,7 +77,6 @@ namespace SnakeOnline
         
         private void BeginReceiveDataFromServer(IAsyncResult AR)
         {
-            //Socket socket = (Socket) AR.AsyncState;
             AsyncStateContainer stateContainer = (AsyncStateContainer) AR.AsyncState;
 
             try
@@ -219,7 +217,7 @@ namespace SnakeOnline
 
                                 if (clientLobbyWindow != null)
                                 {
-                                    clientGameWindow = new ClientGameWindow(this, currentUniqueGameManagerID, true, leaderID);
+                                    clientGameWindow = new ClientGameWindow(this, currentUniqueGameManagerID, true, leaderID, gameDescriptor.roomState, gameDescriptor.arenaWidth, gameDescriptor.arenaHeight);
                                     clientGameWindow.ShowDialog();
 
                                     // Update the player and spectator lists.
@@ -250,7 +248,7 @@ namespace SnakeOnline
 
                                 if (clientLobbyWindow != null)
                                 {
-                                    clientGameWindow = new ClientGameWindow(this, currentUniqueGameManagerID, false, leaderID);
+                                    clientGameWindow = new ClientGameWindow(this, currentUniqueGameManagerID, false, leaderID, gameDescriptor.roomState, gameDescriptor.arenaWidth, gameDescriptor.arenaHeight);
                                     clientGameWindow.ShowDialog();
 
                                     // Update the player and spectator lists.
@@ -276,9 +274,26 @@ namespace SnakeOnline
                                 break;
                             }
 
-                        case Socp.SEND_ARENA_MATRIX:
+                        case Socp.RESPONSE_MATCH_STARTED:
                             {
-                                // TODO
+                                SnakeOrientation snakeOrientation = (SnakeOrientation) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                                if (clientGameWindow != null)
+                                {
+                                    clientGameWindow.StartGameMatch(snakeOrientation);
+                                }
+
+                                break;
+                            }
+
+                        case Socp.SEND_ARENA_DATA:
+                            {
+                                SnakeGameArenaObject[, ] data = (SnakeGameArenaObject [, ]) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                                if (clientGameWindow != null)
+                                {
+                                    clientGameWindow.UpdateArenaData(data);
+                                }
 
                                 break;
                             }
@@ -287,12 +302,9 @@ namespace SnakeOnline
                             {
                                 if (clientGameWindow != null && ! clientGameWindow.IsDisposed)
                                 {
-                                    clientGameWindow.RequestGameToEnd();
                                     clientGameWindow = null;
                                 }
                                 
-                                // TODO: Anything to handle here?
-
                                 break;
                             }
 
@@ -311,7 +323,7 @@ namespace SnakeOnline
                                 string newLeaderID = (string) SocpUtils.GetDataFromCommand(dataBuffer);
                                 bool bIsThisLeader = String.Equals(newLeaderID, uniquePlayerID);
 
-                                if (clientGameWindow != null && !clientGameWindow.IsDisposed)
+                                if (clientGameWindow != null && ! clientGameWindow.IsDisposed)
                                 {
                                     clientGameWindow.ChangeRoomLeader(newLeaderID, bIsThisLeader);
                                 }
@@ -340,7 +352,7 @@ namespace SnakeOnline
         public void SendPingToServer(string additionalMessage)
         {
             string msgToSend = String.IsNullOrEmpty(additionalMessage.Trim()) ? "" : additionalMessage.Trim();
-            int gameManagerID = clientGameWindow != null ? clientGameWindow.GetSnakeGameManagerCL().GetUniqueGameManagerID() : -1;
+            int gameManagerID = clientGameWindow != null ? clientGameWindow.GetGameRoomID() : -1;
 
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.PING, msgToSend, uniquePlayerID, gameManagerID));
         }
@@ -402,9 +414,9 @@ namespace SnakeOnline
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_GAME_ROOM_JOIN, roomID, uniquePlayerID));
         }
 
-        public void SendSnakeSpawnRequestToServer()
+        public void SendStartMatchRequestToServer(int roomID)
         {
-            socket.Send(SocpUtils.MakeNetworkCommand(Socp.SPAWN_SNAKE, "add snake properties here", uniquePlayerID, clientGameWindow.GetSnakeGameManagerCL().GetUniqueGameManagerID()));
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_GAME_ROOM_MATCH_START, "", uniquePlayerID, roomID));
         }
 
         public void SendDisconnectFromGameRoomRequest(int roomID)
@@ -414,7 +426,7 @@ namespace SnakeOnline
 
         public void SendDisconnectFromServerRequest()
         {
-            int gameManagerID = clientGameWindow != null ? clientGameWindow.GetSnakeGameManagerCL().GetUniqueGameManagerID() : -1;
+            int gameManagerID = clientGameWindow != null ? clientGameWindow.GetGameRoomID() : -1;
 
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_DISCONNECT_FROM_SERVER, "", uniquePlayerID, gameManagerID));
         }

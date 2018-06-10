@@ -9,32 +9,32 @@ using System.Windows.Forms;
 
 namespace SnakeOnlineCore
 {
-    public sealed class SnakeGameManager
+    public abstract class SnakeGameManager
     {
-        private static SnakeGameManager classInstance = new SnakeGameManager();
-        private static bool bApplicationAttemptsClosing;
+        protected bool bApplicationAttemptsClosing;
 
-        private List<Snake> snakes = new List<Snake>();
+        protected const int TIME_BEFORE_GAME_STARTS = 3;  // in seconds.
 
-        public int gameArenaWidth = 50;
-        public int gameArenaHeight = 50;
-        public SnakeGameArenaObject[, ] gameArenaObjects;
+        protected List<Snake> snakes = new List<Snake>();
+
+        public int gameArenaWidth { get; set; }
+        public int gameArenaHeight { get; set; }
+        public SnakeGameArenaObject[, ] gameArenaObjects { get; set; }
         
-        private SnakeGameManager()
+        public SnakeGameManager(int arenaWidth, int arenaHeight)
         {
+            bApplicationAttemptsClosing = false;
+
+            gameArenaWidth = arenaWidth;
+            gameArenaHeight = arenaHeight;
             gameArenaObjects = new SnakeGameArenaObject[gameArenaWidth, gameArenaHeight];
         }
 
-        public static SnakeGameManager GetInstance()
-        {
-            return classInstance;
-        }
-
-        public void SetGameArenaPane(PictureBox gameArenaPane)
+        public void StartGameLoop()
         {
             // Start the game loop thread.
 
-            Thread auxGameLoopThread = new Thread(() => GameLoop(snakes, gameArenaPane));
+            Thread auxGameLoopThread = new Thread(() => GameLoop(this, snakes));
             auxGameLoopThread.Start();
         }
 
@@ -43,25 +43,7 @@ namespace SnakeOnlineCore
             bApplicationAttemptsClosing = true;
         }
 
-        private static void GameLoop(List<Snake> snakeList, PictureBox gamePanel)
-        {
-            while (true)
-            {
-                if (bApplicationAttemptsClosing)
-                {
-                    break;
-                }
-
-                foreach (Snake snake in snakeList)
-                {
-                    snake.MoveSnake();
-                }
-                
-                Thread.Sleep(100);
-            }
-
-            Thread.CurrentThread.Abort();
-        }
+        protected abstract void GameLoop(SnakeGameManager gameManager, List<Snake> snakeList);
 
         /// <summary>
         ///     Will randomly generate a food object in an empty spot of the arena.
@@ -102,11 +84,6 @@ namespace SnakeOnlineCore
             }
         }
 
-        public void KillSnake(Snake victim)
-        {
-            victim.bIsAlive = false;
-
-            // other stuff
-        }
+        public abstract void KillSnake(string snakeID);
     }
 }

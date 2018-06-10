@@ -133,6 +133,7 @@ namespace SnakeOnlineServer
         
         private void HandleReceivedData(byte[] dataBuffer, Socket clientSocket)
         {
+            if (SocpUtils.IsCommandNotEmpty(dataBuffer))
             {
                 Socp command = SocpUtils.GetProtocolValueFromCommand(dataBuffer);
 
@@ -315,15 +316,17 @@ namespace SnakeOnlineServer
 
                             break;
                         }
-
-                        // TODO: needed anymore??
-                    case Socp.SPAWN_SNAKE:
+                        
+                    case Socp.REQUEST_GAME_ROOM_MATCH_START:
                         {
-                            LogMessage("Player requested a snake to be created.");
+                            string clientID = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
 
-                            // Create a snake and a unique ID and return the ID to the player.
-                            // ... but not here. The right place is the game manager.
-                            // ... also, it might be better to just generate an ID for each player when they connect for the first time.
+                            LogMessage(String.Format("Room leader \"{0}\" requested a match to begin in room {1}.", clientID, gameManagerID));
+
+                            snakeGameManagerSVCollection[gameManagerID].StartGame();
+                            
+                            BroadcastRoomListForLobby();
 
                             break;
                         }
@@ -548,6 +551,26 @@ namespace SnakeOnlineServer
             }
 
             LogMessage("Done with leader stuff.");
+        }
+
+        public void SendStartGameRequestToClient(string clientID, SnakeOrientation? snakeOrientation)
+        {
+            idClientSocketPairs[clientID].Send(SocpUtils.MakeNetworkCommand(Socp.RESPONSE_MATCH_STARTED, snakeOrientation));
+        }
+
+        public void SendUpdatedArenaDataToClients(int gameManagerID, SnakeGameArenaObject[, ] data)
+        {
+            byte[] updatedDataMsg = SocpUtils.MakeNetworkCommand(Socp.SEND_ARENA_DATA, data);
+
+            foreach (string player in snakeGameManagerSVCollection[gameManagerID].Players)
+            {
+                idClientSocketPairs[player].Send(updatedDataMsg);
+            }
+
+            foreach (string spec in snakeGameManagerSVCollection[gameManagerID].Spectators)
+            {
+                idClientSocketPairs[spec].Send(updatedDataMsg);
+            }
         }
 
         #endregion

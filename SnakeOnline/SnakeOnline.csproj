@@ -76,7 +76,6 @@
       <DependentUpon>ClientGameWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
-    <Compile Include="SnakeGameManagerCL.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SnakeController.cs" />
     <EmbeddedResource Include="ClientGameParamsWindow.resx">

@@ -11,29 +11,17 @@ namespace SnakeOnline
 {
     class SnakeController
     {
-        // TODO: temporary..
-        public Snake controlledSnake { get; set; }
-
         private GameClient socket;
+
         private SnakeOrientation currentOrientation;
 
         /// <summary>
         ///     Constructor.
         /// </summary>
-        public SnakeController(GameClient client, int snakePosX, int snakePosY, Color snakeColor, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
+        public SnakeController(GameClient client, SnakeOrientation snakeOrientation)
         {
-            // TODO: temporary.. should create the snake on the server in the future.
-            controlledSnake = new Snake(snakePosX, snakePosY, snakeColor, snakeOrientation, bodyLength);
-
             socket = client;
-            currentOrientation = snakeOrientation;  // how to deal with this? get it from the server? send it to the server?
-
-            AskServerToSpawnSnake();
-        }
-
-        public Snake GetControlledSnake()
-        {
-            return controlledSnake;
+            currentOrientation = snakeOrientation;
         }
 
         public void ChangeDirectionUp()
@@ -43,7 +31,7 @@ namespace SnakeOnline
                 currentOrientation = SnakeOrientation.Up;
 
                 // TODO: temporary..
-                controlledSnake.ChangeDirection(SnakeOrientation.Up);
+                //controlledSnake.ChangeDirection(SnakeOrientation.Up);
             }
         }
 
@@ -54,7 +42,7 @@ namespace SnakeOnline
                 currentOrientation = SnakeOrientation.Right;
 
                 // TODO: temporary..
-                controlledSnake.ChangeDirection(SnakeOrientation.Right);
+                //controlledSnake.ChangeDirection(SnakeOrientation.Right);
             }
         }
 
@@ -65,7 +53,7 @@ namespace SnakeOnline
                 currentOrientation = SnakeOrientation.Down;
 
                 // TODO: temporary..
-                controlledSnake.ChangeDirection(SnakeOrientation.Down);
+                //controlledSnake.ChangeDirection(SnakeOrientation.Down);
             }
         }
 
@@ -76,13 +64,8 @@ namespace SnakeOnline
                 currentOrientation = SnakeOrientation.Left;
 
                 // TODO: temporary..
-                controlledSnake.ChangeDirection(SnakeOrientation.Left);
+                //controlledSnake.ChangeDirection(SnakeOrientation.Left);
             }
-        }
-
-        private void AskServerToSpawnSnake()
-        {
-            socket.SendSnakeSpawnRequestToServer();
         }
     }
 }

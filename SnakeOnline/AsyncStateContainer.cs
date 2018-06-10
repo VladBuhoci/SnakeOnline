@@ -15,7 +15,7 @@ namespace SnakeOnline
         public AsyncStateContainer(Socket _socket)
         {
             socket = _socket;
-            dataBuffer = new byte[1024];
+            dataBuffer = new byte[8192];
         }
     }
 }

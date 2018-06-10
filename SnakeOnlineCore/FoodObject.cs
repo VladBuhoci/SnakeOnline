@@ -1,7 +1,9 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace SnakeOnlineCore
 {
+    [Serializable]
     public class FoodObject : SnakeGameArenaObject
     {
         /// <summary>

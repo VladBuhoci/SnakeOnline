@@ -17,7 +17,7 @@ namespace SnakeOnline
         private GameClient socket;
 
         // Refresh rate of the lobby, in seconds.
-        private static int LOBBY_REFRESH_RATE = 3;
+        private static int LOBBY_REFRESH_RATE = 1;
 
         public ClientLobbyWindow(GameClient socket)
         {

@@ -1,7 +1,9 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace SnakeOnlineCore
 {
+    [Serializable]
     public class SnakeGameArenaObject
     {
         public int posX { get; set; }

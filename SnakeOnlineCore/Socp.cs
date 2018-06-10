@@ -94,11 +94,11 @@ namespace SnakeOnlineCore
         REQUEST_GAME_ROOM_COLLECTION_UPDATE,
 
         /// <summary>
-        ///     Used when the client joins a match and it requires a snake to take control of during gameplay.
+        ///     Used when a client wants the game to begin in their room for every connected client.
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        SPAWN_SNAKE,
+        REQUEST_GAME_ROOM_MATCH_START,
 
         /// <summary>
         ///     Used when a player wants to leave a game room and return to the lobby.
@@ -224,11 +224,20 @@ namespace SnakeOnlineCore
         SERVER_BROADCAST_GAME_ROOM_COLLECTION,
 
         /// <summary>
+        ///     Sent to the clients that are connected to a room where a match just began
+        ///         and who need (or not) to initialize a controller for their snake locally,
+        ///         depending on the data paired with this message type.
+        ///     <para/>
+        ///     USAGE: server to client.
+        /// </summary>
+        RESPONSE_MATCH_STARTED,
+
+        /// <summary>
         ///     Used whenever the arena matrix is changed in some way and the clients need to be aware of that change.
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_ARENA_MATRIX,
+        SEND_ARENA_DATA,
 
         /// <summary>
         ///     Lets the user know that the server has accepted their request of leaving a room.

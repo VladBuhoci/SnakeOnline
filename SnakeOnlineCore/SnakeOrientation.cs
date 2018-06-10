@@ -1,10 +1,12 @@
-﻿namespace SnakeOnlineCore
+﻿using System;
+
+namespace SnakeOnlineCore
 {
-    public enum SnakeOrientation
+    public enum SnakeOrientation : Int32
     {
-        Up,
-        Right,
-        Down,
-        Left
+        Up = 0,
+        Right = 1,
+        Down = 2,
+        Left = 3
     }
 }

@@ -15,41 +15,40 @@ namespace SnakeOnline
     partial class ClientGameWindow : Form
     {
         private GameClient socket;
-        private SnakeGameManagerCL snakeGameManagerCL;
         private SnakeController snakeController;
         private int gameRoomID;
+        private GameRoomState gameRoomState;
+
+        private SnakeGameArenaObject[, ] gameArenaObjects;
+
+        public int GetGameRoomID()
+        {
+            return gameRoomID;
+        }
 
         // Refresh rate of the room, in seconds.
-        private static int ROOM_REFRESH_RATE = 3;
+        private static int ROOM_REFRESH_RATE = 1;
 
-        public ClientGameWindow(GameClient _socket, int uniqueGameManagerID, bool bIsThisLeader, string roomLeaderID)
+        public ClientGameWindow(GameClient _socket, int uniqueGameManagerID, bool bIsThisLeader, string roomLeaderID, GameRoomState gameState, int arenaWidth, int arenaHeight)
         {
             InitializeComponent();
             
-            snakeGameManagerCL = new SnakeGameManagerCL(gameArenaPane, uniqueGameManagerID);
-            gameRoomID = uniqueGameManagerID;
             socket = _socket;
+            gameRoomID = uniqueGameManagerID;
+            gameRoomState = gameState;
 
-            roomLeaderLabel.Text = roomLeaderID;
+            roomLeaderLabel.Text = String.Format("Room leader: {0}", roomLeaderID);
+
+            // Scale and center the game preview window in its parent panel.
+            gameArenaPane.Size = new Size(arenaWidth * 10, arenaHeight * 10);
+            gameArenaPane.Location = new Point(gameViewportPanel.Width / 2 - arenaWidth * 5, gameViewportPanel.Height / 2 - arenaHeight * 5);
 
             if (! bIsThisLeader)
             {
                 startMatchButton.Enabled = false;
                 roomSettingsButton.Enabled = false;
             }
-
-            // TODO: should be created as a request from the server once the match has begun.
-            //       Have some sort of method here that will be called by the client, in order to instantiate a controller.
-            //snakeController = new SnakeController(client, 19, 30, Color.Red);
-
-            //SnakeGameManager.GetInstance().SetGameArenaPane(gameArenaPane);
             
-            // Snake handling will be migrated on the server.
-            //SnakeGameManager.GetInstance().AddSnake(snakeController.GetControlledSnake());
-
-            // Food spawning will be migrated on the server.
-            //SnakeGameManager.GetInstance().SpawnFood(snakeController.GetControlledSnake().GetSnakeBodyParts().FirstOrDefault().color);
-
             Thread refreshRoomThread = new Thread(() => RefreshRoomLoop(socket));
             refreshRoomThread.Start();
         }
@@ -74,7 +73,7 @@ namespace SnakeOnline
 
         public void ChangeRoomLeader(string newLeaderID, bool bIsThisNewLeader)
         {
-            roomLeaderLabel.Text = newLeaderID;
+            roomLeaderLabel.Text = String.Format("Room leader: {0}", newLeaderID);
 
             if (bIsThisNewLeader)
             {
@@ -86,10 +85,56 @@ namespace SnakeOnline
             roomChatTextBox.AppendText(String.Format("[SYST]: New room leader is \"{0}\"", newLeaderID));
         }
 
+        public void StartGameMatch(SnakeOrientation? initialOrientation)
+        {
+            gameRoomState = GameRoomState.PLAYING;
+            gameArenaPane.BackColor = Color.Black;
+
+            // Disable menu buttons.
+            startMatchButton.Enabled = false;
+            roomSettingsButton.Enabled = false;
+            switchSidesButton.Enabled = false;
+
+            if (initialOrientation != null)
+            {
+                snakeController = new SnakeController(socket, initialOrientation.Value);
+            }
+
+            //gameArenaPane.Refresh();
+        }
+
+        public void UpdateArenaData(SnakeGameArenaObject[, ] gameArenaObjects)
+        {
+            this.gameArenaObjects = gameArenaObjects;
+
+            gameArenaPane.Refresh();
+        }
+
+        public void EndGameMatch(bool bIsLeader)
+        {
+            gameRoomState = GameRoomState.WAITING;
+            gameArenaObjects = null;
+            snakeController = null;
+
+            // Enable menu buttons.
+            if (bIsLeader)
+            {
+                startMatchButton.Enabled = false;
+                roomSettingsButton.Enabled = false;
+            }
+            switchSidesButton.Enabled = true;
+
+            gameArenaPane.BackColor = Color.White;
+        }
+
         private void gameArenaPane_Paint(object sender, PaintEventArgs e)
         {
-            //foreach (SnakeGameArenaObject arenaObj in snakeGameManagerCL.gameArenaObjects)
-            foreach (SnakeGameArenaObject arenaObj in SnakeGameManager.GetInstance().gameArenaObjects)
+            if (gameArenaObjects == null)
+            {
+                return;
+            }
+
+            foreach (SnakeGameArenaObject arenaObj in gameArenaObjects)
             {
                 if (arenaObj is SnakeBodyObject)
                 {
@@ -97,17 +142,19 @@ namespace SnakeOnline
 
                     if (snakePart.isHead)
                     {
+                        // Draw a bigger square.
                         e.Graphics.DrawEllipse(new Pen(snakePart.color), new Rectangle(snakePart.posX * 10, snakePart.posY * 10, 10, 10));
                         e.Graphics.FillEllipse(new SolidBrush(snakePart.color), new Rectangle(snakePart.posX * 10, snakePart.posY * 10, 10, 10));
                     }
                     else
                     {
+                        // Draw a smaller square.
                         e.Graphics.DrawEllipse(new Pen(snakePart.color), new Rectangle(snakePart.posX * 10 + 1, snakePart.posY * 10 + 1, 8, 8));
                     }
                 }
                 else if (arenaObj is FoodObject)
                 {
-                    // Draw a diamond (for now).
+                    // Draw a diamond.
                     e.Graphics.DrawPolygon(new Pen(arenaObj.color), new Point[] { new Point(arenaObj.posX * 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10), new Point(arenaObj.posX * 10 + 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10 + 10) });
                     e.Graphics.FillPolygon(new SolidBrush(arenaObj.color), new Point[] { new Point(arenaObj.posX * 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10), new Point(arenaObj.posX * 10 + 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10 + 10) });
                 }
@@ -116,25 +163,28 @@ namespace SnakeOnline
         
         private void gameWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (snakeController != null)
+            if (gameRoomState == GameRoomState.PLAYING)
             {
-                switch (e.KeyCode)
+                if (snakeController != null)
                 {
-                    case Keys.W:
-                        snakeController.ChangeDirectionUp();
-                        break;
+                    switch (e.KeyCode)
+                    {
+                        case Keys.W:
+                            snakeController.ChangeDirectionUp();
+                            break;
 
-                    case Keys.D:
-                        snakeController.ChangeDirectionRight();
-                        break;
+                        case Keys.D:
+                            snakeController.ChangeDirectionRight();
+                            break;
 
-                    case Keys.S:
-                        snakeController.ChangeDirectionDown();
-                        break;
+                        case Keys.S:
+                            snakeController.ChangeDirectionDown();
+                            break;
 
-                    case Keys.A:
-                        snakeController.ChangeDirectionLeft();
-                        break;
+                        case Keys.A:
+                            snakeController.ChangeDirectionLeft();
+                            break;
+                    }
                 }
             }
         }
@@ -156,7 +206,10 @@ namespace SnakeOnline
 
         private void startMatchButton_Click(object sender, EventArgs e)
         {
-
+            if (playerListBox.DataSource is string[] playerList && playerList.Length >= 2)
+            {
+                socket.SendStartMatchRequestToServer(gameRoomID);
+            }
         }
 
         private void roomSettingsButton_Click(object sender, EventArgs e)
@@ -181,7 +234,7 @@ namespace SnakeOnline
             if (e.KeyCode == Keys.Enter)
             {
                 sendRoomChatMessageButton_Click(sender, e);
-
+                
                 e.Handled = true;
                 e.SuppressKeyPress = true;
             }
@@ -197,20 +250,7 @@ namespace SnakeOnline
                 roomChatTextToSendTextBox.Clear();
             }
         }
-
-        public void RequestGameToEnd()
-        {
-            if (snakeGameManagerCL != null)
-            {
-                snakeGameManagerCL.RequestAuxGameLoopThreadToEnd();
-            }
-        }
-
-        public SnakeGameManagerCL GetSnakeGameManagerCL()
-        {
-            return snakeGameManagerCL;
-        }
-
+        
         private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
             var result = MessageBox.Show(this, "Are you sure you want to leave?", "Abandon room", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);

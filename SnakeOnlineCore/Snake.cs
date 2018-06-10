@@ -7,8 +7,11 @@ using System.Threading.Tasks;
 
 namespace SnakeOnlineCore
 {
+    [Serializable]
     public class Snake
     {
+        private string snakeID;
+
         private SnakeOrientation currentOrientation;
         private Queue<SnakeOrientation> orientationQueue;
 
@@ -43,11 +46,18 @@ namespace SnakeOnlineCore
             }
         }
 
+        public string GetID()
+        {
+            return snakeID;
+        }
+
         /// <summary>
         ///     Constructor.
         /// </summary>
-        public Snake(int posX, int posY, Color color, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
+        public Snake(int posX, int posY, Color color, string snakeID, SnakeOrientation snakeOrientation = SnakeOrientation.Right, int bodyLength = 4)
         {
+            this.snakeID = snakeID;
+
             this.currentOrientation = snakeOrientation;
             this.orientationQueue = new Queue<SnakeOrientation>();
 
@@ -70,40 +80,40 @@ namespace SnakeOnlineCore
                 case SnakeOrientation.Up:
                     for (int i = 0; i < bodyLength; i++)
                     {
-                        snakeParts.Enqueue(new SnakeBodyObject(posX, posY - i, false, color, this));
+                        snakeParts.Enqueue(new SnakeBodyObject(posX, posY - i, false, color, snakeID));
                     }
 
-                    snakeParts.Enqueue(new SnakeBodyObject(posX, posY - bodyLength, true, color, this));   // The head.
+                    snakeParts.Enqueue(new SnakeBodyObject(posX, posY - bodyLength, true, color, snakeID));   // The head.
 
                     break;
 
                 case SnakeOrientation.Right:
                     for (int i = 0; i < bodyLength; i++)
                     {
-                        snakeParts.Enqueue(new SnakeBodyObject(posX + i, posY, false, color, this));
+                        snakeParts.Enqueue(new SnakeBodyObject(posX + i, posY, false, color, snakeID));
                     }
 
-                    snakeParts.Enqueue(new SnakeBodyObject(posX + bodyLength, posY, true, color, this));   // The head.
+                    snakeParts.Enqueue(new SnakeBodyObject(posX + bodyLength, posY, true, color, snakeID));   // The head.
 
                     break;
 
                 case SnakeOrientation.Down:
                     for (int i = 0; i < bodyLength; i++)
                     {
-                        snakeParts.Enqueue(new SnakeBodyObject(posX, posY + i, false, color, this));
+                        snakeParts.Enqueue(new SnakeBodyObject(posX, posY + i, false, color, snakeID));
                     }
 
-                    snakeParts.Enqueue(new SnakeBodyObject(posX, posY + bodyLength, true, color, this));   // The head.
+                    snakeParts.Enqueue(new SnakeBodyObject(posX, posY + bodyLength, true, color, snakeID));   // The head.
 
                     break;
 
                 case SnakeOrientation.Left:
                     for (int i = 0; i < bodyLength; i++)
                     {
-                        snakeParts.Enqueue(new SnakeBodyObject(posX - i, posY, false, color, this));
+                        snakeParts.Enqueue(new SnakeBodyObject(posX - i, posY, false, color, snakeID));
                     }
 
-                    snakeParts.Enqueue(new SnakeBodyObject(posX - bodyLength, posY, true, color, this));   // The head.
+                    snakeParts.Enqueue(new SnakeBodyObject(posX - bodyLength, posY, true, color, snakeID));   // The head.
 
                     break;
             }
@@ -116,6 +126,11 @@ namespace SnakeOnlineCore
             return bodyParts;
         }
 
+        public SnakeOrientation GetOrientation()
+        {
+            return currentOrientation;
+        }
+
         // ~ Begin movement interface.
 
         public void ChangeDirection(SnakeOrientation newOrientation)
@@ -123,7 +138,7 @@ namespace SnakeOnlineCore
             orientationQueue.Enqueue(newOrientation);
         }
 
-        public void MoveSnake()
+        public void MoveSnake(SnakeGameManager gameManager)
         {
             if (! bIsAlive)
                 return;
@@ -134,67 +149,72 @@ namespace SnakeOnlineCore
             switch (currentOrientation)
             {
                 case SnakeOrientation.Up:
-                    MoveSnakeInCurrentDirection(bodyParts.Last().posX, bodyParts.Last().posY - 1);
+                    MoveSnakeInCurrentDirection(gameManager, bodyParts.Last().posX, bodyParts.Last().posY - 1);
                     break;
 
                 case SnakeOrientation.Right:
-                    MoveSnakeInCurrentDirection(bodyParts.Last().posX + 1, bodyParts.Last().posY);
+                    MoveSnakeInCurrentDirection(gameManager, bodyParts.Last().posX + 1, bodyParts.Last().posY);
                     break;
 
                 case SnakeOrientation.Down:
-                    MoveSnakeInCurrentDirection(bodyParts.Last().posX, bodyParts.Last().posY + 1);
+                    MoveSnakeInCurrentDirection(gameManager, bodyParts.Last().posX, bodyParts.Last().posY + 1);
                     break;
 
                 case SnakeOrientation.Left:
-                    MoveSnakeInCurrentDirection(bodyParts.Last().posX - 1, bodyParts.Last().posY);
+                    MoveSnakeInCurrentDirection(gameManager, bodyParts.Last().posX - 1, bodyParts.Last().posY);
                     break;
             }
         }
 
-        private void MoveSnakeInCurrentDirection(int newHeadPosX, int newHeadPosY)
+        private void MoveSnakeInCurrentDirection(SnakeGameManager gameManager, int newHeadPosX, int newHeadPosY)
         {
             // Handle the new coordinates first:
             //      they may make the snake go out of bounds, so try to switch them with the values on the
             //      opposite side of the arena matrix, giving the illusion of "portals" in the walls.
 
-            if (newHeadPosX >= SnakeGameManager.GetInstance().gameArenaWidth)
+            if (newHeadPosX >= gameManager.gameArenaWidth)
                 newHeadPosX = 0;
             else if (newHeadPosX < 0)
-                newHeadPosX = SnakeGameManager.GetInstance().gameArenaWidth - 1;
+                newHeadPosX = gameManager.gameArenaWidth - 1;
 
-            if (newHeadPosY >= SnakeGameManager.GetInstance().gameArenaHeight)
+            if (newHeadPosY >= gameManager.gameArenaHeight)
                 newHeadPosY = 0;
             else if (newHeadPosY < 0)
-                newHeadPosY = SnakeGameManager.GetInstance().gameArenaHeight - 1;
+                newHeadPosY = gameManager.gameArenaHeight - 1;
 
-            // Before proceeding to move the snake pieces, check if there's another thing sitting in that place already.
+            // Before proceeding to move the snake pieces, check if there's another thing sitting in that place at the moment.
 
             SnakeGameArenaObject gameArenaObj;
-            if ((gameArenaObj = SnakeGameManager.GetInstance().gameArenaObjects[newHeadPosX, newHeadPosY]) != null)
+            if ((gameArenaObj = gameManager.gameArenaObjects[newHeadPosX, newHeadPosY]) != null)
             {
                 if (gameArenaObj is SnakeBodyObject)
                 {
                     // Snake dies when hitting another snake (or itself)
-                    SnakeGameManager.GetInstance().KillSnake(this);
+                    gameManager.KillSnake(this.snakeID);
 
                     // See if it has hit another snake head, in which case both snakes die.
                     if (((SnakeBodyObject) gameArenaObj).isHead)
                     {
-                        SnakeGameManager.GetInstance().KillSnake(((SnakeBodyObject) gameArenaObj).snake);
+                        gameManager.KillSnake(((SnakeBodyObject) gameArenaObj).snakeID);
                     }
 
-                    // Exit from this method.. no need to move anymore.
+                    // Exit now.. no need to move anymore.
                     return;
                 }
-                else if (gameArenaObj is FoodObject)
+                else if (gameArenaObj is FoodObject foundFood)
                 {
-                    // Eat the food and grow some parts.
+                    // Eat the food and grow (or lose) some parts.
 
-                    FoodObject foundFood = (FoodObject) gameArenaObj;
+                    if (foundFood.color == bodyParts.Peek().color)
+                    {
+                        bodyPartsToGrow = foundFood.bodyPartsAmount;
+                    }
+                    else // if (food effect)
+                    {
+                        bodyPartsToGrow = (-1) * foundFood.bodyPartsAmount;
+                    }
 
-                    bodyPartsToGrow = foundFood.bodyPartsAmount;
-
-                    SnakeGameManager.GetInstance().FoodWasEaten(foundFood);
+                    gameManager.FoodWasEaten(foundFood);
                 }
             }
 
@@ -205,16 +225,20 @@ namespace SnakeOnlineCore
 
             if (bodyPartsToGrow > 0)
             {
-                bodyPartToBecomeNewHead = new SnakeBodyObject(newHeadPosX, newHeadPosY, true, bodyParts.Last().color, this);
+                bodyPartToBecomeNewHead = new SnakeBodyObject(newHeadPosX, newHeadPosY, true, bodyParts.Last().color, snakeID);
 
                 bodyPartsToGrow -= 1;
             }
+            /*else if (bodyPartsToGrow < 0)
+            {
+
+            }*/
             else
             {
                 bodyPartToBecomeNewHead = bodyParts.Dequeue();
 
                 // Do the same changes in the arena matrix.
-                SnakeGameManager.GetInstance().gameArenaObjects[bodyPartToBecomeNewHead.posX, bodyPartToBecomeNewHead.posY] = null;
+                gameManager.gameArenaObjects[bodyPartToBecomeNewHead.posX, bodyPartToBecomeNewHead.posY] = null;
 
                 bodyPartToBecomeNewHead.isHead = true;
                 bodyPartToBecomeNewHead.posX = newHeadPosX;
@@ -224,12 +248,12 @@ namespace SnakeOnlineCore
             bodyParts.Last().isHead = false;
 
             // Same for arena matrix.. just to be sure nothing bad happens.
-            ((SnakeBodyObject) SnakeGameManager.GetInstance().gameArenaObjects[bodyParts.Last().posX, bodyParts.Last().posY]).isHead = false;
+            ((SnakeBodyObject) gameManager.gameArenaObjects[bodyParts.Last().posX, bodyParts.Last().posY]).isHead = false;
 
             bodyParts.Enqueue(bodyPartToBecomeNewHead);
 
             // Same for the arena matrix.
-            SnakeGameManager.GetInstance().gameArenaObjects[bodyPartToBecomeNewHead.posX, bodyPartToBecomeNewHead.posY] = bodyPartToBecomeNewHead;
+            gameManager.gameArenaObjects[bodyPartToBecomeNewHead.posX, bodyPartToBecomeNewHead.posY] = bodyPartToBecomeNewHead;
         }
 
         // ~ End movement interface.
