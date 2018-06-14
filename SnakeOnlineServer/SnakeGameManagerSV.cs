@@ -117,6 +117,8 @@ namespace SnakeOnlineServer
                 // Add it to the game.
                 AddSnake(snake);
 
+                SpawnFood(snake.GetSnakeBodyParts().Peek().color);
+
                 // Ask the player to initialize a local controller.
                 gameServer.SendStartGameRequestToClient(player, randOrientation);
             }
@@ -207,6 +209,30 @@ namespace SnakeOnlineServer
             }
 
             CheckIfGameShouldEnd();
+        }
+
+        public override void SpawnFood(Color color)
+        {
+            int randPosX, randPosY, randAmount;
+            Random random = new Random(DateTime.Now.Millisecond);
+
+            randAmount = random.Next(1, 4);
+
+            do
+            {
+                randPosX = random.Next(0, gameArenaWidth);
+                randPosY = random.Next(0, gameArenaHeight);
+
+                if (gameArenaObjects[randPosX, randPosY] != null)
+                    continue;
+
+                break;
+            }
+            while (true);
+
+            FoodObject food = new FoodObject(randPosX, randPosY, color, randAmount);
+
+            AddFood(food);
         }
 
         private void CheckIfGameShouldEnd()

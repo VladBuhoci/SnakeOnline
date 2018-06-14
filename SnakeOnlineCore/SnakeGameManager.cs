@@ -51,21 +51,9 @@ namespace SnakeOnlineCore
         /// <summary>
         ///     Will randomly generate a food object in an empty spot of the arena.
         /// </summary>
-        public void SpawnFood(Color color)
-        {
-            int randPosX, randPosY, randAmount;
-            Random random = new Random(DateTime.Now.Millisecond);
-
-            randPosX = random.Next(0, gameArenaWidth);
-            randPosY = random.Next(0, gameArenaHeight);
-            randAmount = random.Next(1, 4);
-
-            FoodObject food = new FoodObject(randPosX, randPosY, color, randAmount);
-
-            AddFood(food);
-        }
-
-        private void AddFood(FoodObject food)
+        public abstract void SpawnFood(Color color);
+        
+        protected void AddFood(FoodObject food)
         {
             gameArenaObjects[food.posX, food.posY] = food;
         }
