@@ -391,7 +391,7 @@ namespace SnakeOnlineServer
                 case GameOverType.TIME_OUT:
                     {
                         // Prepare the leaderboard.
-                        snakes.OrderBy(snk => snk.GetSnakeBodyParts().Count);
+                        snakes = snakes.OrderBy(snk => snk.GetSnakeBodyParts().Count).ToList();
 
                         // See if there is a draw.
 
