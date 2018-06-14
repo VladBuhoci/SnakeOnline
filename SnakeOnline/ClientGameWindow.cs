@@ -59,7 +59,6 @@ namespace SnakeOnline
             if (! bIsThisLeader)
             {
                 startMatchButton.Enabled = false;
-                roomSnakeColourButton.Enabled = false;
             }
             
             Thread refreshRoomThread = new Thread(() => RefreshRoomLoop(socket));
@@ -91,7 +90,6 @@ namespace SnakeOnline
             if (bIsThisNewLeader)
             {
                 startMatchButton.Enabled = true;
-                roomSnakeColourButton.Enabled = true;
             }
             // else is redudant, since the client can never lose his/her leader rank, except when he/she disconnects.
 
@@ -105,7 +103,7 @@ namespace SnakeOnline
 
             // Disable menu buttons.
             startMatchButton.Enabled = false;
-            roomSnakeColourButton.Enabled = false;
+            colorComboBox.Enabled = false;
             switchSidesButton.Enabled = false;
 
             if (initialOrientation != null)
@@ -139,8 +137,8 @@ namespace SnakeOnline
             if (bIsLeader)
             {
                 startMatchButton.Enabled = true;
-                roomSnakeColourButton.Enabled = true;
             }
+            colorComboBox.Enabled = true;
             switchSidesButton.Enabled = true;
 
             gameArenaPane.BackColor = Color.White;

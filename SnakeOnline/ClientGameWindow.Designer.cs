@@ -42,7 +42,6 @@
             this.roomLeaderLabel = new System.Windows.Forms.Label();
             this.switchSidesButton = new System.Windows.Forms.Button();
             this.disconnectButton = new System.Windows.Forms.Button();
-            this.roomSnakeColourButton = new System.Windows.Forms.Button();
             this.startMatchButton = new System.Windows.Forms.Button();
             this.roomChatGroupBox = new System.Windows.Forms.GroupBox();
             this.sendRoomChatMessageButton = new System.Windows.Forms.Button();
@@ -119,7 +118,6 @@
             this.roomMenuGroupBox.Controls.Add(this.roomLeaderLabel);
             this.roomMenuGroupBox.Controls.Add(this.switchSidesButton);
             this.roomMenuGroupBox.Controls.Add(this.disconnectButton);
-            this.roomMenuGroupBox.Controls.Add(this.roomSnakeColourButton);
             this.roomMenuGroupBox.Controls.Add(this.startMatchButton);
             this.roomMenuGroupBox.Location = new System.Drawing.Point(518, 204);
             this.roomMenuGroupBox.Name = "roomMenuGroupBox";
@@ -131,7 +129,7 @@
             // colorComboBox
             // 
             this.colorComboBox.FormattingEnabled = true;
-            this.colorComboBox.Location = new System.Drawing.Point(114, 28);
+            this.colorComboBox.Location = new System.Drawing.Point(115, 28);
             this.colorComboBox.Name = "colorComboBox";
             this.colorComboBox.Size = new System.Drawing.Size(121, 21);
             this.colorComboBox.TabIndex = 6;
@@ -140,7 +138,7 @@
             // roomGameTimeLeft
             // 
             this.roomGameTimeLeft.AutoSize = true;
-            this.roomGameTimeLeft.Location = new System.Drawing.Point(255, 31);
+            this.roomGameTimeLeft.Location = new System.Drawing.Point(265, 31);
             this.roomGameTimeLeft.Name = "roomGameTimeLeft";
             this.roomGameTimeLeft.Size = new System.Drawing.Size(53, 13);
             this.roomGameTimeLeft.TabIndex = 5;
@@ -159,7 +157,7 @@
             // 
             // switchSidesButton
             // 
-            this.switchSidesButton.Location = new System.Drawing.Point(184, 68);
+            this.switchSidesButton.Location = new System.Drawing.Point(140, 68);
             this.switchSidesButton.Name = "switchSidesButton";
             this.switchSidesButton.Size = new System.Drawing.Size(75, 23);
             this.switchSidesButton.TabIndex = 2;
@@ -169,7 +167,7 @@
             // 
             // disconnectButton
             // 
-            this.disconnectButton.Location = new System.Drawing.Point(273, 68);
+            this.disconnectButton.Location = new System.Drawing.Point(268, 68);
             this.disconnectButton.Name = "disconnectButton";
             this.disconnectButton.Size = new System.Drawing.Size(75, 23);
             this.disconnectButton.TabIndex = 3;
@@ -177,19 +175,9 @@
             this.disconnectButton.UseVisualStyleBackColor = true;
             this.disconnectButton.Click += new System.EventHandler(this.disconnectButton_Click);
             // 
-            // roomSnakeColourButton
-            // 
-            this.roomSnakeColourButton.Location = new System.Drawing.Point(95, 68);
-            this.roomSnakeColourButton.Name = "roomSnakeColourButton";
-            this.roomSnakeColourButton.Size = new System.Drawing.Size(75, 23);
-            this.roomSnakeColourButton.TabIndex = 1;
-            this.roomSnakeColourButton.Text = "Colour";
-            this.roomSnakeColourButton.UseVisualStyleBackColor = true;
-            this.roomSnakeColourButton.Click += new System.EventHandler(this.roomSnakeColourButton_Click);
-            // 
             // startMatchButton
             // 
-            this.startMatchButton.Location = new System.Drawing.Point(6, 68);
+            this.startMatchButton.Location = new System.Drawing.Point(11, 68);
             this.startMatchButton.Name = "startMatchButton";
             this.startMatchButton.Size = new System.Drawing.Size(75, 23);
             this.startMatchButton.TabIndex = 0;
@@ -277,7 +265,6 @@
         private System.Windows.Forms.GroupBox spectatorsGroupBox;
         private System.Windows.Forms.GroupBox roomMenuGroupBox;
         private System.Windows.Forms.Button disconnectButton;
-        private System.Windows.Forms.Button roomSnakeColourButton;
         private System.Windows.Forms.Button startMatchButton;
         private System.Windows.Forms.GroupBox roomChatGroupBox;
         private System.Windows.Forms.TextBox roomChatTextToSendTextBox;
