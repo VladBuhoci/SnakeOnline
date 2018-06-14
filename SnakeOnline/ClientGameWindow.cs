@@ -155,10 +155,8 @@ namespace SnakeOnline
 
             foreach (SnakeGameArenaObject arenaObj in gameArenaObjects)
             {
-                if (arenaObj is SnakeBodyObject)
+                if (arenaObj is SnakeBodyObject snakePart)
                 {
-                    SnakeBodyObject snakePart = (SnakeBodyObject) arenaObj;
-
                     if (snakePart.isHead)
                     {
                         // Draw a bigger square.
@@ -176,6 +174,14 @@ namespace SnakeOnline
                     // Draw a diamond.
                     e.Graphics.DrawPolygon(new Pen(arenaObj.color), new Point[] { new Point(arenaObj.posX * 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10), new Point(arenaObj.posX * 10 + 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10 + 10) });
                     e.Graphics.FillPolygon(new SolidBrush(arenaObj.color), new Point[] { new Point(arenaObj.posX * 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10), new Point(arenaObj.posX * 10 + 10, arenaObj.posY * 10 + 5), new Point(arenaObj.posX * 10 + 5, arenaObj.posY * 10 + 10) });
+                }
+                else if (arenaObj is PowerUpObject powerUp)
+                {
+                    if (powerUp is SpeedPowerUpObject speedPowerUp)
+                    {
+                        e.Graphics.DrawPie(new Pen(speedPowerUp.color), new Rectangle(speedPowerUp.posX * 10, speedPowerUp.posY * 10, 10, 10), 0, 180);
+                        e.Graphics.FillPie(new SolidBrush(speedPowerUp.color), new Rectangle(speedPowerUp.posX * 10, speedPowerUp.posY * 10, 10, 10), 0, 180);
+                    }
                 }
             }
         }

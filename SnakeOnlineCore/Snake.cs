@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SnakeOnlineCore
@@ -22,17 +23,19 @@ namespace SnakeOnlineCore
 
         private int bodyPartsToGrow;
 
-        private bool _bIsAlive;     // real field.
-        public bool bIsAlive
+        private bool bIsAlive;
+        private int speedAmplifier;
+
+        public bool IsAlive
         {
             get
             {
-                return _bIsAlive;
+                return bIsAlive;
             }
 
             set
             {
-                _bIsAlive = value;
+                bIsAlive = value;
 
                 // 'false' means death.
                 if (value == false)
@@ -43,6 +46,14 @@ namespace SnakeOnlineCore
                         snakePart.color = Color.Gray;
                     }
                 }
+            }
+        }
+
+        public int SpeedAmplifier
+        {
+            get
+            {
+                return speedAmplifier;
             }
         }
 
@@ -69,6 +80,7 @@ namespace SnakeOnlineCore
             this.bodyPartsToGrow = 0;
 
             this.bIsAlive = true;
+            this.speedAmplifier = 1;
         }
 
         private Queue<SnakeBodyObject> BuildSnake(int posX, int posY, Color color)
@@ -140,7 +152,7 @@ namespace SnakeOnlineCore
 
         public void MoveSnake(SnakeGameManager gameManager)
         {
-            if (! bIsAlive)
+            if (! IsAlive)
                 return;
 
             if (orientationQueue.Count > 0)
@@ -213,6 +225,23 @@ namespace SnakeOnlineCore
                     }
 
                     gameManager.FoodWasEaten(foundFood);
+                }
+                else if (gameArenaObj is PowerUpObject powerUp)
+                {
+                    if (powerUp is SpeedPowerUpObject speedPowerUp)
+                    {
+                        speedAmplifier = speedPowerUp.speedAmplifier;
+
+                        Thread speedStopperThread = new Thread(() =>
+                        {
+                            Thread.Sleep(speedPowerUp.effectDuration * 1000);
+
+                            speedAmplifier = 1;
+
+                            Thread.CurrentThread.Abort();
+                        });
+                        speedStopperThread.Start();
+                    }
                 }
             }
 

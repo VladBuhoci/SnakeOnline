@@ -14,7 +14,8 @@ namespace SnakeOnlineServer
     {
         private Dictionary<string, Color> playerWithSnakeCollection;
         private List<string> spectatorList;
-        List<Color> colors;
+        private List<Color> colors;
+        private int powerUpSpawnTimer;
 
         private SnakeGameDescriptor gameDescriptor;
 
@@ -148,6 +149,8 @@ namespace SnakeOnlineServer
         {
             int gameDuration = gameDescriptor.matchDuration * 60000;
 
+            powerUpSpawnTimer = new Random(DateTime.Now.Millisecond).Next(5, 10) * 1000;        // turn this into seconds.
+
             Thread.Sleep(TIME_BEFORE_GAME_STARTS * 1000);
 
             while (true)
@@ -160,7 +163,11 @@ namespace SnakeOnlineServer
 
                 for (int i = 0; i < snakeList.Count; i ++)
                 {
-                    snakeList[i].MoveSnake(gameManager);
+                    // Have the snakes under the effect of the Speed Power Up move more times.
+                    for (int k = 0; k < snakeList[i].SpeedAmplifier; k += 1)
+                    {
+                        snakeList[i].MoveSnake(gameManager);
+                    }
                 }
 
                 // Check again.
@@ -177,8 +184,13 @@ namespace SnakeOnlineServer
                     break;
                 }
 
-                gameDuration -= 100;
+                powerUpSpawnTimer -= 100;
+                if (powerUpSpawnTimer <= 0)
+                {
+                    SpawnPowerUp(GenerateRandomColour());
+                }
 
+                gameDuration -= 100;
                 if (gameDuration <= 0)
                 {
                     EndGame(GameOverType.TIME_OUT);
@@ -196,7 +208,7 @@ namespace SnakeOnlineServer
             {
                 if (String.Equals(snake.GetID(), snakeID))
                 {
-                    snake.bIsAlive = false;
+                    snake.IsAlive = false;
                     
                     break;
                 }
@@ -211,7 +223,7 @@ namespace SnakeOnlineServer
             {
                 if (snakeIDs.Contains(snake.GetID()))
                 {
-                    snake.bIsAlive = false;
+                    snake.IsAlive = false;
 
                     // other things like notifying the player or something...
                 }
@@ -244,13 +256,38 @@ namespace SnakeOnlineServer
             AddFood(food);
         }
 
+        public override void SpawnPowerUp(Color color)
+        {
+            int randPosX, randPosY;
+            Random random = new Random(DateTime.Now.Millisecond);
+            
+            do
+            {
+                randPosX = random.Next(0, gameArenaWidth);
+                randPosY = random.Next(0, gameArenaHeight);
+
+                if (gameArenaObjects[randPosX, randPosY] != null)
+                    continue;
+
+                break;
+            }
+            while (true);
+
+            // TODO: add some variety perhaps?
+            PowerUpObject powerUp = new SpeedPowerUpObject(randPosX, randPosY, color, random.Next(2, 5), random.Next(2, 5));
+
+            AddPowerUp(powerUp);
+
+            powerUpSpawnTimer = random.Next(3, 10) * 1000;      // turn the number into seconds.
+        }
+
         private void CheckIfGameShouldEnd()
         {
             int aliveSnakes = 0;
 
             foreach (Snake snake in snakes)
             {
-                if (snake.bIsAlive)
+                if (snake.IsAlive)
                 {
                     aliveSnakes += 1;
                 }
@@ -385,7 +422,7 @@ namespace SnakeOnlineServer
             {
                 case GameOverType.LAST_ONE_STANDING:
                     {
-                        resultMessage = String.Format("The winner is: {0} !", snakes.Where(snk => snk.bIsAlive).First().GetID());
+                        resultMessage = String.Format("The winner is: {0} !", snakes.Where(snk => snk.IsAlive).First().GetID());
 
                         break;
                     }

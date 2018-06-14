@@ -65,6 +65,18 @@ namespace SnakeOnlineCore
             SpawnFood(food.color);
         }
 
+        public abstract void SpawnPowerUp(Color color);
+
+        protected void AddPowerUp(PowerUpObject powerUp)
+        {
+            gameArenaObjects[powerUp.posX, powerUp.posY] = powerUp;
+        }
+
+        public void PowerUpWasTaken(PowerUpObject powerUp)
+        {
+            gameArenaObjects[powerUp.posX, powerUp.posY] = null;
+        }
+
         public void AddSnake(Snake snake)
         {
             snakes.Add(snake);
