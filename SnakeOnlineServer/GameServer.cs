@@ -1,6 +1,7 @@
 ﻿using SnakeOnlineCore;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -204,6 +205,17 @@ namespace SnakeOnlineServer
                             int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
                             
                             BroadcastSpectatorListForRoom(gameManagerID);
+
+                            break;
+                        }
+
+                    case Socp.REQUEST_CHANGE_SNAKE_COLOUR:
+                        {
+                            string clientID = SocpUtils.GetPlayerIDFromCommand(dataBuffer);
+                            int gameManagerID = SocpUtils.GetGameManagerIDFromCommand(dataBuffer);
+                            Color colour = (Color) SocpUtils.GetDataFromCommand(dataBuffer);
+
+                            snakeGameManagerSVCollection[gameManagerID].ChangeSnakeColour(clientID, colour);
 
                             break;
                         }
@@ -469,7 +481,7 @@ namespace SnakeOnlineServer
         {
             if (snakeGameManagerSVCollection.Keys.Contains(gameManagerID))
             {
-                string[] playerNames = snakeGameManagerSVCollection[gameManagerID].Players;
+                string[] playerNames = snakeGameManagerSVCollection[gameManagerID].PlayersWithColorNames;
 
                 foreach (string id in idClientSocketPairs.Keys)
                 {

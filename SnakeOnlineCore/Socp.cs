@@ -40,6 +40,13 @@ namespace SnakeOnlineCore
         REQUEST_ROOM_SPECTATOR_LIST_UPDATE,
 
         /// <summary>
+        ///     Used when a client wants to change the colour of their snake, while the match is not in progress.
+        ///     <para/>
+        ///     USAGE: client to server.
+        /// </summary>
+        REQUEST_CHANGE_SNAKE_COLOUR,
+
+        /// <summary>
         ///     Used when a client wants to switch sides (from players to spectators or vice versa) in a room,
         ///         but only if there isn't an ongoing match linked to this room.
         ///         (room/game manager ID must exist within the message object.)
@@ -112,7 +119,7 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: client to server.
         /// </summary>
-        REQUEST_DISCONNECT_FROM_GAME_ROOM,
+        REQUEST_DISCONNECT_FROM_GAME_ROOM = 17,
 
         /// <summary>
         ///     Used when the client closes the program and thus, disconnects from the server.
@@ -174,7 +181,7 @@ namespace SnakeOnlineCore
         ///     USAGE: server to client.
         /// </summary>
         SEND_ROOM_SPECTATOR_COLLECTION,
-
+        
         /// <summary>
         ///     Used when the server (and related game manager) accept a client's request to switch sides in a room
         ///         (from players to spectators or vice versa), but only if there isn't an ongoing match linked to this room.
@@ -182,7 +189,7 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        ACCEPT_PLAYER_SWITCH_SIDES_ROOM,
+        ACCEPT_PLAYER_SWITCH_SIDES_ROOM = 106,
 
         /// <summary>
         ///     Used when the server sends a text message to all clients in the lobby chat.
@@ -244,7 +251,7 @@ namespace SnakeOnlineCore
         ///     <para/>
         ///     USAGE: server to client.
         /// </summary>
-        SEND_ARENA_DATA,
+        SEND_ARENA_DATA = 115,
 
         /// <summary>
         ///     Used to send a message to every client connected to a room when the game has ended

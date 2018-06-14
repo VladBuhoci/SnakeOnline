@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,6 +37,15 @@ namespace SnakeOnline
             // Set the title of the window.
             this.Text = String.Format("Snake Online Room - {0}", roomName);
 
+            // Get all defined colors and put them in the combo box.
+            List<string> colors = new List<string>();
+            PropertyInfo[] colorsInfo = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
+            foreach (PropertyInfo colorInfo in colorsInfo)
+            {
+                colors.Add(colorInfo.Name);
+            }
+            colorComboBox.DataSource = colors;
+
             socket = _socket;
             gameRoomID = uniqueGameManagerID;
             gameRoomState = gameState;
@@ -49,7 +59,7 @@ namespace SnakeOnline
             if (! bIsThisLeader)
             {
                 startMatchButton.Enabled = false;
-                roomSettingsButton.Enabled = false;
+                roomSnakeColourButton.Enabled = false;
             }
             
             Thread refreshRoomThread = new Thread(() => RefreshRoomLoop(socket));
@@ -81,7 +91,7 @@ namespace SnakeOnline
             if (bIsThisNewLeader)
             {
                 startMatchButton.Enabled = true;
-                roomSettingsButton.Enabled = true;
+                roomSnakeColourButton.Enabled = true;
             }
             // else is redudant, since the client can never lose his/her leader rank, except when he/she disconnects.
 
@@ -95,7 +105,7 @@ namespace SnakeOnline
 
             // Disable menu buttons.
             startMatchButton.Enabled = false;
-            roomSettingsButton.Enabled = false;
+            roomSnakeColourButton.Enabled = false;
             switchSidesButton.Enabled = false;
 
             if (initialOrientation != null)
@@ -129,7 +139,7 @@ namespace SnakeOnline
             if (bIsLeader)
             {
                 startMatchButton.Enabled = true;
-                roomSettingsButton.Enabled = true;
+                roomSnakeColourButton.Enabled = true;
             }
             switchSidesButton.Enabled = true;
 
@@ -238,9 +248,17 @@ namespace SnakeOnline
             }
         }
 
-        private void roomSettingsButton_Click(object sender, EventArgs e)
+        private void roomSnakeColourButton_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void colorComboBox_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            PropertyInfo colourPropInfo = typeof(Color).GetProperty((string) colorComboBox.SelectedItem);
+            Color selectedColour = (Color) colourPropInfo.GetValue(colourPropInfo);
+
+            socket.SendPlayerChangeSnakeColourRequest(selectedColour, gameRoomID);
         }
 
         private void switchSidesButton_Click(object sender, EventArgs e)

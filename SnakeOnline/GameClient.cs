@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -392,6 +393,11 @@ namespace SnakeOnline
         public void SendUpdatedRoomSpectatorListRequest(int gameRoomID)
         {
             socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_ROOM_SPECTATOR_LIST_UPDATE, "", uniquePlayerID, gameRoomID));
+        }
+
+        public void SendPlayerChangeSnakeColourRequest(Color color, int gameRoomID)
+        {
+            socket.Send(SocpUtils.MakeNetworkCommand(Socp.REQUEST_CHANGE_SNAKE_COLOUR, color, uniquePlayerID, gameRoomID));
         }
 
         public void SendPlayerSwitchSidesInRoomRequest(int gameRoomID)

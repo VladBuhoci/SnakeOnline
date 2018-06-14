@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,8 +12,9 @@ namespace SnakeOnlineServer
 {
     class SnakeGameManagerSV : SnakeGameManager
     {
-        private Dictionary<string, Snake> playerWithSnakeCollection;
+        private Dictionary<string, Color> playerWithSnakeCollection;
         private List<string> spectatorList;
+        List<Color> colors;
 
         private SnakeGameDescriptor gameDescriptor;
 
@@ -22,7 +24,7 @@ namespace SnakeOnlineServer
             : base(descriptor.arenaWidth, descriptor.arenaHeight)
         {
             gameArenaObjects = new SnakeGameArenaObject[descriptor.arenaWidth, descriptor.arenaHeight];
-            playerWithSnakeCollection = new Dictionary<string, Snake>();
+            playerWithSnakeCollection = new Dictionary<string, Color>();
             spectatorList = new List<string>();
 
             gameDescriptor = descriptor;
@@ -30,7 +32,14 @@ namespace SnakeOnlineServer
             gameServer = server;
             
             // Add the leader to the Players With Snakes collection automatically.
-            playerWithSnakeCollection.Add(descriptor.roomLeaderID, null);
+            playerWithSnakeCollection.Add(descriptor.roomLeaderID, Color.Aqua);
+
+            colors = new List<Color>();
+            PropertyInfo[] colorsInfo = typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.DeclaredOnly | BindingFlags.Public);
+            foreach (PropertyInfo colorInfo in colorsInfo)
+            {
+                colors.Add((Color) colorInfo.GetValue(colorInfo));
+            }
         }
 
         public void StartGame()
@@ -112,12 +121,12 @@ namespace SnakeOnlineServer
                 while (true);
 
                 // Create the snake with the generated values.
-                Snake snake = new Snake(randPosX, randPosY, Color.Red, player, randOrientation);
+                Snake snake = new Snake(randPosX, randPosY, playerWithSnakeCollection[player], player, randOrientation);
 
                 // Add it to the game.
                 AddSnake(snake);
 
-                SpawnFood(snake.GetSnakeBodyParts().Peek().color);
+                SpawnFood(playerWithSnakeCollection[player]);
 
                 // Ask the player to initialize a local controller.
                 gameServer.SendStartGameRequestToClient(player, randOrientation);
@@ -285,7 +294,7 @@ namespace SnakeOnlineServer
                 spectatorList.Remove(clientID);
                 gameDescriptor.currentSpectatorCount -= 1;
 
-                playerWithSnakeCollection.Add(clientID, null);
+                playerWithSnakeCollection.Add(clientID, GenerateRandomColour());
                 gameDescriptor.currentPlayerCount += 1;
             }
 
@@ -298,7 +307,7 @@ namespace SnakeOnlineServer
         {
             if (gameDescriptor.roomState == GameRoomState.WAITING && gameDescriptor.currentPlayerCount < gameDescriptor.maxSnakesAllowed)
             {
-                playerWithSnakeCollection.Add(clientID, null);
+                playerWithSnakeCollection.Add(clientID, GenerateRandomColour());
                 gameDescriptor.currentPlayerCount += 1;
 
                 gameServer.BroadcastPlayerListForRoom(gameDescriptor.gameManagerID);
@@ -420,6 +429,23 @@ namespace SnakeOnlineServer
             gameOverAndCleanUpThread.Start();
         }
 
+        public void ChangeSnakeColour(string playerID, Color newColour)
+        {
+            if (playerWithSnakeCollection.Keys.Contains(playerID))
+            {
+                playerWithSnakeCollection[playerID] = newColour;
+
+                gameServer.BroadcastPlayerListForRoom(gameDescriptor.gameManagerID);
+            }
+        }
+
+        private Color GenerateRandomColour()
+        {
+            Random rand = new Random(DateTime.Now.Millisecond);
+
+            return colors[rand.Next(0, colors.Count)];
+        }
+
         private void GameOverAndCleanUp(string resultMessage)
         {
             Thread.Sleep(TIME_BEFORE_GAME_ENDS * 1000);
@@ -456,6 +482,23 @@ namespace SnakeOnlineServer
             get
             {
                 return playerWithSnakeCollection.Keys.ToArray();
+            }
+        }
+
+        public string[] PlayersWithColorNames
+        {
+            get
+            {
+                List<string> playersWithColors = new List<string>();
+
+                foreach (string player in playerWithSnakeCollection.Keys)
+                {
+                    string colour = playerWithSnakeCollection[player].Name.ToUpper();
+
+                    playersWithColors.Add(String.Format("{0} ({1})", player, colour));
+                }
+
+                return playersWithColors.ToArray();
             }
         }
 
