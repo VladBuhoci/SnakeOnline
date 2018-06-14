@@ -36,10 +36,6 @@
             this.gameProps = new System.Windows.Forms.GroupBox();
             this.matchDurationBox = new System.Windows.Forms.NumericUpDown();
             this.label8 = new System.Windows.Forms.Label();
-            this.losePartsRadioButton = new System.Windows.Forms.RadioButton();
-            this.nothingRadioButton = new System.Windows.Forms.RadioButton();
-            this.growPartsRadioButton = new System.Windows.Forms.RadioButton();
-            this.label7 = new System.Windows.Forms.Label();
             this.maxSnakesAllowedBox = new System.Windows.Forms.NumericUpDown();
             this.label6 = new System.Windows.Forms.Label();
             this.arenaHeightBox = new System.Windows.Forms.NumericUpDown();
@@ -112,10 +108,6 @@
             // 
             this.gameProps.Controls.Add(this.matchDurationBox);
             this.gameProps.Controls.Add(this.label8);
-            this.gameProps.Controls.Add(this.losePartsRadioButton);
-            this.gameProps.Controls.Add(this.nothingRadioButton);
-            this.gameProps.Controls.Add(this.growPartsRadioButton);
-            this.gameProps.Controls.Add(this.label7);
             this.gameProps.Controls.Add(this.maxSnakesAllowedBox);
             this.gameProps.Controls.Add(this.label6);
             this.gameProps.Controls.Add(this.arenaHeightBox);
@@ -124,7 +116,7 @@
             this.gameProps.Controls.Add(this.label4);
             this.gameProps.Location = new System.Drawing.Point(13, 122);
             this.gameProps.Name = "gameProps";
-            this.gameProps.Size = new System.Drawing.Size(339, 217);
+            this.gameProps.Size = new System.Drawing.Size(339, 133);
             this.gameProps.TabIndex = 1;
             this.gameProps.TabStop = false;
             this.gameProps.Text = "Game properties";
@@ -132,7 +124,7 @@
             // matchDurationBox
             // 
             this.matchDurationBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.matchDurationBox.Location = new System.Drawing.Point(89, 177);
+            this.matchDurationBox.Location = new System.Drawing.Point(89, 95);
             this.matchDurationBox.Maximum = new decimal(new int[] {
             10,
             0,
@@ -155,53 +147,11 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(19, 179);
+            this.label8.Location = new System.Drawing.Point(19, 97);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(47, 13);
             this.label8.TabIndex = 10;
             this.label8.Text = "Duration";
-            // 
-            // losePartsRadioButton
-            // 
-            this.losePartsRadioButton.AutoSize = true;
-            this.losePartsRadioButton.Location = new System.Drawing.Point(198, 145);
-            this.losePartsRadioButton.Name = "losePartsRadioButton";
-            this.losePartsRadioButton.Size = new System.Drawing.Size(107, 17);
-            this.losePartsRadioButton.TabIndex = 9;
-            this.losePartsRadioButton.TabStop = true;
-            this.losePartsRadioButton.Text = "losing body parts.";
-            this.losePartsRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // nothingRadioButton
-            // 
-            this.nothingRadioButton.AutoSize = true;
-            this.nothingRadioButton.Checked = true;
-            this.nothingRadioButton.Location = new System.Drawing.Point(198, 121);
-            this.nothingRadioButton.Name = "nothingRadioButton";
-            this.nothingRadioButton.Size = new System.Drawing.Size(63, 17);
-            this.nothingRadioButton.TabIndex = 8;
-            this.nothingRadioButton.TabStop = true;
-            this.nothingRadioButton.Text = "nothing.";
-            this.nothingRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // growPartsRadioButton
-            // 
-            this.growPartsRadioButton.AutoSize = true;
-            this.growPartsRadioButton.Location = new System.Drawing.Point(198, 97);
-            this.growPartsRadioButton.Name = "growPartsRadioButton";
-            this.growPartsRadioButton.Size = new System.Drawing.Size(117, 17);
-            this.growPartsRadioButton.TabIndex = 7;
-            this.growPartsRadioButton.Text = "growing body parts.";
-            this.growPartsRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(19, 123);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(154, 13);
-            this.label7.TabIndex = 6;
-            this.label7.Text = "Eating the wrong food leads to:";
             // 
             // maxSnakesAllowedBox
             // 
@@ -294,7 +244,7 @@
             // createRoomPanel
             // 
             this.createRoomPanel.Controls.Add(this.createRoomButton);
-            this.createRoomPanel.Location = new System.Drawing.Point(13, 336);
+            this.createRoomPanel.Location = new System.Drawing.Point(13, 261);
             this.createRoomPanel.Name = "createRoomPanel";
             this.createRoomPanel.Size = new System.Drawing.Size(339, 34);
             this.createRoomPanel.TabIndex = 2;
@@ -313,7 +263,7 @@
             // joinRoomPanel
             // 
             this.joinRoomPanel.Controls.Add(this.joinRoomButton);
-            this.joinRoomPanel.Location = new System.Drawing.Point(13, 336);
+            this.joinRoomPanel.Location = new System.Drawing.Point(13, 261);
             this.joinRoomPanel.Name = "joinRoomPanel";
             this.joinRoomPanel.Size = new System.Drawing.Size(339, 34);
             this.joinRoomPanel.TabIndex = 3;
@@ -334,7 +284,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(364, 382);
+            this.ClientSize = new System.Drawing.Size(364, 306);
             this.Controls.Add(this.joinRoomPanel);
             this.Controls.Add(this.createRoomPanel);
             this.Controls.Add(this.gameProps);
@@ -373,10 +323,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.NumericUpDown maxSnakesAllowedBox;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.RadioButton growPartsRadioButton;
-        private System.Windows.Forms.RadioButton nothingRadioButton;
-        private System.Windows.Forms.RadioButton losePartsRadioButton;
         private System.Windows.Forms.NumericUpDown matchDurationBox;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Panel createRoomPanel;

@@ -23,11 +23,7 @@ namespace SnakeOnline
             InitializeComponent();
 
             socket = clientSocket;
-
-            growPartsRadioButton.Text = FoodObject.EFFECT_GROW_PARTS;
-            nothingRadioButton.Text = FoodObject.EFFECT_NOTHING;
-            losePartsRadioButton.Text = FoodObject.EFFECT_LOSE_PARTS;
-
+            
             if (roomDescr != null)
             {
                 roomNameTextBox.Enabled = false;
@@ -49,32 +45,8 @@ namespace SnakeOnline
 
                 //maxSnakesAllowedBox.Enabled = false;
                 maxSnakesAllowedBox.Text = roomDescr.Value.maxSnakesAllowed.ToString();
-
-                //growPartsRadioButton.Enabled = false;
-                growPartsRadioButton.Checked = false;
-
-                //nothingRadioButton.Enabled = false;
-                nothingRadioButton.Checked = false;
-
-                //losePartsRadioButton.Enabled = false;
-                losePartsRadioButton.Checked = false;
-
+                
                 gameProps.Enabled = false;
-
-                switch (roomDescr.Value.foodEffect)
-                {
-                    case FoodObject.EFFECT_GROW_PARTS:
-                        growPartsRadioButton.Checked = true;
-                        break;
-
-                    case FoodObject.EFFECT_NOTHING:
-                        nothingRadioButton.Checked = true;
-                        break;
-
-                    case FoodObject.EFFECT_LOSE_PARTS:
-                        losePartsRadioButton.Checked = true;
-                        break;
-                }
                 
                 matchDurationBox.Enabled = false;
                 matchDurationBox.Text = roomDescr.Value.matchDuration.ToString();
@@ -116,7 +88,6 @@ namespace SnakeOnline
                 arenaWidth = Decimal.ToInt32(arenaWidthBox.Value),
                 arenaHeight = Decimal.ToInt32(arenaHeightBox.Value),
                 maxSnakesAllowed = Decimal.ToInt32(maxSnakesAllowedBox.Value),
-                foodEffect = GetChosenFoodEffect(),
                 matchDuration = Decimal.ToInt32(matchDurationBox.Value)
             };
 
@@ -151,18 +122,6 @@ namespace SnakeOnline
             // Formula for minimum value:
             //      max. snakes = round (sqrt (sqrt (map width * map height)) * 2 + 5)
             maxSnakesAllowedBox.Maximum = Math.Round((decimal) (Math.Sqrt(Math.Sqrt(Decimal.ToDouble(arenaWidthBox.Value * arenaHeightBox.Value))) * 2 + 5));
-        }
-
-        private string GetChosenFoodEffect()
-        {
-            if (growPartsRadioButton.Checked)
-                return growPartsRadioButton.Text;
-            else if (nothingRadioButton.Checked)
-                return nothingRadioButton.Text;
-            else if (losePartsRadioButton.Checked)
-                return losePartsRadioButton.Text;
-
-            throw new Exception("None of the three food effects were chosen.");
         }
     }
 }

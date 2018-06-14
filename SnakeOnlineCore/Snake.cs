@@ -205,15 +205,11 @@ namespace SnakeOnlineCore
                 }
                 else if (gameArenaObj is FoodObject foundFood)
                 {
-                    // Eat the food and grow (or lose) some parts.
+                    // Eat the food and grow some parts.
 
                     if (foundFood.color == bodyParts.Peek().color)
                     {
                         bodyPartsToGrow = foundFood.bodyPartsAmount;
-                    }
-                    else // if (food effect)
-                    {
-                        bodyPartsToGrow = (-1) * foundFood.bodyPartsAmount;
                     }
 
                     gameManager.FoodWasEaten(foundFood);
@@ -231,10 +227,6 @@ namespace SnakeOnlineCore
 
                 bodyPartsToGrow -= 1;
             }
-            /*else if (bodyPartsToGrow < 0)
-            {
-
-            }*/
             else
             {
                 bodyPartToBecomeNewHead = bodyParts.Dequeue();
