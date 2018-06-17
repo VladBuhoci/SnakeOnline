@@ -362,9 +362,16 @@ namespace SnakeOnlineServer
         {
             if (playerWithSnakeCollection.Keys.Contains(clientID))
             {
-                // TODO: handle this player's now-orphan snake.
+                foreach (Snake snk in snakes)
                 {
+                    if (String.Equals(snk.GetID(), clientID))
+                    {
+                        RemoveSnake(snk);
 
+                        CheckIfGameShouldEnd();
+
+                        break;
+                    }
                 }
 
                 playerWithSnakeCollection.Remove(clientID);

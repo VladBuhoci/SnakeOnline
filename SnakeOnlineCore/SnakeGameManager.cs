@@ -87,6 +87,25 @@ namespace SnakeOnlineCore
             }
         }
 
+        public void RemoveSnake(Snake snake)
+        {
+            foreach (SnakeBodyObject snakePart in snake.GetSnakeBodyParts())
+            {
+                gameArenaObjects[snakePart.posX, snakePart.posY] = null;
+            }
+
+            snakes.Remove(snake);
+
+            // Find this snake's food in the arena and remove it.
+            foreach (SnakeGameArenaObject arenaObj in gameArenaObjects)
+            {
+                if (arenaObj is FoodObject foodObj && foodObj.color == snake.GetSnakeBodyParts().Peek().color)
+                {
+                    gameArenaObjects[foodObj.posX, foodObj.posY] = null;
+                }
+            }
+        }
+
         public abstract void KillSnake(string snakeID);
 
         public abstract void KillSnakes(params string[] snakeIDs);
