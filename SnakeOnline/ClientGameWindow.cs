@@ -60,6 +60,12 @@ namespace SnakeOnline
             {
                 startMatchButton.Enabled = false;
             }
+
+            if (gameRoomState == GameRoomState.PLAYING)
+            {
+                gameArenaPane.BackColor = Color.Black;
+                switchSidesButton.Enabled = false;
+            }
             
             Thread refreshRoomThread = new Thread(() => RefreshRoomLoop(socket));
             refreshRoomThread.Start();
@@ -96,7 +102,7 @@ namespace SnakeOnline
             roomChatTextBox.AppendText(String.Format("[SYST]: New room leader is \"{0}\"", newLeaderID));
         }
 
-        public void StartGameMatch(SnakeOrientation? initialOrientation)
+        public void StartGameMatch(SnakeOrientation initialOrientation)
         {
             gameRoomState = GameRoomState.PLAYING;
             gameArenaPane.BackColor = Color.Black;
@@ -106,12 +112,10 @@ namespace SnakeOnline
             colorComboBox.Enabled = false;
             switchSidesButton.Enabled = false;
 
-            if (initialOrientation != null)
+            if (initialOrientation != SnakeOrientation.None)
             {
-                snakeController = new SnakeController(socket, gameRoomID, initialOrientation.Value);
+                snakeController = new SnakeController(socket, gameRoomID, initialOrientation);
             }
-
-            //gameArenaPane.Refresh();
         }
 
         public void UpdateArenaData(SnakeGameArenaObject[, ] gameArenaObjects, int timeLeft)
@@ -216,11 +220,13 @@ namespace SnakeOnline
                             case Keys.A:
                                 snakeController.ChangeDirectionLeft();
                                 return true;
-
-                            case Keys.T:
-                                roomChatTextToSendTextBox.Select();
-                                return true;
                         }
+                    }
+
+                    if (keyData == Keys.T)
+                    {
+                        roomChatTextToSendTextBox.Select();
+                        return true;
                     }
                 }
 
@@ -250,11 +256,6 @@ namespace SnakeOnline
             {
                 socket.SendStartMatchRequestToServer(gameRoomID);
             }
-        }
-
-        private void roomSnakeColourButton_Click(object sender, EventArgs e)
-        {
-
         }
 
         private void colorComboBox_SelectionChangeCommitted(object sender, EventArgs e)

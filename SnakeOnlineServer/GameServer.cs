@@ -583,7 +583,7 @@ namespace SnakeOnlineServer
             LogMessage("Done with leader stuff.");
         }
 
-        public void SendStartGameRequestToClient(string clientID, SnakeOrientation? snakeOrientation)
+        public void SendStartGameRequestToClient(string clientID, SnakeOrientation snakeOrientation)
         {
             idClientSocketPairs[clientID].Send(SocpUtils.MakeNetworkCommand(Socp.RESPONSE_MATCH_STARTED, snakeOrientation));
         }

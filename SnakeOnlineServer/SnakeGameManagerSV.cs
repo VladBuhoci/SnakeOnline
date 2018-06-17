@@ -136,7 +136,7 @@ namespace SnakeOnlineServer
             // Ask every spectator to initialize a local controller.
             foreach (string spec in Spectators)
             {
-                gameServer.SendStartGameRequestToClient(spec, null);
+                gameServer.SendStartGameRequestToClient(spec, SnakeOrientation.None);
             }
 
             gameServer.SendUpdatedArenaDataToClients(gameDescriptor.gameManagerID, gameArenaObjects, gameDescriptor.matchDuration * 60);
