@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SnakeOnline.Core
+namespace SnakeOnline
 {
     static class Program
     {
@@ -16,7 +16,7 @@ namespace SnakeOnline.Core
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ApplicationWindow());
+            Application.Run(new ClientMenuWindow());
         }
     }
 }

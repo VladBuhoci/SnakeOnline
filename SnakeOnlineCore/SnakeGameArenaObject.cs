@@ -1,8 +1,10 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
-namespace SnakeOnline.Core
+namespace SnakeOnlineCore
 {
-    class SnakeGameArenaObject
+    [Serializable]
+    public class SnakeGameArenaObject
     {
         public int posX { get; set; }
         public int posY { get; set; }

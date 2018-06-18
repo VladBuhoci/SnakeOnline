@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnakeOnline", "SnakeOnline\SnakeOnline.csproj", "{36F6F9A6-9892-4D3F-AF02-54C092FE815C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnakeOnlineServer", "SnakeOnlineServer\SnakeOnlineServer.csproj", "{FD97BFBE-4A5F-4019-AF0E-DA25CC9EFA1A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnakeOnlineCore", "SnakeOnlineCore\SnakeOnlineCore.csproj", "{8CA6BFEA-F8F2-4A7A-8E98-788847C3202B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{36F6F9A6-9892-4D3F-AF02-54C092FE815C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36F6F9A6-9892-4D3F-AF02-54C092FE815C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36F6F9A6-9892-4D3F-AF02-54C092FE815C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD97BFBE-4A5F-4019-AF0E-DA25CC9EFA1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD97BFBE-4A5F-4019-AF0E-DA25CC9EFA1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD97BFBE-4A5F-4019-AF0E-DA25CC9EFA1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD97BFBE-4A5F-4019-AF0E-DA25CC9EFA1A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CA6BFEA-F8F2-4A7A-8E98-788847C3202B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CA6BFEA-F8F2-4A7A-8E98-788847C3202B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CA6BFEA-F8F2-4A7A-8E98-788847C3202B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CA6BFEA-F8F2-4A7A-8E98-788847C3202B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
